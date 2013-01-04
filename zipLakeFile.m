@@ -1,16 +1,20 @@
-function zipLakeFile(lakeNm)
+function zipLakeFile(lakeNm,appendNm)
 % aggregates names, appends a name to the begining of the zip file,
 % re-writes the .prj file for each lake (to conform to prj2epsg web
 % services)
 
 % - lakeNm must be a string
 
+if eq(nargin,1)
+    appendNm = 'WiLMA_lake_';
+end
+
 if ~ischar(lakeNm)
     error('lake name input must be a string')
 end
 
 %% -- variables --
-appendNm = 'WiLMA_';
+
 rootDir = '/Volumes/projects/WiLMA/rawLakes/';
 zipDir  = '/Volumes/projects/WiLMA/zippedLakes/';
 prjWrite = ['GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",'...
@@ -20,7 +24,7 @@ files = {[lakeNm '.dbf'],[lakeNm '.prj'],...
     [lakeNm '.shx'],[lakeNm '.shp']};
 replcPrj = true;
 
-%% begin process
+%% begin function
 if replcPrj
     fID = fopen([rootDir lakeNm '.prj'],'w');
     fwrite(fID,prjWrite);
