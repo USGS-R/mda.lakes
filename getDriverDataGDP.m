@@ -3,7 +3,8 @@ function getDriverDataGDP
 clc
 clear all
 %% -- variables --
-timerPeriod = 30;    % seconds
+timerPeriod = 22;    % seconds
+retries = 1;
 
 
 writeDir= '/Users/jread/Desktop/Science Projects/WiLMA/Driver data/';
@@ -35,8 +36,7 @@ VarSets = struct('srad',srad,'dlwrf',dlwrf,'tmax',tmax,'tmin',tmin,...
 feature_collection = 'sb:managedLakesAllOne';
 attribute = 'OBJECTID';
 
-years = 1980:2011;
-
+years = 1998:2011;
 
 %% set processing
 
@@ -63,37 +63,50 @@ for i = 1:length(years)
             'TIME_END',  [YYYY '-12-31T00:00:00.000Z']);
         GDP = GDP.setDatasetURI(URI);
         GDP = GDP.executePost;
+        attempt = 1;
+        retry = false;
         done = false;
-        % now loop and check
         
+        % now loop and check 
         while ~done
             toc
             pause(timerPeriod)
+            if retry && ~gt(attempt,retries)
+                GDP = GDP.executePost;
+                attempt = attempt+1;
+                retry = false;
+            elseif retry
+                done = true;
+                disp(['Process failed after ' num2str(attempt)...
+                    ' attempts']);
+            end
             fileNm = VarSets.(var).fileName;
-            if ~done
-                try [f_Handle,done] = GDP.checkProcess;
-                catch mssg;
-                    f_Handle = [];
-                    done = false;
-                    disp(mssg)
-                    delete mssg
+            if ~done    % if still not done
+                disp(['currently working on ' var]);
+                
+                % status can be failed, complete, incomplete, none, or unknown
+                [f_Handle,status] = GDP.checkProcess;   % check again
+                if strcmp(status,'failed')
+                    retry = true;       % need to try again with execute
+                elseif strcmp(status,'complete')
+                    done = true;
+                elseif strcmp(status,'none')
+                    error('no process started')
                 end
-                disp(var);
-                if done  % will be first time
+                
+                
+                if done  % will be first time that done is true
                     disp(['***** writing ' YYYY '/' fileNm '.txt *****']);
                     urlwrite(f_Handle,[writeDir YYYY '/' fileNm '.txt']);
                 end
+            elseif done && retry
+                disp(['#$(&@#&'  var ' process failed #$&(@#$'])
             else
                 disp(['*----' var ' process complete----*'])
-            end
-
-            
-            
+            end    
+            disp(status)
         end
-        clear GDP
+        clear GDP     
     end
-
-
-
 end
 
