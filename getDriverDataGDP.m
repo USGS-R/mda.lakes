@@ -36,7 +36,7 @@ VarSets = struct('srad',srad,'dlwrf',dlwrf,'tmax',tmax,'tmin',tmin,...
 feature_collection = 'sb:managedLakesAllOne';
 attribute = 'OBJECTID';
 
-years = 1998:2011;
+years = 2007:2011;
 
 %% set processing
 
@@ -97,10 +97,10 @@ for i = 1:length(years)
                 
                 if done  % will be first time that done is true
                     disp(['***** writing ' YYYY '/' fileNm '.txt *****']);
-                    urlwrite(f_Handle,[writeDir YYYY '/' fileNm '.txt']);
+                    urlwrite(f_Handle,[writeDir YYYY '/' fileNm '.txt']);cd ..
                 end
             elseif done && retry
-                disp(['#$(&@#&'  var ' process failed #$&(@#$'])
+                disp(['#$(&@#& '  var ' process failed #$&(@#$'])
             else
                 disp(['*----' var ' process complete----*'])
             end    
