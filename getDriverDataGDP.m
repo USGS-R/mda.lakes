@@ -10,33 +10,37 @@ retries = 1;
 writeDir= '/Users/jread/Desktop/Science Projects/WiLMA/Driver data/';
 GeoServ = 'https://www.sciencebase.gov/catalogMaps/mapping/ows/50d35261e4b062c7914ebd14';
 
-SW_URI  = 'dods://cida-eros-mows1.er.usgs.gov:8080/thredds/dodsC/daymet';
-LW_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR.dailyavgs/monolevel/dlwrf.YYYY.nc';
-air_URI = 'dods://cida-eros-mows1.er.usgs.gov:8080/thredds/dodsC/daymet';
-uwnd_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR.dailyavgs/monolevel/uwnd.10m.YYYY.nc';
-vwnd_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR.dailyavgs/monolevel/vwnd.10m.YYYY.nc';
-prcp_URI= 'dods://cida-eros-mows1.er.usgs.gov:8080/thredds/dodsC/daymet';
-vprP_URI= 'dods://cida-eros-mows1.er.usgs.gov:8080/thredds/dodsC/daymet';
-snow_URI= 'dods://cida-eros-mows1.er.usgs.gov:8080/thredds/dodsC/daymet';
+SW_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/dswrf.YYYY.nc';
+LW_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/dlwrf.YYYY.nc';
+air_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/air.2m.YYYY.nc';
+uwnd_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/uwnd.10m.YYYY.nc';
+vwnd_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/vwnd.10m.YYYY.nc';
+prcp_URI= 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/apcp.YYYY.nc';
+RH_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/rhum.2m.YYYY.nc';
+snow_URI= 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/weasd.YYYY.nc';
+snowZ_URI='dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/snod.YYYY.nc';
+CC_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/tcdc.YYYY.nc';
 
-srad = struct('uri',SW_URI,'fileName','SW_daymet');
+dswrf= struct('uri',SW_URI,'fileName','SW_daymet');
 dlwrf= struct('uri',LW_URI,'fileName','LW_NARR');
-tmax = struct('uri',air_URI,'fileName','airMx_daymet');
-tmin = struct('uri',air_URI,'fileName','airMn_daymet');
+air  = struct('uri',air_URI,'fileName','air_NARR');
 uwnd = struct('uri',uwnd_URI,'fileName','uwnd_NARR');
 vwnd = struct('uri',vwnd_URI,'fileName','vwnd_NARR');
-prcp = struct('uri',prcp_URI,'fileName','prcp_daymet');
-vp   = struct('uri',vprP_URI,'fileName','VP_daymet');
-swe  = struct('uri',snow_URI,'fileName','snow_daymet');
+apcp = struct('uri',prcp_URI,'fileName','prcp_NARR');
+rhum = struct('uri',RH_URI,'fileName','RH_NARR');
+weasd= struct('uri',snow_URI,'fileName','snow_NARR');
+snod = struct('uri',snowZ_URI,'fileName','snowZ_NARR');
+tcdc = struct('uri',CC_URI,'fileName','CC_NARR');
 
 
-VarSets = struct('srad',srad,'dlwrf',dlwrf,'tmax',tmax,'tmin',tmin,...
-    'uwnd',uwnd,'vwnd',vwnd,'prcp',prcp,'vp',vp,'swe',swe);
+VarSets = struct('dswrf',dswrf,'dlwrf',dlwrf,'air',air,...
+    'uwnd',uwnd,'vwnd',vwnd,'apcp',apcp,'rhum',rhum,'weasd',weasd,...
+    'snod',snod,'tcdc',tcdc);
 
 feature_collection = 'sb:managedLakesAllOne';
-attribute = 'OBJECTID';
+attribute = 'WBDY_WBIC'; % for WBIC codes... 
 
-years = 2007:2011;
+years = 1980:2011;
 
 %% set processing
 
