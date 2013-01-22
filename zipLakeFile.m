@@ -31,7 +31,7 @@ if replcPrj
     fwrite(fID,prjWrite);
 end
 
-zFile = [zipDir appendNm lakeNm '.zip'];
+zFile = [zipDir appendNm lakeNm];
 
 zip(zFile,files,rootDir)  
 

@@ -3,8 +3,8 @@ function getDriverDataGDP
 clc
 clear all
 %% -- variables --
-timerPeriod = 22;    % seconds
-retries = 1;
+timerPeriod = 42;    % seconds
+retries = 5;
 
 
 writeDir= '/Users/jread/Desktop/Science Projects/WiLMA/Driver data/';
@@ -13,15 +13,19 @@ GeoServ = 'https://www.sciencebase.gov/catalogMaps/mapping/ows/50d35261e4b062c79
 SW_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/dswrf.YYYY.nc';
 LW_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/dlwrf.YYYY.nc';
 air_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/air.2m.YYYY.nc';
-uwnd_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/uwnd.10m.YYYY.nc';
-vwnd_URI = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/vwnd.10m.YYYY.nc';
+uwnd_URI= 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/uwnd.10m.YYYY.nc';
+vwnd_URI= 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/vwnd.10m.YYYY.nc';
 prcp_URI= 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/apcp.YYYY.nc';
 RH_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/rhum.2m.YYYY.nc';
 snow_URI= 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/weasd.YYYY.nc';
 snowZ_URI='dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/snod.YYYY.nc';
 CC_URI  = 'dods://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/NARR/monolevel/tcdc.YYYY.nc';
 
-dswrf= struct('uri',SW_URI,'fileName','SW_daymet');
+%WPS_URL = 'http://cida.usgs.gov/qa/climate/gdp/process/WebProcessingService';
+WPS_URL = 'http://cida.usgs.gov/gdp/process/WebProcessingService';
+
+
+dswrf= struct('uri',SW_URI,'fileName','SW_NARR');
 dlwrf= struct('uri',LW_URI,'fileName','LW_NARR');
 air  = struct('uri',air_URI,'fileName','air_NARR');
 uwnd = struct('uri',uwnd_URI,'fileName','uwnd_NARR');
@@ -33,14 +37,14 @@ snod = struct('uri',snowZ_URI,'fileName','snowZ_NARR');
 tcdc = struct('uri',CC_URI,'fileName','CC_NARR');
 
 
-VarSets = struct('dswrf',dswrf,'dlwrf',dlwrf,'air',air,...
-    'uwnd',uwnd,'vwnd',vwnd,'apcp',apcp,'rhum',rhum,'weasd',weasd,...
-    'snod',snod,'tcdc',tcdc);
+VarSets = struct('weasd',weasd,...
+    'snod',snod,'tcdc',tcdc,'dswrf',dswrf,'dlwrf',dlwrf,'air',air,...
+    'uwnd',uwnd,'vwnd',vwnd,'apcp',apcp,'rhum',rhum);
 
 feature_collection = 'sb:managedLakesAllOne';
 attribute = 'WBDY_WBIC'; % for WBIC codes... 
 
-years = 1980:2011;
+years = 1998:1998;
 
 %% set processing
 
@@ -55,10 +59,10 @@ for i = 1:length(years)
         GDP = mGDP();
         
         GDP = GDP.setGeoserver(GeoServ);
+        GDP = GDP.setWPS(WPS_URL);
         GDP = GDP.setFeature('FEATURE_COLLECTION',feature_collection,...
             'ATTRIBUTE',attribute,'GML','NULL');
-        
-        
+            
         URI = regexprep(VarSets.(vars{v}).uri,'YYYY',YYYY);
         disp(URI)
         var = vars{v};
