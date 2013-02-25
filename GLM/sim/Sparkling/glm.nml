@@ -200,8 +200,8 @@
 !
 !-------------------------------------------------------------------------------
 &inflow
-   num_inflows    = 1
-   names_of_strms = 'Riv2'
+   num_inflows    = 0
+   names_of_strms = 'Riv1'
    strm_hf_angle  = 65.0
    strmbd_slope   = 0.11
    strmbd_drag    = 0.0160
@@ -225,7 +225,7 @@
 !
 !-------------------------------------------------------------------------------
 &outflow
-   num_outlet   = 1
+   num_outlet   = 0
    flt_off_sw   = .false.
    outl_elvs    = -215.5
    bsn_len_outl = 799
