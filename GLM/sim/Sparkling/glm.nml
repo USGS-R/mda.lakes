@@ -146,7 +146,6 @@
    csv_point_nvars = 3
    csv_point_vars = 'temp',
               'salt',
-              'aed_oxygen_oxy',
 
 
    csv_lake_fname = 'lake'
@@ -200,7 +199,7 @@
 !
 !-------------------------------------------------------------------------------
 &inflow
-   num_inflows    = 0
+   num_inflows    = 1
    names_of_strms = 'Riv1'
    strm_hf_angle  = 65.0
    strmbd_slope   = 0.11
@@ -225,7 +224,7 @@
 !
 !-------------------------------------------------------------------------------
 &outflow
-   num_outlet   = 0
+   num_outlet   = 1
    flt_off_sw   = .false.
    outl_elvs    = -215.5
    bsn_len_outl = 799
