@@ -207,7 +207,7 @@
    strmbd_drag    = 0.0160
    inflow_factor = 1.0
    inflow_fl      = 'inflow_2.csv'
-   inflow_varnum  = 4,
+   inflow_varnum  = 3,
    inflow_vars    = 'FLOW',
                     'TEMP',
                     'SALT',
