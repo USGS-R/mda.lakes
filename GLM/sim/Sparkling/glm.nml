@@ -143,7 +143,7 @@
    csv_point_nlevs = 1
    csv_point_fname = 'WQ_'
    csv_point_at = 17.
-   csv_point_nvars = 3
+   csv_point_nvars = 2
    csv_point_vars = 'temp',
               'salt',
 
