@@ -181,6 +181,7 @@
    csv_point_nvars = 3
    csv_point_vars = 'temp',
               'salt',
+              'aed_oxygen_oxy',
 
 
    csv_lake_fname = 'lake'
