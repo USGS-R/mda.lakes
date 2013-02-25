@@ -209,8 +209,7 @@
    inflow_fl      = 'inflow_2.csv'
    inflow_varnum  = 2
    inflow_vars    = 'FLOW',
-                    'TEMP',
-                    'SALT'
+                    'TEMP'
 /
 
 !-------------------------------------------------------------------------------
