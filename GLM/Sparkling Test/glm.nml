@@ -80,9 +80,9 @@
 !
 !-------------------------------------------------------------------------------
 &morphometry
-   lake_name  = 'TestLake2'
-   latitude   = 32
-   longitude  = 35
+   lake_name  = 'Sparkling'
+   latitude   = 46
+   longitude  = -89
    base_elev  = -252.9,
    crest_elev = -203.9,
    bsn_len    = 21000,
