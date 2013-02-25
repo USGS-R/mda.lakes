@@ -21,7 +21,7 @@
 &plots
   nplots = 2
   plot_width = 400
-  plot_height = 200
+  plot_height = 400
 
   title = 'Temperature', 'Salinity'
   vars  = 'temp','salt'
