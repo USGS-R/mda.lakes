@@ -224,7 +224,7 @@
 !
 !-------------------------------------------------------------------------------
 &outflow
-   num_outlet   = 1
+   num_outlet   = 0
    flt_off_sw   = .false.
    outl_elvs    = -215.5
    bsn_len_outl = 799
