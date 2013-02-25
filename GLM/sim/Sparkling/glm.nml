@@ -26,6 +26,39 @@
    coef_mix_kh = 0.30
 /
 
+!-------------------------------------------------------------------------------
+! fabm setup
+!-------------------------------------------------------------------------------
+! ode_method        [integer]
+!                     ODE scheme for source and sink dynamics
+!                     1: first-order explicit (not positive)
+!                     2: second-order explicit Runge-Kutta (not positive)
+!                     3: fourth-order explicit Runge-Kutta (not positive)
+!                     4: Patankar (first-order, not conservative)
+!                     5: Patankar-RK (second-order, not conservative)
+!                     6: Patankar-RK (does not work, not conservative)
+!                     7: Modified Patankar (1st-order, conservat., posit.)
+!                     8: Modified Patankar-RK (2nd-order, conservat., posit.)
+!                     9: Modified Patankar-RK (does not work, conservat.,
+!                       posit.)
+!                     10: Extended Modified Patankar (1st-order, conservat.,
+!                       posit.)
+!                     11: Extended Modified Patankar-RK (2nd-order, conservat.,
+!                       posit.)
+!                     This variable is used only if bio_calc = True
+! split_factor      [integer, minimum = 1]
+!                     number of biogeochemical time steps per physical time step
+! bioshade_feedback [bool]
+!                     feedback of bio-turbidity to temperature equation
+!-------------------------------------------------------------------------------
+&fabm_setup
+   ode_method = 1
+   split_factor = 1
+   bioshade_feedback = .true.
+   repair_state = .true.
+   fabm_nml_file = 'fabm.nml'
+   multi_ben = .true.
+/
 
 !-------------------------------------------------------------------------------
 ! lake details
@@ -147,7 +180,8 @@
    csv_point_at = 17.
    csv_point_nvars = 3
    csv_point_vars = 'temp',
-              'salt'
+              'salt',
+              'aed_oxygen_oxy',
 
 
    csv_lake_fname = 'lake'
