@@ -245,21 +245,7 @@
    inflow_varnum  = 4,
    inflow_vars    = 'FLOW',
                     'TEMP',
-                    'SALT',
-                    'aed_oxygen_oxy',
-                    'aed_silica_rsi',
-                    'aed_nitrogen_amm',
-                    'aed_nitrogen_nit',
-                    'aed_phosphorus_frp',
-                    'aed_organic_matter_don',
-                    'aed_organic_matter_pon',
-                    'aed_organic_matter_dop',
-                    'aed_organic_matter_pop',
-                    'aed_organic_matter_doc',
-                    'aed_organic_matter_poc',
-                    'aed_phytoplankton_green',
-                    'aed_phytoplankton_crypto',
-                    'aed_phytoplankton_diatom'
+                    'SALT'
 /
 
 !-------------------------------------------------------------------------------
