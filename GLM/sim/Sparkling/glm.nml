@@ -51,14 +51,7 @@
 ! bioshade_feedback [bool]
 !                     feedback of bio-turbidity to temperature equation
 !-------------------------------------------------------------------------------
-&fabm_setup
-   ode_method = 1
-   split_factor = 1
-   bioshade_feedback = .true.
-   repair_state = .true.
-   fabm_nml_file = 'fabm.nml'
-   multi_ben = .true.
-/
+
 
 !-------------------------------------------------------------------------------
 ! lake details
