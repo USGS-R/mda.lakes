@@ -19,14 +19,14 @@
 ! tinkering with
 !-----------------------------------------------------------
 &plots
-  nplots = 9
+  nplots = 2
   plot_width = 400
   plot_height = 200
 
-  title = 'Temperature', 'Salinity','DO','Green','Diatom','Crypto','NO3','PO4','GreenIN'
-  vars  = 'temp','salt','aed_oxygen_oxy','aed_phytoplankton_green','aed_phytoplankton_diatom','aed_phytoplankton_crypto','aed_nitrogen_nit','aed_phosphorus_frp','aed_phytoplankton_green_IN'
-  min_z = 12.0, 0.0,   0.0,   0.0,   0.0,  0.0,   0., 0., 0.
-  max_z = 35.0, 0.91, 600.0, 150.0, 350.0, 2.5, 100., 5., 5.
+  title = 'Temperature', 'Salinity'
+  vars  = 'temp','salt'
+  min_z = 12.0, 0.0
+  max_z = 35.0, 0.91
 /
 
 !-----------------------------------------------------------
