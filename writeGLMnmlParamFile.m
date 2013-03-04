@@ -3,7 +3,7 @@ function writeGLMnmlParamFile( varargin )
             
 
 
-nmlDir = '/Users/jread/Desktop/Science Projects/WiLMA/GLM/';
+nmlDir = '/supporting files/';
 simDir = '/Volumes/projects/WiLMA/GLM/GLM run/sim/Sparkling/';
 % writes the glm.nml param file according to lake parameters
 
