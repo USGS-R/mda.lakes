@@ -119,9 +119,9 @@
    out_dir = '.'
    out_fn = 'output'
    out_lkn = .false.
-   nsave = 1
+   nsave = nsave_INT
 
-   csv_point_nlevs = 2
+   csv_point_nlevs = 0
    csv_point_fname = 'tempZ_'
    csv_point_at = 2., 1.
    csv_point_nvars = 1
@@ -159,8 +159,8 @@
    rain_sw    = rain_sw_BL
    snow_sw    = snow_sw_BL
    atm_stab   = .true.
-   subdaily   = .false.
-   meteo_fl   = 'Sparkling_met_daily.csv'
+   subdaily   = subdaily_BL
+   meteo_fl   = meteo_fl_STR
    wind_factor = wind_factor_FLT
    ce         = ce_FLT
    ch         = ch_FLT
@@ -179,7 +179,7 @@
 !
 !-------------------------------------------------------------------------------
 &inflow
-   num_inflows    = 0
+   num_inflows    = num_inflows_FLT
    names_of_strms = 'GroundWater'
    strm_hf_angle  = 65.0
    strmbd_slope   = 0.11
@@ -204,7 +204,7 @@
 !
 !-------------------------------------------------------------------------------
 &outflow
-   num_outlet   = num_outlet_BL
+   num_outlet   = num_outlet_FLT
    flt_off_sw   = .false.
    outl_elvs    = outl_elvs_FLT
    bsn_len_outl = 799
