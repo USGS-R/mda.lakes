@@ -19,11 +19,11 @@
    max_layer_thick = max_layer_thick_FLT
    Kw = Kw_FLT
    coef_inf_entrain = coef_inf_entrain_FLT
-   coef_mix_kinetic = coef_mix_kinetic_FLT
-   coef_mix_eta = coef_mix_eta_FLT
-   coef_mix_ct = coef_mix_ct_FLT
-   coef_mix_cs = coef_mix_cs_FLT
-   coef_mix_kh = coef_mix_kh_FLT
+   coef_mix_conv = coef_mix_conv_FLT
+   coef_wind_stir = coef_wind_stir_FLT
+   coef_mix_shear = coef_mix_shear_FLT
+   coef_mix_turb = coef_mix_turb_FLT
+   coef_mix_KH = coef_mix_KH_FLT
 /
 
 !-------------------------------------------------------------------------------
@@ -136,6 +136,7 @@
 !-------------------------------------------------------------------------------
 &init_profiles
     num_depths = num_depths_INT
+    lake_depth = lake_depth_FLT
     the_depths = the_depths_csvVEC
     the_temps  = the_temps_csvVEC
     the_sals   = the_sals_csvVEC
