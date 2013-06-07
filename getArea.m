@@ -1,12 +1,15 @@
-function lkeArea = getArea(WBIC)
+function lkeArea = getArea(WBIC,metaFile)
 
 % gets the max depth value for a given lake
 % WBIC is a string;
 
+if eq(nargin,1)
+    metaFile = ['/Users/jread/Desktop/Science Projects/'...
+    'WiLMA/GLM files/Metadata/managed_lake_info.txt'];
+end
 acre2m2 = 4046.85642;
 
-metaFile = ['/Users/jread/Desktop/Science Projects/'...
-    'WiLMA/GLM files/Metadata/managed_lake_info.txt'];
+
 wbic_i = 1;
 lkeA_i = 4;
 reader = '%s %s %s %s %s %s %s %s %s %s %s %s';

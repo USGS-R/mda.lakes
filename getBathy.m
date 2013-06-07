@@ -1,4 +1,4 @@
-function bth = getBathy(WBIC)
+function [bth,fromBth] = getBathy(WBIC)
 
 % get or estimate bathemetry 
 % bth is (2,n); (1,n) is bthH, (2,n) is bthA
@@ -9,12 +9,14 @@ rootDir = ['/Users/jread/Desktop/Science Projects/'...
     'WiLMA/GLM files/Metadata/'];
 
 %% first, look for bathy file
+fromBth = false;
 fID = fopen([rootDir '/Bathy/' WBIC '.bth']);
 if gt(fID,0)
     % parse..
     dat = textscan(fID,'%f %f','Delimiter','\t','HeaderLines',1);
     bthH = dat{1}';
     bthA = dat{2}';
+    fromBth = true;
 else
     % look for max depth and area
     zMax = getZmax(WBIC);
