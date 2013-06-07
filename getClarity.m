@@ -1,12 +1,12 @@
-function Kd = getClarity( WBIC )
+function Kd = getClarity( WBIC,SecchiFile )
 
 % gets the Kd value for a given lake
 % WBIC is a string;
 
 
-
-SecchiFile = ['/Users/jread/Desktop/Science Projects/'...
-    'WiLMA/GLM files/Metadata/annual_mean_secchi.txt'];
+if eq(nargin,1)
+    SecchiFile = 'supporting files/annual_mean_secchi.txt';
+end
 wbic_i = 1;
 secc_i = 9;
 reader = '%s %s %s %s %s %s %s %s %s %s';

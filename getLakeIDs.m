@@ -1,9 +1,9 @@
-function lakeIDs = getLakeIDs()
+function lakeIDs = getLakeIDs(metaFile)
 
 
-
-metaFile = ['/Users/jread/Desktop/Science Projects/'...
-    'WiLMA/GLM files/Metadata/managed_lake_info.txt'];
+if eq(nargin,0)
+    metaFile = 'supporting files/managed_lake_info.txt';
+end
 wbic_i = 1;
 reader = '%s %s %s %s %s %s %s %s %s %s %s %s';
 

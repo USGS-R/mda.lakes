@@ -1,12 +1,13 @@
-function [bth,fromBth] = getBathy(WBIC)
+function [bth,fromBth] = getBathy(WBIC,rootDir)
 
 % get or estimate bathemetry 
 % bth is (2,n); (1,n) is bthH, (2,n) is bthA
 % assumes m2 area!!!
 numZ= 15;
 
-rootDir = ['/Users/jread/Desktop/Science Projects/'...
-    'WiLMA/GLM files/Metadata/'];
+if eq(nargin,1)
+    rootDir = 'supporting files/';
+end
 
 %% first, look for bathy file
 fromBth = false;
