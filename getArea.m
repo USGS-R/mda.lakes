@@ -4,7 +4,7 @@ function lkeArea = getArea(WBIC,metaFile)
 % WBIC is a string;
 
 if eq(nargin,1)
-    metaFile = ['supporting files/managed_lake_info.txt'];
+    metaFile = 'supporting files/managed_lake_info.txt';
 end
 acre2m2 = 4046.85642;
 
