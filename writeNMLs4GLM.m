@@ -4,6 +4,8 @@ function writeNMLs4GLM
 
 refreshWiLMAfiles()
 
+writeRoot = '/Users/jread/Desktop/Science Projects/WiLMA/GLM files/';
+
 lakeIDs = getLakeIDs();
 
 for j = 1:length(lakeIDs)
@@ -17,7 +19,7 @@ for j = 1:length(lakeIDs)
     elev = getElev(lakeID);
     canopy = getCanopy(lakeID);
     lkeArea = getArea(lakeID);
-    [lat,long] = getLatLong(lakeID);    % Luke?
+    [lat,long] = getLatLon(lakeID);
     Wstr = getWstr(canopy,lkeArea);
     
     Cu   = Wstr^0.33333;
@@ -30,7 +32,9 @@ for j = 1:length(lakeIDs)
     lakeRef = ['WBIC_' lakeID];
     metFile = ['WBIC_' lakeID '.csv'];
     
-    writeGLMnmlParamFile('Kw_FLT',Kd,'lake_name_STR',lakeRef,...
+    simDir = [writeRoot lakeRef '/'];
+    
+    writeGLMnmlParamFile(simDir,'Kw_FLT',Kd,'lake_name_STR',lakeRef,...
         'latitude_FLT',lat,'longitude_FLT',long,...
         'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
         'wind_factor_FLT',1,'ce_FLT',0.0013/Cu,'ch_FLT',0.0013/Cu,...
