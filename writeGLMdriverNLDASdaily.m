@@ -2,22 +2,22 @@ function writeGLMdriverNLDASdaily()
 
 
 
-writeRoot = '/Users/jread/Desktop/Science Projects/WiLMA/GLM files/Driver files/';
-driverDir = '/Users/jread/Desktop/Science Projects/WiLMA/Driver data/NLDAS/matYYYY/';
+writeRoot = 'D:\WiLMA\Driver files\';
+driverDir = 'D:\WiLMA\matYYYY\';
 
 dataFormat = '%s,%2.1f,%2.1f,%2.2f,%2.1f,%2.2f,%2.3f,%2.3f\n';
 dynamicVar = {'airT','LW','prcp','prss','spHum','SW','uWnd','vWnd'};
 writeVar = {'ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow'};
-lakeIDs = getLakeIDs();
+%lakeIDs = getLakeIDs();
 %%%% shortening lakeIDs %%%%
+fID = fopen('D:\WiLMA\to_cal_wbic.csv');
+lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
+
 %lakeIDs = lakeIDs(1078:end);
 
 kelvinConv = -273.15;
-%lakeIDs = {'968800','805400','190500','182000'};
-tic
-load([driverDir '../../StationaryGLM_struct']);
-% loads Hc, snow from NARR
-toc
+%lakeIDs = {'968800','805400'};
+
 
 blcks = regexp(num2str(1979:2011),'  ','split');
 
@@ -29,7 +29,7 @@ blcks = regexp(num2str(1979:2011),'  ','split');
 % - clear memory of large loads
 tic
 
-for b = 33:length(blcks)
+for b = 1:length(blcks)
     % load all into memory:
     disp(' ')
     toc
@@ -47,8 +47,8 @@ for b = 33:length(blcks)
         varStruct.prcp = [varStruct.prcp(:,:); zeros(length(names),1)'];
         disp(['>> precip added one zero in ' blcks{b}])
     end
-    for lk = 1:length(lakeIDs);
-        lakeID = lakeIDs{lk};
+    for lk = 1:length(lakeIDs{1});
+        lakeID = lakeIDs{1}{lk};
         fileN = ['WBIC_' lakeID '.csv'];
         lakeI= strcmp(names,lakeID);
         if any(lakeI)
@@ -60,22 +60,14 @@ for b = 33:length(blcks)
             q_sat = qsat(data(:,3),varStruct.prss(:,lakeI)*0.01);
             RH = 100*Q./q_sat;
             data(:,4) = RH;
-            lkeArea = getArea(lakeID);
             wnd = sqrt(varStruct.uWnd(:,lakeI).^2+varStruct.vWnd(:,lakeI).^2); % hourly windspeed
-			
-            structI = strcmp(StationaryGLM_struct.feature,lakeID);
-            
             data(:,5) = wnd.^3;	% use for downsampling power (cubed)
             data(:,6) = varStruct.prcp(:,lakeI)*0.001; % now in m/hr
             
             snow = zeros(length(data(:,6)),1);
             swapI = lt(data(:,3),0);
-            snow(swapI) = data(swapI,6)*10; % 10:1 ratio
-            % find snow to repace timesteps:
-            %useI = ismember(StationaryGLM_struct.time,dates);
-            %swapI = ismember(dates,StationaryGLM_struct.time);
-            %snow(swapI) = StationaryGLM_struct.snow(useI,structI);
-            %snow = snow*0.01; % assuming 1:10 density ratio water weight % is WRONG?????
+            snow(swapI) = data(swapI,6)*10; % 10:1 ratio assuming 1:10 density ratio water weight
+            data(swapI,6) = 0; % no precip falls as rain.
             
             data(:,7) = snow;
             if eq(b,1)
@@ -92,13 +84,17 @@ for b = 33:length(blcks)
 			
             for j = 1:length(dayDates)
 				% downsample to daily
-				useI = eq(floor(dates),dayDates(j)));
-				dataWrite = NaN(1,length(writeVar))
+				useI = eq(floor(dates),dayDates(j));
+				dataWrite = NaN(1,length(writeVar));
 				for var = 1:length(writeVar)
 					if strcmp(writeVar{var},'WindSpeed')
-						dataWrite = mean(data(useI,var))^0.33333	% gets mean daily value of cube root
+						dataWrite(:,var) = mean(data(useI,var))^0.33333;	% gets mean daily value of cube root
+                    elseif strcmp(writeVar{var},'Rain')
+						dataWrite(:,var) = sum(data(useI,var));	% gets mean daily value
+                    elseif strcmp(writeVar{var},'Snow')
+						dataWrite(:,var) = sum(data(useI,var));	% gets mean daily value
 					else
-						dataWrite = mean(data(useI,var))	% gets mean daily value
+						dataWrite(:,var) = mean(data(useI,var));	% gets mean daily value
 					end
 				end
                 fprintf(fID,dataFormat,dateCell(j,:),dataWrite);
@@ -106,7 +102,7 @@ for b = 33:length(blcks)
             fclose(fID);
         else
             if eq(b,1)
-                fID_log = fopen([driverDir '../../../WiLMA_driver_log.txt'],'A');
+                fID_log = fopen([driverDir '../WiLMA_driver_log.txt'],'A');
                 fprintf(fID_log,[lakeID ' missing from driver set\n']);
                 disp([lakeID ' missing from driver set, writing to log file'])
                 fclose(fID_log);
@@ -114,54 +110,14 @@ for b = 33:length(blcks)
                 disp([lakeID ' missing from driver set, skipping'])
             end
         end
-        if eq(rem(lk,10),0)
-            disp(['....' num2str(lk) ' lakes complete out of ' num2str(length(lakeIDs)) '....'])
+        if eq(rem(lk,50),0)
+            disp(['....' num2str(lk) ' lakes complete out of ' num2str(length(lakeIDs{1})) '....'])
         end
         
     end 
     disp(['**** done with block ' num2str(b) ' of ' num2str(length(blcks)) ...
         '(' blcks{b} ') ****'])
 end
-fclose all;
-% 
-%         %% now build the param file
-%         
-
-    lakeID = '1008700'
-        Kd = getClarity(lakeID);
-        bth= getBathy(lakeID);
-        if isnan(Kd)
-            Kd = 1;
-        end
-        elev = getElev(lakeID);
-        bthH = bth(1,:);
-        bthA = bth(2,:);
-        for i = 1:length(bth(1,:))
-            bthH(i) = elev-bth(1,length(bthH)-i+1);
-            bthA(i) = bth(2,length(bthA)-i+1)/1000; %% FIXX
-        end
-        lakeRef = ['WBIC_' lakeID];
-        metFile = ['WBIC_' lakeID '.csv'];
-        writeGLMnmlParamFile('Kw_FLT',Kd,'lake_name_STR',lakeRef,...
-            'latitude_FLT',43,'longitude_FLT',-89,...
-            'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
-            'wind_factor_FLT',1,'ce_FLT',0.0013/Cu,'ch_FLT',0.0013/Cu,...
-            'stop_STR','2012-06-30 00:00:00','min_layer_thick_FLT',0.5,...
-            'max_layer_thick_FLT',0.5)
-        toc
-        disp(['lake ' num2str(lk) ' of ' num2str(length(lakeIDs))]);
-        disp('-----');
-%     else
-%         disp(['skipping ' lakeID]);
-%         disp('-----');
-%     end
-% end
-% 
-% 
-% 
-% 
-% 
-
 
 toc
 
