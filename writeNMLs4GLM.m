@@ -1,10 +1,12 @@
 function writeNMLs4GLM
 
-%refreshWiLMAfiles()
+refreshWiLMAfiles()
 
 writeRoot = 'D:/WilmaInputFiles/';
-
+writeRoot = 'C:\Users\jread\Desktop\GLM_v1.2.0\sim\Anvil_daily\';
 lakeIDs = getLakeIDs();
+
+lakeIDs = {'968800'};
 
 for j = 1:length(lakeIDs)
     lakeID = lakeIDs{j};
