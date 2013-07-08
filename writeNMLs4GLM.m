@@ -1,15 +1,18 @@
 function writeNMLs4GLM
 
-refreshWiLMAfiles()
+refresh = false;
+if refresh
+    refreshWiLMAfiles()
+end
 
-writeRoot = 'D:/WilmaInputFiles/';
-writeRoot = 'C:\Users\jread\Desktop\GLM_v1.2.0\sim\Anvil_daily\';
-lakeIDs = getLakeIDs();
+writeRoot = 'D:\WiLMA\NML\';
+fID = fopen('D:\WiLMA\to_cal_wbic.csv');
+lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
+fclose(fID);
 
-lakeIDs = {'968800'};
 
-for j = 1:length(lakeIDs)
-    lakeID = lakeIDs{j};
+for j = 1:length(lakeIDs{1})
+    lakeID = lakeIDs{1}{j};
     Kd = getClarity(lakeID);
     bth= getBathy(lakeID);
     if isnan(Kd)
@@ -31,18 +34,23 @@ for j = 1:length(lakeIDs)
     end
     lakeRef = ['WBIC_' lakeID];
     metFile = ['WBIC_' lakeID '.csv'];
+    bsn_len = sqrt((max (bthA)*1000)/pi())*2;
+    bsn_wid = sqrt((max(bthA)*1000)/pi())*2;
     
-    simDir = [writeRoot lakeRef '/'];
+    simDir = [writeRoot lakeRef '/']; % override to write to just one dir
     mkdir(simDir);
     
     writeGLMnmlParamFile(simDir,'Kw_FLT',Kd,'lake_name_STR',lakeRef,...
         'latitude_FLT',lat,'longitude_FLT',long,...
         'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
-        'wind_factor_FLT',1,'ce_FLT',0.0013/Cu,'ch_FLT',0.0013/Cu,...
+        'wind_factor_FLT',Wstr,'ce_FLT',0.0013/Wstr,'ch_FLT',0.0013/Wstr,...
         'stop_STR','2011-12-31 23:00:00','min_layer_thick_FLT',0.1,...
-        'max_layer_thick_FLT',1)
+        'max_layer_thick_FLT',1.0,'dt_FLT',86400,'nsave_INT',1,...
+        'coef_mix_KH_FLT',0.5,'coef_mix_conv_FLT',0.33,...
+        'coef_wind_stir_FLT',0.48,'coef_mix_shear_FLT',0.213,...
+        'bsn_len_FLT',bsn_len,'bsn_wid_FLT',bsn_wid);
     
-    disp(['lake ' num2str(j) ' of ' num2str(length(lakeIDs))]);
+    disp(['lake ' num2str(j) ' of ' num2str(length(lakeIDs{1}))]);
     disp('-----');
     %     else
     
