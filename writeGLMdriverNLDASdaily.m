@@ -12,7 +12,7 @@ writeVar = {'ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow'}
 %%%% shortening lakeIDs %%%%
 fID = fopen('D:\WiLMA\to_cal_wbic.csv');
 lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
-
+fclose(fID);
 %lakeIDs = lakeIDs(1078:end);
 
 kelvinConv = -273.15;
