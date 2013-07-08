@@ -1,8 +1,8 @@
 function writeNMLs4GLM
 
+%refreshWiLMAfiles()
 
-
-refreshWiLMAfiles()
+writeRoot = 'D:/WilmaInputFiles/';
 
 lakeIDs = getLakeIDs();
 
@@ -17,7 +17,7 @@ for j = 1:length(lakeIDs)
     elev = getElev(lakeID);
     canopy = getCanopy(lakeID);
     lkeArea = getArea(lakeID);
-    [lat,long] = getLatLong(lakeID);    % Luke?
+    [lat,long] = getLatLon(lakeID);
     Wstr = getWstr(canopy,lkeArea);
     
     Cu   = Wstr^0.33333;
@@ -30,14 +30,17 @@ for j = 1:length(lakeIDs)
     lakeRef = ['WBIC_' lakeID];
     metFile = ['WBIC_' lakeID '.csv'];
     
-    writeGLMnmlParamFile('Kw_FLT',Kd,'lake_name_STR',lakeRef,...
+    simDir = [writeRoot lakeRef '/'];
+    mkdir(simDir);
+    
+    writeGLMnmlParamFile(simDir,'Kw_FLT',Kd,'lake_name_STR',lakeRef,...
         'latitude_FLT',lat,'longitude_FLT',long,...
         'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
         'wind_factor_FLT',1,'ce_FLT',0.0013/Cu,'ch_FLT',0.0013/Cu,...
         'stop_STR','2011-12-31 23:00:00','min_layer_thick_FLT',0.1,...
         'max_layer_thick_FLT',1)
-    toc
-    disp(['lake ' num2str(lk) ' of ' num2str(length(lakeIDs))]);
+    
+    disp(['lake ' num2str(j) ' of ' num2str(length(lakeIDs))]);
     disp('-----');
     %     else
     

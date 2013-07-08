@@ -1,9 +1,7 @@
 function refreshWiLMAfiles
 
-bs = '\';
-if isunix
-    bs = '/';
-end
+bs = filesep;
+
 finalDir = ['supporting files' bs];
 tempDir = [finalDir 'tmp' bs];
 if ~exist([finalDir 'tmp' bs],'dir')
