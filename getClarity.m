@@ -2,10 +2,14 @@ function Kd = getClarity( WBIC,SecchiFile )
 
 % gets the Kd value for a given lake
 % WBIC is a string;
-
+if isunix
+    del = '/';
+else
+    del = '\';
+end
 
 if eq(nargin,1)
-    SecchiFile = 'supporting files/annual_mean_secchi.txt';
+    SecchiFile = ['supporting files' del 'annual_mean_secchi.txt'];
 end
 wbic_i = 1;
 secc_i = 9;
