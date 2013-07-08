@@ -16,7 +16,7 @@ for j = 1:length(lakeIDs{1})
     Kd = getClarity(lakeID);
     bth= getBathy(lakeID);
     if isnan(Kd)
-        Kd = 1;
+        Kd = 0.63; % overall mean
     end
     
     elev = getElev(lakeID);
