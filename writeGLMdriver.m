@@ -4,6 +4,8 @@ function writeGLMdriver()
 daily = false;
 
 rawDir = '/Users/jread/Desktop/Science Projects/WiLMA/Driver data/';
+writeRoot = '/Volumes/projects/WiLMA/GLM/GLM run/sim/Delevan/';
+%writeRoot = '/Users/jread/Desktop/Science Projects/WiLMA/GLM files/';
 fileN = 'GLM_GDP_driver';
 if daily 
     rawDir = [rawDir 'Dailies/'];
@@ -11,14 +13,15 @@ if daily
 end
 
 dataFormat = '%s,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f\n';
-lakeIDs = getLakeIDs();
+%lakeIDs = getLakeIDs();
 
+lakeIDs = {'793600'};
 tic
 load([rawDir fileN]);
 toc
 
 
-for lk = 27:length(lakeIDs)
+for lk = 1:length(lakeIDs)
     lakeID = lakeIDs{lk};
     
     lakeI= strcmp(GLM_NARR.feature,lakeID);
@@ -26,10 +29,11 @@ for lk = 27:length(lakeIDs)
     bth= getBathy(lakeID);
     if any(lakeI) && ~any(isnan(bth(1,:))) % otherwise, skip
         lakeRef = ['WBIC_' lakeID];
-        writeDir = ['/Volumes/projects/WiLMA/GLM/GLM run/sim/' lakeRef '/'];
+        lakeRef = 'Delevan';
+        writeDir = [writeRoot lakeRef '/'];
         mkdir(writeDir);
         lkeArea = getArea(lakeID);
-        hc = 10; % GET THIS FROM COVER
+        hc = getCanopy(lakeID); % GET THIS FROM COVER
         D = 2*sqrt(lkeArea/pi);
         Xt = 50*hc; % canopy height times 50
         
@@ -45,7 +49,7 @@ for lk = 27:length(lakeIDs)
             GLM_NARR.airT(:,lakeI)-273.15 ...
             GLM_NARR.RH(:,lakeI) ...
             wnd*Cu ...
-            GLM_NARR.prcp(:,lakeI)/50 ...
+            GLM_NARR.prcp(:,lakeI)/100 ...   %was /50
             GLM_NARR.snow(:,lakeI)/30000];
         dateWt = GLM_NARR.time;
         data = (interp2(dateWt,1:7,data',(dateWt(1):1/24:dateWt(end))',1:7))';
