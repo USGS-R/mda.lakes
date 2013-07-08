@@ -1,4 +1,4 @@
-function writeGLMnmlParamFile(varargin)
+function writeGLMnmlParamFile(simDir, varargin)
 
 global gblVar
 gblVar = varargin;
@@ -12,8 +12,6 @@ gblVar = varargin;
     end
         
 nmlDir = 'supporting files/';
-writeRoot = '/Users/jread/Desktop/Science Projects/WiLMA/GLM files/';
-simDir = [writeRoot getVal('lake_name_STR') '/'];
 % writes the glm.nml param file according to lake parameters
 
 
@@ -43,8 +41,8 @@ defaults = struct(...
     'base_elev_FLT',min(getVal('H_csvVEC')),...
     'crest_elev_FLT',max(getVal('H_csvVEC')),...
     'bsn_len_FLT',sqrt((max(getVal('A_csvVEC'))*1000)/pi())*2,... % pi()*R^2 = 
-    'bsn_wid_FLT',sqrt((max(getVal('A_csvVEC'))*1000)/pi())*2,...
-    'bsn_vals_INT',length(getVal('A_csvVEC')),...                   % number of elements in H
+    'bsn_wid_FLT',sqrt((max(getVal('A_csvVEC'))*1000)/pi())*2,... % circle lake
+    'bsn_vals_INT',length(getVal('A_csvVEC')),...                 % number of elements in H
     'H_csvVEC',getVal('H_csvVEC'),...
     'A_csvVEC',getVal('A_csvVEC'),...
     'start_STR','1979-01-02 00:00:00',...
@@ -108,7 +106,7 @@ end
 
 fID = fopen([simDir 'glm.nml'],'w');
 fprintf(fID,'%s',text);
-fclose all;     
+fclose(fID);     
 
 
 
