@@ -62,20 +62,10 @@ for b = 33:length(blcks)
             data(:,4) = RH;
             lkeArea = getArea(lakeID);
             wnd = sqrt(varStruct.uWnd(:,lakeI).^2+varStruct.vWnd(:,lakeI).^2); % hourly windspeed
-			wndPwr = wnd.^3;	% use for downsampling power (cubed)
 			
             structI = strcmp(StationaryGLM_struct.feature,lakeID);
-            hc = max(str2double(StationaryGLM_struct.Hc{structI}),1);   % must be at least 1 m;
-            D = 2*sqrt(lkeArea/pi);
-            Xt = 50*hc; % canopy height times 50
             
-            Wstr = 2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2);
-            if le(D,Xt)
-                Wstr = 0.0005;
-            end
-            wnd = wnd.^1.3;
-            Cu   = Wstr^0.33333;
-            data(:,5) = Cu*wnd;
+            data(:,5) = wnd.^3;	% use for downsampling power (cubed)
             data(:,6) = varStruct.prcp(:,lakeI)*0.001; % now in m/hr
             
             snow = zeros(length(data(:,6)),1);
@@ -96,9 +86,22 @@ for b = 33:length(blcks)
                 headers = '';
             end
             fprintf(fID,headers);
-            dateCell = datestr(dates,'yyyy-mm-dd HH:MM:SS');
-            for j = 1:length(dates)
-                fprintf(fID,dataFormat,dateCell(j,:),data(j,:));
+            
+			dayDates = unique(floor(dates));
+			dateCell = datestr(dayDates,'yyyy-mm-dd HH:MM:SS');
+			
+            for j = 1:length(dayDates)
+				% downsample to daily
+				useI = eq(floor(dates),dayDates(j)));
+				dataWrite = NaN(1,length(writeVar))
+				for var = 1:length(writeVar)
+					if strcmp(writeVar{var},'WindSpeed')
+						dataWrite = mean(data(useI,var))^0.33333	% gets mean daily value of cube root
+					else
+						dataWrite = mean(data(useI,var))	% gets mean daily value
+					end
+				end
+                fprintf(fID,dataFormat,dateCell(j,:),dataWrite);
             end
             fclose(fID);
         else
