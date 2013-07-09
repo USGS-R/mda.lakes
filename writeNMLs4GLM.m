@@ -30,11 +30,26 @@ for j = 1:length(lakeIDs{1})
     
     Cu   = Wstr^0.33333;
     bthH = bth(1,:);
+    
+    
     bthA = bth(2,:);
     for i = 1:length(bth(1,:))
         bthH(i) = elev-bth(1,length(bthH)-i+1);
         bthA(i) = bth(2,length(bthA)-i+1)/1000; 
     end
+    
+    if ge(max(bthH),20)
+        mxLyr = 1.5;
+    elseif ge(max(bthH),8) && lt(max(bthH),20)
+        mxLyr = 1.0;
+    elseif ge(max(bthH),5) && lt(max(bthH),8)
+        mxLyr = .8;
+    elseif ge(max(bthH),3) && lt(max(bthH),5)
+        mxLyr = .5;
+    else
+        mxLyr = .3;
+    end
+    
     lakeRef = ['WBIC_' lakeID];
     metFile = ['WBIC_' lakeID '.csv'];
     bsn_len = sqrt((max (bthA)*1000)/pi())*2;
@@ -48,7 +63,7 @@ for j = 1:length(lakeIDs{1})
         'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
         'wind_factor_FLT',Cu,'ce_FLT',0.0013/Cu,'ch_FLT',0.0013/Cu,...
         'stop_STR','2011-12-31 23:00:00','min_layer_thick_FLT',0.1,...
-        'max_layer_thick_FLT',1.0,'dt_FLT',86400,'nsave_INT',1,...
+        'max_layer_thick_FLT',mxLyr,'dt_FLT',86400,'nsave_INT',1,...
         'coef_mix_KH_FLT',0.5,'coef_mix_conv_FLT',0.33,...
         'coef_wind_stir_FLT',0.48,'coef_mix_shear_FLT',0.213,...
         'bsn_len_FLT',bsn_len,'bsn_wid_FLT',bsn_wid);
