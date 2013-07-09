@@ -1,11 +1,14 @@
-function writeNMLs4GLM
+function writeNMLs4GLM(writeRoot)
 
 refresh = false;
 if refresh
     refreshWiLMAfiles()
 end
 
-writeRoot = 'D:\WiLMA\NML\';
+if eq(nargin,0)
+    writeRoot = 'D:\WiLMA\NML\';
+end
+
 fID = fopen('D:\WiLMA\to_cal_wbic.csv');
 lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
 fclose(fID);
@@ -37,13 +40,13 @@ for j = 1:length(lakeIDs{1})
     bsn_len = sqrt((max (bthA)*1000)/pi())*2;
     bsn_wid = sqrt((max(bthA)*1000)/pi())*2;
     
-    simDir = [writeRoot lakeRef '/']; % override to write to just one dir
+    simDir = [writeRoot lakeRef '/']; 
     mkdir(simDir);
     
     writeGLMnmlParamFile(simDir,'Kw_FLT',Kd,'lake_name_STR',lakeRef,...
         'latitude_FLT',lat,'longitude_FLT',long,...
         'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
-        'wind_factor_FLT',Wstr,'ce_FLT',0.0013/Wstr,'ch_FLT',0.0013/Wstr,...
+        'wind_factor_FLT',Wstr,'ce_FLT',0.0013/Cu,'ch_FLT',0.0013/Cu,...
         'stop_STR','2011-12-31 23:00:00','min_layer_thick_FLT',0.1,...
         'max_layer_thick_FLT',1.0,'dt_FLT',86400,'nsave_INT',1,...
         'coef_mix_KH_FLT',0.5,'coef_mix_conv_FLT',0.33,...
