@@ -1,4 +1,4 @@
-function writeNMLs4GLM(writeRoot)
+function writeNMLs4GLM(writeRoot,lakeIDs)
 
 refresh = false;
 if refresh
@@ -7,11 +7,17 @@ end
 
 if eq(nargin,0)
     writeRoot = 'D:\WiLMA\NML\';
+    fID = fopen('D:\WiLMA\to_cal_wbic.csv');
+    lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
+    fclose(fID);
+elseif eq(nargin,1)
+    fID = fopen('D:\WiLMA\to_cal_wbic.csv');
+    lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
+    fclose(fID);
 end
 
-fID = fopen('D:\WiLMA\to_cal_wbic.csv');
-lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
-fclose(fID);
+
+
 
 
 for j = 1:length(lakeIDs{1})
