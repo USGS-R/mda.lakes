@@ -6,6 +6,9 @@ close all
 if eq(nargin,0)
     fileName = '2013-07-08_Cal.tsv';
 end
+
+logColor = true;
+rankArea = false;
 slope = 0.1;
 addpath('..\Lake-Analyzer\Source')
 rootDir = 'supporting files\Calibration\';
@@ -92,7 +95,11 @@ for lk = 1:length(unWBIC)
                 ThrmZ(cnt,2) = SthermoD;
                 SS(cnt,2) = schmidtStability(wtrM,dep,bthA,bthD);
                 
-                lkeSz(cnt,1) = max(bthA);
+                if rankArea
+                    lkeSz(cnt,1) = max(bthA);
+                else
+                    lkeSz(cnt,1) = max(bthD);
+                end
             end
         end
 
@@ -111,7 +118,12 @@ lkeSz = lkeSz(~nanI,:);
 
 cmap = colormap(jet(100));
 close all
-lkvals = linspace(log(min(lkeSz)),log(max(lkeSz)),100);
+if logColor 
+    lkvals = linspace(log(min(lkeSz)),log(max(lkeSz)),100);
+else
+    lkvals = linspace(min(lkeSz),max(lkeSz),100);
+end
+    
 
 
 figW = 8;
@@ -122,7 +134,7 @@ bM = .75;
 tM = .25;
 vSpc = .7;
 wSpc = .7;
-mS = 1.5;
+mS = 1.0;
 W = (figW-lM-rM-wSpc)/2;
 H = (figH-tM-bM-vSpc)/2;
 axLW = 1.0;
@@ -172,7 +184,12 @@ set(ax_TD,'Xlim',[0 25],'YLim',[0 25]);
 for lk = 1:length(lkeSz)
     clr = [1 1 1];
     for i = 1:3
-        clr(i) = interp1(lkvals,cmap(:,i),log(lkeSz(lk)));
+        if logColor
+            clr(i) = interp1(lkvals,cmap(:,i),log(lkeSz(lk)));
+        else
+            clr(i) = interp1(lkvals,cmap(:,i),lkeSz(lk));
+        end
+            
     end
     plot(SS(lk,1),SS(lk,2),'ro','MarkerSize',mS,'Parent',ax_SS,...
         'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
