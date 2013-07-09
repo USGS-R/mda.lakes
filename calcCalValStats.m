@@ -6,9 +6,10 @@ close all
 if eq(nargin,0)
     fileName = '2013-07-08_Cal.tsv';
 end
+disp(fileName);
 
 logColor = true;
-rankArea = false;
+rankArea = true;
 slope = 0.1;
 addpath('..\Lake-Analyzer\Source')
 rootDir = 'supporting files\Calibration\';
@@ -134,7 +135,7 @@ bM = .75;
 tM = .25;
 vSpc = .7;
 wSpc = .7;
-mS = 1.0;
+mS = 0.7;
 W = (figW-lM-rM-wSpc)/2;
 H = (figH-tM-bM-vSpc)/2;
 axLW = 1.0;
@@ -201,7 +202,6 @@ for lk = 1:length(lkeSz)
         'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
     
 end
-
 print('-dpng','-r300',[rootDir fileName(1:end-4) '_val'])
 end
 
