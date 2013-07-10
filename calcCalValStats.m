@@ -8,6 +8,7 @@ if eq(nargin,0)
 end
 disp(fileName);
 
+colorChg = false;
 useAlpha = true;
 fAlpha = 0.15;
 markDiv = 0.015; % size relative to axis;
@@ -44,7 +45,7 @@ lkeSz   = NaN(length(dat{1}),1);
 cnt = 0;
 %% get unique lakes
 unWBIC = unique(dat{1});
-for lk = 1:20;%length(unWBIC)
+for lk = 1:length(unWBIC)
     WBIC = unWBIC{lk};
     bth = getBathy(WBIC);
     %Kd  = getClarity(WBIC);
@@ -236,14 +237,16 @@ set(ax_ST,'Xlim',[0 35],'YLim',[0 35]);
 set(ax_AT,'Xlim',[0 35],'YLim',[0 35]);
 
 for lk = 1:length(lkeSz)
-    clr = [1 1 1];
-    for i = 1:3
-        if logColor
-            clr(i) = interp1(lkvals,cmap(:,i),log(lkeSz(lk)));
-        else
-            clr(i) = interp1(lkvals,cmap(:,i),lkeSz(lk));
-        end
+    clr = [.2 .2 .2];
+    if colorChg
+        for i = 1:3
+            if logColor
+                clr(i) = interp1(lkvals,cmap(:,i),log(lkeSz(lk)));
+            else
+                clr(i) = interp1(lkvals,cmap(:,i),lkeSz(lk));
+            end
             
+        end
     end
     
     if useAlpha
