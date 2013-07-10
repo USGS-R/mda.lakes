@@ -82,7 +82,7 @@ for lk = 1:length(unWBIC)
             if ge(length(dep),minDep)                
                 % for obs
                 if le(max(wtrO)-min(wtrO),mixDef)
-                    ThrmZ(cnt,1) = max(dep);
+                    ThrmZ(cnt,1) = NaN;
                     EpiAve(cnt,1) = NaN;
                     HypAve(cnt,1) = NaN;
                 else
@@ -101,8 +101,7 @@ for lk = 1:length(unWBIC)
                 SS(cnt,1) = schmidtStability(wtrO,dep,bthA,bthD);
                 % for mod
                 if le(max(wtrM)-min(wtrM),mixDef)
-                    ThrmZ(cnt,2) = max(dep);
-                    metaTop = max(dep);
+                    ThrmZ(cnt,2) = NaN;
                     HypAve(cnt,2) = NaN;
                     EpiAve(cnt,2) = NaN;
                 else
@@ -114,7 +113,6 @@ for lk = 1:length(unWBIC)
                     EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
                     ThrmZ(cnt,2) = SthermoD;
                 end
-                EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrM,dep,bthA,bthD);
                 
                 SS(cnt,2) = schmidtStability(wtrM,dep,bthA,bthD);
                 if rankArea
