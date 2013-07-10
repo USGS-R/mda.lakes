@@ -8,6 +8,8 @@ if eq(nargin,0)
 end
 disp(fileName);
 
+minDep = 5; % min number of depths to calc a result from
+mixDef = 1.0;
 logColor = true;
 rankArea = true;
 slope = 0.1;
@@ -39,6 +41,7 @@ unWBIC = unique(dat{1});
 for lk = 1:length(unWBIC)
     WBIC = unWBIC{lk};
     bth = getBathy(WBIC);
+    %Kd  = getClarity(WBIC);
     bthA = bth(2,:);
     bthD = bth(1,:);
     useI = strcmp(WBIC,WBICs);
@@ -61,7 +64,7 @@ for lk = 1:length(unWBIC)
         rhoMod = waterdensity(wtrM);
         rhoObs = waterdensity(wtrO);
         
-        if gt(length(dep),2)
+        if ge(length(dep),minDep)
             bI = length(rhoObs);
             for d = 2:length(rhoObs)
                 if lt(rhoObs(d),rhoObs(d-1))
@@ -76,26 +79,38 @@ for lk = 1:length(unWBIC)
             dep = dep(~nanI);
             wtrO = wtrO(~nanI);
             wtrM = wtrM(~nanI);
-            if gt(length(dep),2)                
+            if ge(length(dep),minDep)                
                 % for obs
-                [~,~,drho_dz,SthermoD] = ...
-                    FindThermoDepth( rhoObs,dep);
-                metaTop = FindMetaTop(drho_dz,SthermoD,dep,slope);
-                metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
-                EpiAve(cnt,1) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
-                HypAve(cnt,1) = layerTemperature(metaBot,max(dep),wtrO,dep,bthA,bthD);
-                ThrmZ(cnt,1) = SthermoD;
+                if le(max(wtrO)-min(wtrO),mixDef)
+                    ThrmZ(cnt,1) = max(dep);
+                    EpiAve(cnt,1) = max(dep);
+                    EpiAve(cnt,1) = max(dep);
+                else
+                    
+                    [~,~,drho_dz,SthermoD] = ...
+                        FindThermoDepth( rhoObs,dep);
+                    metaTop = FindMetaTop(drho_dz,SthermoD,dep,slope);
+                    metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
+                    EpiAve(cnt,1) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
+                    HypAve(cnt,1) = layerTemperature(metaBot,max(dep),wtrO,dep,bthA,bthD);
+                    ThrmZ(cnt,1) = SthermoD;
+                end
                 SS(cnt,1) = schmidtStability(wtrO,dep,bthA,bthD);
                 % for mod
-                [~,~,drho_dz,SthermoD] = ...
-                    FindThermoDepth( rhoMod,dep);
-                metaTop = FindMetaTop(drho_dz,SthermoD,dep,slope);
-                metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
-                EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrM,dep,bthA,bthD);
-                HypAve(cnt,2) = layerTemperature(metaBot,max(dep),wtrM,dep,bthA,bthD);
-                ThrmZ(cnt,2) = SthermoD;
-                SS(cnt,2) = schmidtStability(wtrM,dep,bthA,bthD);
-                
+                if le(max(wtrM)-min(wtrM),mixDef)
+                    ThrmZ(cnt,2) = max(dep);
+                    EpiAve(cnt,2) = max(dep);
+                    EpiAve(cnt,2) = max(dep);
+                else
+                    [~,~,drho_dz,SthermoD] = ...
+                        FindThermoDepth( rhoMod,dep);
+                    metaTop = FindMetaTop(drho_dz,SthermoD,dep,slope);
+                    metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
+                    EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrM,dep,bthA,bthD);
+                    HypAve(cnt,2) = layerTemperature(metaBot,max(dep),wtrM,dep,bthA,bthD);
+                    ThrmZ(cnt,2) = SthermoD;
+                    SS(cnt,2) = schmidtStability(wtrM,dep,bthA,bthD);
+                end
                 if rankArea
                     lkeSz(cnt,1) = max(bthA);
                 else
@@ -135,7 +150,7 @@ bM = .75;
 tM = .25;
 vSpc = .7;
 wSpc = .7;
-mS = 0.7;
+mS = 0.85;
 W = (figW-lM-rM-wSpc)/2;
 H = (figH-tM-bM-vSpc)/2;
 axLW = 1.0;
@@ -192,6 +207,7 @@ for lk = 1:length(lkeSz)
         end
             
     end
+
     plot(SS(lk,1),SS(lk,2),'ro','MarkerSize',mS,'Parent',ax_SS,...
         'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
     plot(EpiAve(lk,1),EpiAve(lk,2),'ro','MarkerSize',mS,'Parent',ax_ET,...
@@ -202,6 +218,6 @@ for lk = 1:length(lkeSz)
         'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
     
 end
-print('-dpng','-r300',[rootDir fileName(1:end-4) '_val'])
+print('-dpng','-r300',[rootDir fileName(1:end-4) '_val.png'])
 end
 
