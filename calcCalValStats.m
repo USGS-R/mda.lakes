@@ -8,6 +8,7 @@ if eq(nargin,0)
 end
 disp(fileName);
 
+useAlpha = false;
 fAlpha = 0.15;
 markDiv = 0.015; % size relative to axis;
 minDep = 5; % min number of depths to calc a result from
@@ -245,60 +246,75 @@ for lk = 1:length(lkeSz)
             
     end
     
-    % Schmidt 
-    xL = get(ax_SS,'XLim'); yL = get(ax_SS,'YLim');
-    bX = markDiv*(xL(2)-xL(1));
-    bY = markDiv*(yL(2)-yL(1));
-    plVal = SS;
-    
-    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
-        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
-        'Parent',ax_SS,'EdgeColor','none','FaceAlpha',fAlpha,...
-        'FaceColor',clr);
-    
-    % Epilimnion
-    xL = get(ax_ET,'XLim'); yL = get(ax_ET,'YLim');
-    bX = markDiv*(xL(2)-xL(1));
-    bY = markDiv*(yL(2)-yL(1));
-    plVal = EpiAve;
-    
-    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
-        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
-        'Parent',ax_ET,'EdgeColor','none','FaceAlpha',fAlpha,...
-        'FaceColor',clr);
-    
-    % Hypo
-    xL = get(ax_HT,'XLim'); yL = get(ax_HT,'YLim');
-    bX = markDiv*(xL(2)-xL(1));
-    bY = markDiv*(yL(2)-yL(1));
-    plVal = HypAve;
-    
-    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
-        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
-        'Parent',ax_HT,'EdgeColor','none','FaceAlpha',fAlpha,...
-        'FaceColor',clr);
-    
-    % Ave temp
-    xL = get(ax_HT,'XLim'); yL = get(ax_AT,'YLim');
-    bX = markDiv*(xL(2)-xL(1));
-    bY = markDiv*(yL(2)-yL(1));
-    plVal = AveTemp;
-    
-    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
-        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
-        'Parent',ax_AT,'EdgeColor','none','FaceAlpha',fAlpha,...
-        'FaceColor',clr);
-    
-    % Surface temp
-    xL = get(ax_HT,'XLim'); yL = get(ax_ST,'YLim');
-    bX = markDiv*(xL(2)-xL(1));
-    bY = markDiv*(yL(2)-yL(1));
-    plVal = SurTemp;
-    
-    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
-        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
-        'Parent',ax_ST,'EdgeColor','none','FaceAlpha',fAlpha,...
-        'FaceColor',clr);
+    if useAlpha
+        % Schmidt
+        xL = get(ax_SS,'XLim'); yL = get(ax_SS,'YLim');
+        bX = markDiv*(xL(2)-xL(1));
+        bY = markDiv*(yL(2)-yL(1));
+        plVal = SS;
+        
+        fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+            [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+            'Parent',ax_SS,'EdgeColor','none','FaceAlpha',fAlpha,...
+            'FaceColor',clr);
+        
+        % Epilimnion
+        xL = get(ax_ET,'XLim'); yL = get(ax_ET,'YLim');
+        bX = markDiv*(xL(2)-xL(1));
+        bY = markDiv*(yL(2)-yL(1));
+        plVal = EpiAve;
+        
+        fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+            [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+            'Parent',ax_ET,'EdgeColor','none','FaceAlpha',fAlpha,...
+            'FaceColor',clr);
+        
+        % Hypo
+        xL = get(ax_HT,'XLim'); yL = get(ax_HT,'YLim');
+        bX = markDiv*(xL(2)-xL(1));
+        bY = markDiv*(yL(2)-yL(1));
+        plVal = HypAve;
+        
+        fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+            [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+            'Parent',ax_HT,'EdgeColor','none','FaceAlpha',fAlpha,...
+            'FaceColor',clr);
+        
+        % Ave temp
+        xL = get(ax_HT,'XLim'); yL = get(ax_AT,'YLim');
+        bX = markDiv*(xL(2)-xL(1));
+        bY = markDiv*(yL(2)-yL(1));
+        plVal = AveTemp;
+        
+        fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+            [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+            'Parent',ax_AT,'EdgeColor','none','FaceAlpha',fAlpha,...
+            'FaceColor',clr);
+        
+        % Surface temp
+        xL = get(ax_HT,'XLim'); yL = get(ax_ST,'YLim');
+        bX = markDiv*(xL(2)-xL(1));
+        bY = markDiv*(yL(2)-yL(1));
+        plVal = SurTemp;
+        
+        fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+            [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+            'Parent',ax_ST,'EdgeColor','none','FaceAlpha',fAlpha,...
+            'FaceColor',clr);
+    else
+        plot(SS(lk,1),SS(lk,2),'ro','MarkerSize',mS,'Parent',ax_SS,...
+            'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+        plot(EpiAve(lk,1),EpiAve(lk,2),'ro','MarkerSize',mS,'Parent',ax_ET,...
+            'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+        plot(HypAve(lk,1),HypAve(lk,2),'ro','MarkerSize',mS,'Parent',ax_HT,...
+            'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+        plot(ThrmZ(lk,1),ThrmZ(lk,2),'ro','MarkerSize',mS,'Parent',ax_TD,...
+            'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+        plot(AveTemp(lk,1),AveTemp(lk,2),'ro','MarkerSize',mS,'Parent',ax_AT,...
+            'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+        plot(SurTemp(lk,1),SurTemp(lk,2),'ro','MarkerSize',mS,'Parent',ax_ST,...
+            'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+    end
     
 end
 print('-dpng','-r300',[rootDir fileName(1:end-4) '_val.png'])
