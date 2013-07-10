@@ -8,11 +8,11 @@ driverDir = 'D:\WiLMA\matYYYY\';
 dataFormat = '%s,%2.1f,%2.1f,%2.2f,%2.1f,%2.2f,%2.3f,%2.3f\n';
 dynamicVar = {'airT','LW','prcp','prss','spHum','SW','uWnd','vWnd'};
 writeVar = {'ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow'};
-%lakeIDs = getLakeIDs();
+lakeIDs = getLakeIDs();
 %%%% shortening lakeIDs %%%%
-fID = fopen('D:\WiLMA\to_cal_wbic.csv');
-lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
-fclose(fID);
+%fID = fopen('D:\WiLMA\to_cal_wbic.csv');
+%lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
+%fclose(fID);
 %lakeIDs = lakeIDs(1078:end);
 
 kelvinConv = -273.15;
@@ -47,8 +47,8 @@ for b = 1:length(blcks)
         varStruct.prcp = [varStruct.prcp(:,:); zeros(length(names),1)'];
         disp(['>> precip added one zero in ' blcks{b}])
     end
-    for lk = 1:length(lakeIDs{1});
-        lakeID = lakeIDs{1}{lk};
+    for lk = 1:length(lakeIDs);
+        lakeID = lakeIDs{lk};
         fileN = ['WBIC_' lakeID '.csv'];
         lakeI= strcmp(names,lakeID);
         if any(lakeI)
