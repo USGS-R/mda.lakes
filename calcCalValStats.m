@@ -83,7 +83,7 @@ for lk = 1:length(unWBIC)
                 % for obs
                 if le(max(wtrO)-min(wtrO),mixDef)
                     ThrmZ(cnt,1) = max(dep);
-                    metaTop = max(dep);
+                    EpiAve(cnt,1) = NaN;
                     HypAve(cnt,1) = NaN;
                 else
                     
@@ -93,8 +93,9 @@ for lk = 1:length(unWBIC)
                     metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
                     ThrmZ(cnt,1) = SthermoD;
                     HypAve(cnt,1) = layerTemperature(metaBot,max(dep),wtrO,dep,bthA,bthD);
+                    EpiAve(cnt,1) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
                 end
-                EpiAve(cnt,1) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
+               
                 
                 
                 SS(cnt,1) = schmidtStability(wtrO,dep,bthA,bthD);
@@ -103,12 +104,14 @@ for lk = 1:length(unWBIC)
                     ThrmZ(cnt,2) = max(dep);
                     metaTop = max(dep);
                     HypAve(cnt,2) = NaN;
+                    EpiAve(cnt,2) = NaN;
                 else
                     [~,~,drho_dz,SthermoD] = ...
                         FindThermoDepth( rhoMod,dep);
                     metaTop = FindMetaTop(drho_dz,SthermoD,dep,slope);
                     metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
                     HypAve(cnt,2) = layerTemperature(metaBot,max(dep),wtrO,dep,bthA,bthD);
+                    EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
                     ThrmZ(cnt,2) = SthermoD;
                 end
                 EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrM,dep,bthA,bthD);
