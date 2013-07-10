@@ -8,7 +8,10 @@ if eq(nargin,0)
 end
 disp(fileName);
 
+fAlpha = 0.15;
+markDiv = 0.015; % size relative to axis;
 minDep = 5; % min number of depths to calc a result from
+surfMax = 1; % max depth to still be "surface"
 mixDef = .5;
 logColor = true;
 rankArea = true;
@@ -33,6 +36,8 @@ SS      = NaN(length(dat{1}),2);
 ThrmZ   = NaN(length(dat{1}),2);
 EpiAve  = NaN(length(dat{1}),2);
 HypAve  = NaN(length(dat{1}),2);
+SurTemp = NaN(length(dat{1}),2);
+AveTemp = NaN(length(dat{1}),2);
 lkeSz   = NaN(length(dat{1}),1);
 
 cnt = 0;
@@ -95,8 +100,11 @@ for lk = 1:length(unWBIC)
                     HypAve(cnt,1) = layerTemperature(metaBot,max(dep),wtrO,dep,bthA,bthD);
                     EpiAve(cnt,1) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
                 end
-               
-                
+                surI = ge(dep,surfMax);
+                if any(surI)
+                    SurTemp(cnt,1) = mean(wtrO(surI));
+                end
+                AveTemp(cnt,1) = layerTemperature(0,max(dep),wtrO,dep,bthA,bthD);
                 
                 SS(cnt,1) = schmidtStability(wtrO,dep,bthA,bthD);
                 % for mod
@@ -109,10 +117,14 @@ for lk = 1:length(unWBIC)
                         FindThermoDepth( rhoMod,dep);
                     metaTop = FindMetaTop(drho_dz,SthermoD,dep,slope);
                     metaBot = FindMetaBot(drho_dz,SthermoD,dep,slope);
-                    HypAve(cnt,2) = layerTemperature(metaBot,max(dep),wtrO,dep,bthA,bthD);
-                    EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrO,dep,bthA,bthD);
+                    HypAve(cnt,2) = layerTemperature(metaBot,max(dep),wtrM,dep,bthA,bthD);
+                    EpiAve(cnt,2) = layerTemperature(0,metaTop,wtrM,dep,bthA,bthD);
                     ThrmZ(cnt,2) = SthermoD;
                 end
+                if any(surI)
+                    SurTemp(cnt,2) = mean(wtrM(surI));
+                end
+                AveTemp(cnt,2) = layerTemperature(0,max(dep),wtrM,dep,bthA,bthD);
                 
                 SS(cnt,2) = schmidtStability(wtrM,dep,bthA,bthD);
                 if rankArea
@@ -146,8 +158,8 @@ end
     
 
 
-figW = 8;
-figH = 8;
+figW = 7.5;
+figH = 11;
 lM = .75;
 rM = .25;
 bM = .75;
@@ -156,7 +168,7 @@ vSpc = .7;
 wSpc = .7;
 mS = 1;
 W = (figW-lM-rM-wSpc)/2;
-H = (figH-tM-bM-vSpc)/2;
+H = (figH-tM-bM-vSpc*2)/3;
 axLW = 1.0;
 fontS = 12;
 fontN = 'Times New Roman';
@@ -192,14 +204,35 @@ set(get(ax_TD,'YLabel'),'String','Thermocline depth (modeled)',...
 set(get(ax_TD,'XLabel'),'String','Thermocline depth(observed)',...
     'FontSize',fontS,'FontName',fontN);
 
+ax_AT = copyobj(ax_SS,fig_h);
+set(ax_AT,'Position',[lM/figW (bM+2*vSpc+2*H)/figH W/figW H/figH]);
+set(get(ax_AT,'YLabel'),'String','Average temperature (modeled)',...
+    'FontSize',fontS,'FontName',fontN);
+set(get(ax_AT,'XLabel'),'String','Average temperature(observed)',...
+    'FontSize',fontS,'FontName',fontN);
+
+ax_ST = copyobj(ax_SS,fig_h);
+set(ax_ST,'Position',[(lM+W+wSpc)/figW (bM+2*vSpc+2*H)/figH W/figW H/figH]);
+set(get(ax_ST,'YLabel'),'String','Surface temperature (modeled)',...
+    'FontSize',fontS,'FontName',fontN);
+set(get(ax_ST,'XLabel'),'String','Surface temperature(observed)',...
+    'FontSize',fontS,'FontName',fontN);
+
+
 set(get(ax_SS,'YLabel'),'String','Schmidt Stability (modeled)',...
     'FontSize',fontS,'FontName',fontN);
 set(get(ax_SS,'XLabel'),'String','Schmidt Stability (observed)',...
     'FontSize',fontS,'FontName',fontN);
+
+
+
+
 set(ax_SS,'Xlim',[0 2000],'YLim',[0 2000]);
 set(ax_ET,'Xlim',[0 35],'YLim',[0 35]);
 set(ax_HT,'Xlim',[0 35],'YLim',[0 35]);
 set(ax_TD,'Xlim',[0 25],'YLim',[0 25]);
+set(ax_ST,'Xlim',[0 35],'YLim',[0 35]);
+set(ax_AT,'Xlim',[0 35],'YLim',[0 35]);
 
 for lk = 1:length(lkeSz)
     clr = [1 1 1];
@@ -211,15 +244,61 @@ for lk = 1:length(lkeSz)
         end
             
     end
-
-    plot(SS(lk,1),SS(lk,2),'ro','MarkerSize',mS,'Parent',ax_SS,...
-        'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
-    plot(EpiAve(lk,1),EpiAve(lk,2),'ro','MarkerSize',mS,'Parent',ax_ET,...
-        'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
-    plot(HypAve(lk,1),HypAve(lk,2),'ro','MarkerSize',mS,'Parent',ax_HT,...
-        'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
-    plot(ThrmZ(lk,1),ThrmZ(lk,2),'ro','MarkerSize',mS,'Parent',ax_TD,...
-        'MarkerEdgeColor',clr,'MarkerFaceColor',clr);
+    
+    % Schmidt 
+    xL = get(ax_SS,'XLim'); yL = get(ax_SS,'YLim');
+    bX = markDiv*(xL(2)-xL(1));
+    bY = markDiv*(yL(2)-yL(1));
+    plVal = SS;
+    
+    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+        'Parent',ax_SS,'EdgeColor','none','FaceAlpha',fAlpha,...
+        'FaceColor',clr);
+    
+    % Epilimnion
+    xL = get(ax_ET,'XLim'); yL = get(ax_ET,'YLim');
+    bX = markDiv*(xL(2)-xL(1));
+    bY = markDiv*(yL(2)-yL(1));
+    plVal = EpiAve;
+    
+    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+        'Parent',ax_ET,'EdgeColor','none','FaceAlpha',fAlpha,...
+        'FaceColor',clr);
+    
+    % Hypo
+    xL = get(ax_HT,'XLim'); yL = get(ax_HT,'YLim');
+    bX = markDiv*(xL(2)-xL(1));
+    bY = markDiv*(yL(2)-yL(1));
+    plVal = HypAve;
+    
+    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+        'Parent',ax_HT,'EdgeColor','none','FaceAlpha',fAlpha,...
+        'FaceColor',clr);
+    
+    % Ave temp
+    xL = get(ax_HT,'XLim'); yL = get(ax_AT,'YLim');
+    bX = markDiv*(xL(2)-xL(1));
+    bY = markDiv*(yL(2)-yL(1));
+    plVal = AveTemp;
+    
+    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+        'Parent',ax_AT,'EdgeColor','none','FaceAlpha',fAlpha,...
+        'FaceColor',clr);
+    
+    % Surface temp
+    xL = get(ax_HT,'XLim'); yL = get(ax_ST,'YLim');
+    bX = markDiv*(xL(2)-xL(1));
+    bY = markDiv*(yL(2)-yL(1));
+    plVal = SurTemp;
+    
+    fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+        [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+        'Parent',ax_ST,'EdgeColor','none','FaceAlpha',fAlpha,...
+        'FaceColor',clr);
     
 end
 print('-dpng','-r300',[rootDir fileName(1:end-4) '_val.png'])
