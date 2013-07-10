@@ -8,7 +8,7 @@ if eq(nargin,0)
 end
 disp(fileName);
 
-useAlpha = false;
+useAlpha = true;
 fAlpha = 0.15;
 markDiv = 0.015; % size relative to axis;
 minDep = 5; % min number of depths to calc a result from
@@ -44,7 +44,7 @@ lkeSz   = NaN(length(dat{1}),1);
 cnt = 0;
 %% get unique lakes
 unWBIC = unique(dat{1});
-for lk = 1:length(unWBIC)
+for lk = 1:20;%length(unWBIC)
     WBIC = unWBIC{lk};
     bth = getBathy(WBIC);
     %Kd  = getClarity(WBIC);
@@ -278,6 +278,17 @@ for lk = 1:length(lkeSz)
         fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
             [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
             'Parent',ax_HT,'EdgeColor','none','FaceAlpha',fAlpha,...
+            'FaceColor',clr);
+        
+        % Thermo depth
+        xL = get(ax_TD,'XLim'); yL = get(ax_TD,'YLim');
+        bX = markDiv*(xL(2)-xL(1));
+        bY = markDiv*(yL(2)-yL(1));
+        plVal = ThrmZ;
+        
+        fill([plVal(lk,1) plVal(lk,1)+bX*.5 plVal(lk,1) plVal(lk,1)-bX*.5],...
+            [plVal(lk,2)+bY*.5 plVal(lk,2) plVal(lk,2)-bY*.5 plVal(lk,2)],'r',...
+            'Parent',ax_TD,'EdgeColor','none','FaceAlpha',fAlpha,...
             'FaceColor',clr);
         
         % Ave temp
