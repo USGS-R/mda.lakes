@@ -12,15 +12,93 @@ function buildIceOffCalibration
 % - longitude of lake
 % - elevation of lake
 
+% ==== need to subsample for validation (elsewhere) ====
+
+%% variables
+writeRoot = '';
+driverRoot = 'D:\WiLMA\Driver files\';
+UTC = -6;   % get actual UTC offset for daylight savings!   
 %% open ice cover file and extract necessary information
 fID = fopen('supporting files/Validation/ice_data.csv');
 
-dat = textscan(fID,'%f %f %f %f %f %f %s %s %f %f %s %s','Delimiter',',',...
+dat = textscan(fID,'%f %f %f %f %f %f %f %s %s %f %f %s %s','Delimiter',',',...
     'HeaderLines',1);
 
 fclose(fID);
 
-dat
+WBICs = dat{13};
+iceOffYYYY  = dat{4};
+iceOffMM    = dat{5};
+iceOffdd    = dat{6};
+JulDay = datenum(iceOffYYYY,iceOffMM,iceOffdd)-datenum(iceOffYYYY,0,0);
+rmvI = lt(JulDay,0) | lt(iceOffYYYY,0) | strcmp(WBICs,'1864700'); % don't have that WBIC
+JulDay = JulDay(~rmvI);
+iceOffYYYY = iceOffYYYY(~rmvI);
+WBICs  = WBICs(~rmvI);
+unWBICs = unique(WBICs);
+
+
+figure;
+
+%% now get all info
+for i = 1:length(unWBICs);
+    WBIC = unWBICs{i};
+    % open driver file
+    fID = fopen([driverRoot 'WBIC_' WBIC '.csv']);
+    if lt(fID,0)
+        disp(WBIC)
+    end
+    dat = textscan(fID,'%s %f %f %f %f %f %f %f',...
+        'Delimiter',',','HeaderLines',1);
+    fclose(fID);
+    dates = datenum(dat{1});
+    airT = dat{4};
+    smthAir = airT*NaN;
+    % create 30 day smoothed air temp. Assumed centered left!
+    for j = 16:length(airT)-14
+        smthAir(j) = mean(airT(j-15:j+14));
+    end
+    
+    % ---- get zero_sp day
+    useI = strcmp(unWBICs{i},WBICs);
+    julUse = JulDay(useI);
+    yrUse = iceOffYYYY(useI);
+    zero_sp = julUse*NaN;
+    ang_sp = julUse*NaN;
+    indx = 1:length(dates);
+    % for each ice off year, find the starting point to move back from
+    [lat, lon] = getLatLon(WBIC);
+    SA = getArea(WBIC)*1e-6;
+    EL = getElev(WBIC);
+    for j = 1:length(julUse);
+        startI = indx(eq(dates,datenum(yrUse(j),0,0)+183));
+        
+        zero_sp(j) = find(le(smthAir(startI-183:startI),0),1,'last')+1; % this is the day
+        dateV = datevec(datenum(yrUse(j),0,0)+zero_sp(j));
+        
+        location.longitude = lon;
+        location.latitude = lat;
+        location.altitude = EL;
+        time.year = dateV(1);
+        time.month = dateV(2);
+        time.day = dateV(3);
+        time.hour = 12;
+        time.min = 0;
+        time.sec = 0;
+        time.UTC = UTC;
+        sun = sun_position(time, location);
+        ang_sp(j) = sun.zenith;
+        hold on;
+        modIceOff = 175.829+0.25676*zero_sp(j)-2.9453*ang_sp(j)+0.0009347*SA+0.49134*lon+0.01691*EL;
+        plot(julUse(j),modIceOff,'ro','markerSize',j+4);
+        pause(0.1);
+    end
+
+    
+end
+    
+
+
 
 
 
