@@ -5,15 +5,28 @@ function canopy = getCanopy(WBIC,metaFile)
 
 if eq(nargin,1)
     metaFile = 'supporting files/VegetationHeight_WiLMA.tsv';
-end
+    [indx,values] = wcsFileOpen(metaFile);
+    useI = strcmp(indx,WBIC);
+    if any(useI)
+        canopy = values(useI);
+    else
+        canopy = NaN;
+    end
 
-[indx,values] = wcsFileOpen(metaFile);
-useI = strcmp(indx,WBIC);
-if any(useI)
-    canopy = values(useI);
 else
-    canopy = NaN;
-end
+    
+    fID = fopen(metaFile);
+    dat = textscan(fID,'%s %f','Delimiter',',','HeaderLines',1);
+    fclose(fID);
+    indx = dat{1};
+    values = dat{2};
+    useI = strcmp(indx,WBIC);
+    if any(useI)
+        canopy = values(useI);
+    else
+        canopy = NaN;
+    end
+
 
 end
 
