@@ -21,6 +21,8 @@ UTC = -6;   % get actual UTC offset for daylight savings!
 %% open ice cover file and extract necessary information
 fID = fopen('supporting files/Validation/ice_data.csv');
 
+close all
+clc
 dat = textscan(fID,'%f %f %f %f %f %f %f %s %s %f %f %s %s','Delimiter',',',...
     'HeaderLines',1);
 
@@ -31,16 +33,26 @@ iceOffYYYY  = dat{4};
 iceOffMM    = dat{5};
 iceOffdd    = dat{6};
 JulDay = datenum(iceOffYYYY,iceOffMM,iceOffdd)-datenum(iceOffYYYY,0,0);
-rmvI = lt(JulDay,0) | lt(iceOffYYYY,0) | strcmp(WBICs,'1864700'); % don't have that WBIC
+rmvI = lt(JulDay,0) | lt(iceOffYYYY,0) | ...
+    strcmp(WBICs,'1864700') | strcmp(WBICs,'1869700') | ...
+    strcmp(WBICs,'234000') | strcmp(WBICs,'968500'); % don't have that WBIC
 JulDay = JulDay(~rmvI);
 iceOffYYYY = iceOffYYYY(~rmvI);
 WBICs  = WBICs(~rmvI);
 unWBICs = unique(WBICs);
 
+dataFormat = '%s\t%3.0f\t%3.0f\t%2.3f\t%2.3f\t%2.3f\t%2.3f\n';
 
+fileName = [writeRoot 'iceModel.tsv'];
+fid = fopen(fileName,'W');
+headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\n';
+fprintf(fid,headers);
+fclose(fid);
 figure;
 
 %% now get all info
+
+
 for i = 1:length(unWBICs);
     WBIC = unWBICs{i};
     % open driver file
@@ -70,6 +82,7 @@ for i = 1:length(unWBICs);
     [lat, lon] = getLatLon(WBIC);
     SA = getArea(WBIC)*1e-6;
     EL = getElev(WBIC);
+    fid = fopen(fileName,'A');
     for j = 1:length(julUse);
         startI = indx(eq(dates,datenum(yrUse(j),0,0)+183));
         
@@ -91,13 +104,14 @@ for i = 1:length(unWBICs);
         hold on;
         modIceOff = 175.829+0.25676*zero_sp(j)-2.9453*ang_sp(j)+0.0009347*SA+0.49134*lon+0.01691*EL;
         plot(julUse(j),modIceOff,'ro','markerSize',j+4);
-        pause(0.1);
+        fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL]);
+        %pause(0.1);
     end
-
+    fclose(fid);
     
 end
     
-
+fclose all;
 
 
 
