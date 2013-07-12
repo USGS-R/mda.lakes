@@ -102,10 +102,11 @@ for i = 1:length(unWBICs);
         sun = sun_position(time, location);
         ang_sp(j) = sun.zenith;
         hold on;
-        modIceOff = 175.829+0.25676*zero_sp(j)-2.9453*ang_sp(j)+0.0009347*SA+0.49134*lon+0.01691*EL;
+        %modIceOff = 175.829+0.25676*zero_sp(j)-2.9453*ang_sp(j)+0.0009347*SA+0.49134*lon+0.01691*EL;
+        modIceOff = -325.51345+1.82236*zero_sp(j)+2.95482*ang_sp(j)+0.03313*SA-1.48418*lon+0.02767*EL;
         plot(julUse(j),modIceOff,'ro','markerSize',j+4);
         fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL]);
-        %pause(0.1);
+        pause(0.1);
     end
     fclose(fid);
     
