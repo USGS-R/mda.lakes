@@ -239,7 +239,7 @@ set(ax_ST,'Xlim',[0 35],'YLim',[0 35]);
 set(ax_AT,'Xlim',[0 35],'YLim',[0 35]);
 
 for lk = 1:length(lkeSz)
-    if le(lkeSz(lk),lkvals(length(lkeSz))) % now, no cutoff
+    if le(lkeSz(lk),lkvals(length(lkvals))) % now, no cutoff
         clr = [.2 .2 .2];
         if colorChg
             for i = 1:3
