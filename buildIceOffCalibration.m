@@ -45,7 +45,7 @@ dataFormat = '%s\t%3.0f\t%3.0f\t%2.3f\t%2.3f\t%2.3f\t%2.3f\n';
 
 fileName = [writeRoot 'iceModel.tsv'];
 fid = fopen(fileName,'W');
-headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\n';
+headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\tswSmooth\n';
 fprintf(fid,headers);
 fclose(fid);
 figure;
@@ -60,15 +60,18 @@ for i = 1:length(unWBICs);
     if lt(fID,0)
         disp(WBIC)
     end
-    dat = textscan(fID,'%s %f %f %f %f %f %f %f',...
+    dat = textscan(fID,'%s %f %f %f %f %f %f %f %f',...
         'Delimiter',',','HeaderLines',1);
     fclose(fID);
     dates = datenum(dat{1});
     airT = dat{4};
+    sw = dat{2};
     smthAir = airT*NaN;
+    smthSW = sw*NaN;
     % create 30 day smoothed air temp. Assumed centered left!
     for j = 16:length(airT)-14
         smthAir(j) = mean(airT(j-15:j+14));
+        smthSW(j) = mean(sw(j-15:j+14));
     end
     
     % ---- get zero_sp day
@@ -76,6 +79,7 @@ for i = 1:length(unWBICs);
     julUse = JulDay(useI);
     yrUse = iceOffYYYY(useI);
     zero_sp = julUse*NaN;
+    swSmooth = julUse*NaN;
     ang_sp = julUse*NaN;
     indx = 1:length(dates);
     % for each ice off year, find the starting point to move back from
@@ -85,8 +89,9 @@ for i = 1:length(unWBICs);
     fid = fopen(fileName,'A');
     for j = 1:length(julUse);
         startI = indx(eq(dates,datenum(yrUse(j),0,0)+183));
-        
+
         zero_sp(j) = find(le(smthAir(startI-183:startI),0),1,'last')+1; % this is the day
+        swSmooth(j) = smthSW(find(le(smthAir(startI-183:startI),0),1,'last')+1);
         dateV = datevec(datenum(yrUse(j),0,0)+zero_sp(j));
         
         location.longitude = lon;
@@ -105,7 +110,7 @@ for i = 1:length(unWBICs);
         %modIceOff = 175.829+0.25676*zero_sp(j)-2.9453*ang_sp(j)+0.0009347*SA+0.49134*lon+0.01691*EL;
         modIceOff = -325.51345+1.82236*zero_sp(j)+2.95482*ang_sp(j)+0.03313*SA-1.48418*lon+0.02767*EL;
         plot(julUse(j),modIceOff,'ro','markerSize',j+4);
-        fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL]);
+        fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL,swSmooth(j)]);
         pause(0.1);
     end
     fclose(fid);
