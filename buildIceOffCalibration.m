@@ -15,7 +15,7 @@ function buildIceOffCalibration
 % ==== need to subsample for validation (elsewhere) ====
 
 %% variables
-writeRoot = '';
+writeRoot = 'supporting files\Validation\';
 driverRoot = 'D:\WiLMA\Driver files\';
 UTC = -6;   % get actual UTC offset for daylight savings!   
 %% open ice cover file and extract necessary information
