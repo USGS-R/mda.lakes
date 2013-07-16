@@ -41,11 +41,11 @@ iceOffYYYY = iceOffYYYY(~rmvI);
 WBICs  = WBICs(~rmvI);
 unWBICs = unique(WBICs);
 
-dataFormat = '%s\t%3.0f\t%3.0f\t%2.3f\t%2.3f\t%2.3f\t%2.3f\t%3.1f\r\n';
+dataFormat = '%s\t%3.0f\t%3.0f\t%2.3f\t%2.3f\t%2.3f\t%2.3f\t%3.1f\t%3.2f\r\n';
 
 fileName = [writeRoot 'iceModel.tsv'];
 fid = fopen(fileName,'W');
-headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\tswSmooth\r\n';
+headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\tswSmooth\tmxDepth\r\n';
 fprintf(fid,headers);
 fclose(fid);
 figure;
@@ -71,7 +71,7 @@ for i = 1:length(unWBICs);
     % create 30 day smoothed air temp. Assumed centered left!
     for j = 16:length(airT)-14
         smthAir(j) = mean(airT(j-15:j+14));
-        smthSW(j) = mean(sw(j-15:j+14));
+        smthSW(j) = mean(sw(j:j+14));
     end
     
     % ---- get zero_sp day
@@ -84,6 +84,8 @@ for i = 1:length(unWBICs);
     indx = 1:length(dates);
     % for each ice off year, find the starting point to move back from
     [lat, lon] = getLatLon(WBIC);
+    bth = getBathy(WBIC);
+    mxDepth = bth(1,end);
     SA = getArea(WBIC)*1e-6;
     EL = getElev(WBIC);
     fid = fopen(fileName,'A');
@@ -110,7 +112,7 @@ for i = 1:length(unWBICs);
         %modIceOff = 175.829+0.25676*zero_sp(j)-2.9453*ang_sp(j)+0.0009347*SA+0.49134*lon+0.01691*EL;
         modIceOff = -325.51345+1.82236*zero_sp(j)+2.95482*ang_sp(j)+0.03313*SA-1.48418*lon+0.02767*EL;
         plot(julUse(j),modIceOff,'ro','markerSize',j+4);
-        fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL,swSmooth(j)]);
+        fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL,swSmooth(j),mxDepth]);
         pause(0.01);
     end
     fclose(fid);
