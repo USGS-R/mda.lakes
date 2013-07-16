@@ -41,16 +41,16 @@ iceOffYYYY = iceOffYYYY(~rmvI);
 WBICs  = WBICs(~rmvI);
 unWBICs = unique(WBICs);
 
-dataFormat = '%s\t%3.0f\t%3.0f\t%2.3f\t%2.3f\t%2.3f\t%2.3f\n';
+dataFormat = '%s\t%3.0f\t%3.0f\t%2.3f\t%2.3f\t%2.3f\t%2.3f\t%3.1f\r\n';
 
 fileName = [writeRoot 'iceModel.tsv'];
 fid = fopen(fileName,'W');
-headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\tswSmooth\n';
+headers = 'WBIC\ticeOff(jDay)\tzero_sp\tang_sp\tSA\tlong\tEL\tswSmooth\r\n';
 fprintf(fid,headers);
 fclose(fid);
 figure;
 
-%% now get all info
+%% now get all infosd
 
 
 for i = 1:length(unWBICs);
@@ -111,7 +111,7 @@ for i = 1:length(unWBICs);
         modIceOff = -325.51345+1.82236*zero_sp(j)+2.95482*ang_sp(j)+0.03313*SA-1.48418*lon+0.02767*EL;
         plot(julUse(j),modIceOff,'ro','markerSize',j+4);
         fprintf(fid,dataFormat,WBIC,[julUse(j),zero_sp(j),ang_sp(j),SA,lon,EL,swSmooth(j)]);
-        pause(0.1);
+        pause(0.01);
     end
     fclose(fid);
     
