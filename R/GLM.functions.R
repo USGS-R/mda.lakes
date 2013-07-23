@@ -1,9 +1,30 @@
 getBathy	<-	function(WBIC){
+	numZ	<-	15
+	fileN	<-	paste(c('../supporting files/Bathy/',WBIC,'.bth'),collapse='')
+	if (file.exists(fileN)){
+		data	<-	read.table(fileN,header=TRUE,sep='\t')
+		bathymetry	<-	data.frame(depth=data$depth,area=data$area)
+	} else {
+		lkeArea	<-	getArea(WBIC)
+		zMax	<-	getZmax(WBIC)
+		depth	<-	seq(0,zMax,length.out=numZ)
+		area	<-	approx(c(0,zMax),c(lkeArea,0),depth)$y
+		bathymetry	<-	data.frame(depth=depth,area=area)
+	}
 	
 	return(bathymetry)
 }
 
 getArea	<-	function(WBIC){
+	acre2m2	<-	4046.85642
+	data	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
+	useI	<- data$WBIC==as.numeric(WBIC)
+	if (any(useI)){
+		surface.area	<-	acre2m2*mean(data$acres[useI],na.rm=TRUE)
+	} else {
+		surface.area	<-	NULL
+	}
+	
 	return(surface.area)
 }
 
@@ -49,7 +70,7 @@ getLatLon	<-	function(WBIC){
 
 getWstr	<-	function(WBIC){
 	# Markfort et al. 2010
-	hv	<-	max(c(getCanopy(WBIC),1)
+	hc	<-	max(c(getCanopy(WBIC),1))
 	lkeArea	<-	getArea(WBIC)
 	D	<-	2*sqrt(lkeArea/pi)
 	Xt	<-	50*hc
