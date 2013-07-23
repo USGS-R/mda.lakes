@@ -28,11 +28,17 @@ getClarity	<-	function(WBIC){
 	} else {
 		attenuation.coefficient	<-	NULL
 	}
-	
 	return(attenuation.coefficient)
 }
 
 getElevation	<-	function(WBIC){
+	data	<-	read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
+	indx	<-	paste(c('X',WBIC),collapse='')
+	if (indx %in% names(data)){
+		elevation	<-	as.numeric(levels(data[1,indx])[1])
+	} else {
+		elevation	<-	NULL
+	}
 	return(elevation)
 }
 
