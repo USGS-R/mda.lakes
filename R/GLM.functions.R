@@ -63,10 +63,20 @@ getElevation	<-	function(WBIC){
 	return(elevation)
 }
 
-getLatLon	<-	function(WBIC){
-	# hmmm...Luke?
-	return(latitude.longitude)
-}
+#This uses a little fanciness to prevent loading file on every call.
+getLatLon <- local({ lookup=NULL; function(WBIC) {
+	if (is.null(lookup)) { 
+		cat('Caching lat/lon info.\n')
+		d <- read.table('../supporting files/WI_Lakes_WbicLatLon.tsv', header=TRUE, as.is=TRUE) 
+		lookup <<- new.env()
+		
+		for(i in 1:nrow(d)){
+			lookup[[toString(d$WBIC[i])]] = c(d$LAT[i], d$LON[i])
+		}
+	}
+	lookup[[WBIC]]
+}})
+
 
 getWstr	<-	function(WBIC){
 	# Markfort et al. 2010
@@ -97,18 +107,6 @@ getZmax	<-	function(WBIC){
 }
 
 
-getLatLon <- local({ lookup=NULL; function(WBIC) {
-	if (is.null(lookup)) { # or perhaps !missing(y)
-		cat('Caching lat/lon info.\n')
-		d <- read.table('../supporting files/WI_Lakes_WbicLatLon.tsv', header=TRUE, as.is=TRUE) 
-		lookup <<- new.env()
-		
-		for(i in 1:nrow(d)){
-			lookup[[toString(d$WBIC[i])]] = c(d$LAT[i], d$LON[i])
-		}
-	}
-	lookup[[WBIC]]
-}})
-	
+
 
 
