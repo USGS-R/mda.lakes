@@ -97,3 +97,18 @@ getZmax	<-	function(WBIC){
 }
 
 
+getLatLon <- local({ lookup=NULL; function(WBIC) {
+	if (is.null(lookup)) { # or perhaps !missing(y)
+		cat('Caching lat/lon info.\n')
+		d <- read.table('../supporting files/WI_Lakes_WbicLatLon.tsv', header=TRUE, as.is=TRUE) 
+		lookup <<- new.env()
+		
+		for(i in 1:nrow(d)){
+			lookup[[toString(d$WBIC[i])]] = c(d$LAT[i], d$LON[i])
+		}
+	}
+	lookup[[WBIC]]
+}})
+	
+
+
