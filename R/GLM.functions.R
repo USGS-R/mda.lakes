@@ -42,15 +42,23 @@ getElevation	<-	function(WBIC){
 	return(elevation)
 }
 
-getLatitude	<-	function(WBIC){
-	return(latitude)
-}
-
-getLongitude<-	function(WBIC){
-	return(longitude)
+getLatLon	<-	function(WBIC){
+	# hmmm...Luke?
+	return(latitude.longitude)
 }
 
 getWstr	<-	function(WBIC){
+	# Markfort et al. 2010
+	hv	<-	max(c(getCanopy(WBIC),1)
+	lkeArea	<-	getArea(WBIC)
+	D	<-	2*sqrt(lkeArea/pi)
+	Xt	<-	50*hc
+	
+	if (D<Xt){
+		wind.shelter	<-	0.01
+	} else {
+		wind.shelter	<-	2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2)
+	}
 	return(wind.shelter)
 }
 
