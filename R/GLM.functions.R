@@ -84,6 +84,15 @@ getWstr	<-	function(WBIC){
 }
 
 getZmax	<-	function(WBIC){
+	ft2m	<-	0.3048
+	data	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
+	useI	<- data$WBIC==as.numeric(WBIC)
+	if (any(useI)){
+		max.depth	<-	ft2m*mean(data$max.depth.ft[useI],na.rm=TRUE)
+	} else {
+		max.depth	<-	NULL
+	}
+	
 	return(max.depth)
 }
 
