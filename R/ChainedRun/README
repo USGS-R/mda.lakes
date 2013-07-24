@@ -1,0 +1,47 @@
+This explains how to deal with chained GLM runs. 
+
+--Why is it so weird?
+One of the challenges of writing this kind of code is that 
+often, we want to be able to run it on Condor. But Condor is 
+a drastically different environment. Therefore, the code that
+is written to work on Condor often can be a bit awkward to 
+use on the desktop. 
+
+--What is here?
+There are two key pieces of code. 
+
+---run.chained.GLM.R
+This takes a set of input files (*.nml, driver file, info
+on ice on/off) and runs the model by open water season. 
+
+---output.cal.chained.R
+This reads the results of the 
+chained run and matches the calibration water temp data
+(in cal.in.csv) and outputs a file with the combined 
+results (cal.out.csv) which include both modeled and
+observed temperatures. 
+
+--How does it work? 
+It generally wants to live within a directory which contains all 
+the key input. The files it is looking for are:
+
+---glm.nml
+The run GLM file. This should be setup normally to run the full
+timeseries. It should also be setup with input parameters and whatnot
+though they could be changed on the fly if one wanted.
+
+---icecal.in.csv
+This contains the ice on/off dates. If we don't have both an on and
+off date for a season, that season will *not* be run. Please see
+example for required format.
+
+---cal.in.csv
+This is the calibration/validation water temp observations. Please see
+example for required format.
+
+--Why are the rGLM library files included here?
+Because I didn't want to deal with relative path issues or changing version 
+issues at this moment. They are copied without change, so they could always 
+be updated in the future.
+
+
