@@ -2,7 +2,7 @@ function lakeIDs = getLakeIDs(metaFile)
 
 
 if eq(nargin,0)
-    metaFile = 'supporting files/managed_lake_info.txt';
+    metaFile = '../supporting files/managed_lake_info.txt';
 end
 wbic_i = 1;
 reader = '%s %s %s %s %s %s %s %s %s %s %s %s';
