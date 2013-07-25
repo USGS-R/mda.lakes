@@ -4,7 +4,7 @@ function elev = getElev(WBIC,metaFile)
 % WBIC is a string;
 
 if eq(nargin,1)
-    metaFile = 'supporting files/WI_ManagedLakes_elevation.tsv';
+    metaFile = '../supporting files/WI_ManagedLakes_elevation.tsv';
 end
 
 [indx,values] = wcsFileOpen(metaFile);

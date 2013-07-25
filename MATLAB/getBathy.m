@@ -6,7 +6,7 @@ function [bth,fromBth] = getBathy(WBIC,rootDir)
 numZ= 15;
 
 if eq(nargin,1)
-    rootDir = 'supporting files/';
+    rootDir = '../supporting files/';
 end
 
 %% first, look for bathy file
