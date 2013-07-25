@@ -113,7 +113,7 @@ getZmean	<-	function(WBIC){
 	if (any(useI)){
 		mean.depth	<-	ft2m*mean(data$mean.depth.ft[useI],na.rm=TRUE)
 	} else {
-		mean.depth	<-	2/3*getZmax(WBIC)
+		mean.depth	<-	1/3*getZmax(WBIC)
 	}
 	
 	return(mean.depth)
