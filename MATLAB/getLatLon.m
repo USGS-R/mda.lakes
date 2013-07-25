@@ -5,7 +5,7 @@ function [lat, lon] = getLatLon(WBIC,metaFile)
 persistent dStore;
 
 if (nargin == 1)
-    metaFile = 'supporting files/WI_Lakes_WbicLatLon.tsv';
+    metaFile = '../supporting files/WI_Lakes_WbicLatLon.tsv';
 end
 
 if(isempty(dStore))

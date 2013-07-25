@@ -9,7 +9,7 @@ else
 end
 
 if eq(nargin,1)
-    SecchiFile = ['supporting files' del 'annual_mean_secchi.txt'];
+    SecchiFile = ['../supporting files' del 'annual_mean_secchi.txt'];
 end
 wbic_i = 1;
 secc_i = 9;
