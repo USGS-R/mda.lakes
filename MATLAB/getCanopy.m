@@ -4,7 +4,7 @@ function canopy = getCanopy(WBIC,metaFile)
 % WBIC is a string;
 
 if eq(nargin,1)
-    metaFile = 'supporting files/VegetationHeight_WiLMA.tsv';
+    metaFile = '../supporting files/VegetationHeight_WiLMA.tsv';
     [indx,values] = wcsFileOpen(metaFile);
     useI = strcmp(indx,WBIC);
     if any(useI)

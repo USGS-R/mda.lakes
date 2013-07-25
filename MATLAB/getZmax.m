@@ -5,7 +5,7 @@ function zMax = getZmax(WBIC,metaFile)
 
 ft2m = 0.3048;
 if eq(nargin,1)
-    metaFile = 'supporting files/managed_lake_info.txt';
+    metaFile = '../supporting files/managed_lake_info.txt';
 end
 wbic_i = 1;
 maxZ_i = 6;
