@@ -110,12 +110,13 @@ getZmean	<-	function(WBIC){
 	ft2m	<-	0.3048
 	data	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
 	useI	<- data$WBIC==as.numeric(WBIC)
+	mean.depth	<-	NA
 	if (any(useI)){
 		mean.depth	<-	ft2m*mean(data$mean.depth.ft[useI],na.rm=TRUE)
-	} else {
+	}
+	if (is.na(mean.depth)){
 		mean.depth	<-	1/3*getZmax(WBIC)
 	}
-	
 	return(mean.depth)
 }
 
