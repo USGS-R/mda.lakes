@@ -11,7 +11,7 @@ library(ncdf4)
 source('GLM.nml.R')
 source('GLM.nc.R')
 
-run.chained.GLM = function(run.dir, glm.path,verbose=TRUE){
+run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
   #run.dir is the home for all model inputs
   #glm.path is the path to the glm.exe (including the exe)
 	# I don't like doing this in a function, but you must 
@@ -75,11 +75,14 @@ run.chained.GLM = function(run.dir, glm.path,verbose=TRUE){
 	for(i in 1:length(s.starts)){
 		
 		#Edit and output NML
-		source.nml$time$start = strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S")
-		source.nml$time$stop = strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S")
-		
-		source.nml$output$out_fn = paste('output', strftime(s.starts[i],'%Y'), sep='')
-		
+	  source.nml <- set.nml(source.nml,'start',strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"))
+	  source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
+	  source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
+		if (!is.null(nml.args)){
+      for (a in 1:length(nml.args)){
+        source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
+      }
+	  }
 		write.nml(source.nml, 'glm.nml', './')
 		
 		#Rusn this iteration of the model.
@@ -88,7 +91,7 @@ run.chained.GLM = function(run.dir, glm.path,verbose=TRUE){
 
 		
 	}
-
+	file.copy('glm.nml', paste('glm.', strftime(s.starts[i],'%Y'),'.nml', sep=''))
 	#bring the original back
 	file.rename('glm.nml.orig', 'glm.nml')
 
