@@ -91,7 +91,6 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
 
 		
 	}
-	file.copy('glm.nml', paste('glm.', strftime(s.starts[i],'%Y'),'.nml', sep=''))
 	#bring the original back
 	file.rename('glm.nml.orig', 'glm.nml')
 
