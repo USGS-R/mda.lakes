@@ -11,7 +11,7 @@ library(ncdf4)
 source('GLM.nml.R')
 source('GLM.nc.R')
 
-run.chained.GLM = function(run.dir, glm.path){
+run.chained.GLM = function(run.dir, glm.path,verbose=TRUE){
   #run.dir is the home for all model inputs
   #glm.path is the path to the glm.exe (including the exe)
 	# I don't like doing this in a function, but you must 
@@ -83,9 +83,9 @@ run.chained.GLM = function(run.dir, glm.path){
 		write.nml(source.nml, 'glm.nml', './')
 		
 		#Rusn this iteration of the model.
-		out = system2(glm.path, wait=TRUE)
-		
-		print(out)
+    if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+		out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
+
 		
 	}
 
