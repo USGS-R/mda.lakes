@@ -29,7 +29,8 @@ for j = 1:length(lakeIDs{1})
     end
     
     elev = getElev(lakeID);
-    canopy = getCanopy(lakeID);
+    metaFile = 'supporting files/canopyht_zonal_no_zero_num5_positivehts.csv';
+    canopy = getCanopy(lakeID,metaFile);
     lkeArea = getArea(lakeID);
     [lat,long] = getLatLon(lakeID);
     Wstr = getWstr(canopy,lkeArea);
