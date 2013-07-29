@@ -165,6 +165,7 @@
    wind_factor = wind_factor_FLT
    ce         = ce_FLT
    ch         = ch_FLT
+   coef_wind_drag = coef_wind_drag_FLT
 /
 
 !-------------------------------------------------------------------------------
