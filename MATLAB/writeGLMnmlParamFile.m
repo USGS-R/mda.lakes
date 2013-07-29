@@ -11,7 +11,7 @@ gblVar = varargin;
         val = gblVar{idx1(uI1)+1};
     end
         
-nmlDir = 'supporting files/';
+nmlDir = '../supporting files/';
 % writes the glm.nml param file according to lake parameters
 
 
