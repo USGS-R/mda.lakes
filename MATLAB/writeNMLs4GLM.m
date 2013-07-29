@@ -5,12 +5,29 @@ if refresh
     refreshWiLMAfiles()
 end
 
+metaFile = '../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv';
+
 if eq(nargin,0)
     writeRoot = 'D:\WiLMA\NML\';
     fID = fopen('D:\WiLMA\to_cal_wbic.csv');
     lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
     fclose(fID);
     lakeIDs = lakeIDs{1};
+    rmvI = false(1:length(lakeIDs),1);
+    % skip Kds!
+    for j = 1:length(lakeIDs)
+        if isnan(getClarity(lakeIDs{j}))
+            rmvI(j) = true;
+        else
+            canopy = getCanopy(lakeIDs{j},metaFile);
+            if lt(canopy,3)
+                keyboard
+            end
+            %isnan(getCanopy(lakeIDs{j},metaFile))
+            %rmvI(j) = true;
+        end
+    end
+    lakeIDs = lakeIDs(~rmvI);
 elseif eq(nargin,1)
     fID = fopen('D:\WiLMA\to_cal_wbic.csv');
     lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
@@ -30,7 +47,7 @@ for j = 1:length(lakeIDs)
     end
     
     elev = getElev(lakeID);
-    metaFile = '../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv';
+    
     canopy = getCanopy(lakeID,metaFile);
     lkeArea = getArea(lakeID);
     [lat,long] = getLatLon(lakeID);
