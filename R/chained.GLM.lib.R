@@ -8,8 +8,9 @@ if(iscondor){
 
 # Import Libraries
 library(ncdf4)
-source('GLM.nml.R')
-source('GLM.nc.R')
+library(rGLM)
+#source('GLM.nml.R')
+#source('GLM.nc.R')
 
 run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
   #run.dir is the home for all model inputs
