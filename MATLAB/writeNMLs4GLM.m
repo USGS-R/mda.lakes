@@ -5,11 +5,22 @@ if refresh
     refreshWiLMAfiles()
 end
 
+metaFile = '../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv';
+
 if eq(nargin,0)
     writeRoot = 'D:\WiLMA\NML\';
     fID = fopen('D:\WiLMA\to_cal_wbic.csv');
     lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
     fclose(fID);
+    lakeIDs = lakeIDs{1};
+    rmvI = false(1:length(lakeIDs),1);
+    % skip Kds!
+    for j = 1:length(lakeIDs)
+        if isnan(getClarity(lakeIDs{j}))
+            rmvI(j) = true;
+        end
+    end
+    lakeIDs = lakeIDs(~rmvI);
 elseif eq(nargin,1)
     fID = fopen('D:\WiLMA\to_cal_wbic.csv');
     lakeIDs = textscan(fID,'%s','HeaderLines',1,'Delimiter',',');
@@ -20,8 +31,8 @@ end
 
 
 
-for j = 1:length(lakeIDs{1})
-    lakeID = lakeIDs{1}{j};
+for j = 1:length(lakeIDs)
+    lakeID = lakeIDs{j};
     Kd = getClarity(lakeID);
     bth= getBathy(lakeID);
     if isnan(Kd)
@@ -29,7 +40,8 @@ for j = 1:length(lakeIDs{1})
     end
     
     elev = getElev(lakeID);
-    canopy = getCanopy(lakeID);
+    
+    canopy = getCanopy(lakeID,metaFile);
     lkeArea = getArea(lakeID);
     [lat,long] = getLatLon(lakeID);
     Wstr = getWstr(canopy,lkeArea);
@@ -67,14 +79,13 @@ for j = 1:length(lakeIDs{1})
     writeGLMnmlParamFile(simDir,'Kw_FLT',Kd,'lake_name_STR',lakeRef,...
         'latitude_FLT',lat,'longitude_FLT',long,...
         'H_csvVEC',bthH,'A_csvVEC',bthA,'meteo_fl_STR',metFile,...
-        'wind_factor_FLT',Cu,'ce_FLT',0.0013/Cu,'ch_FLT',0.0021/Cu,...
+        'ce_FLT',0.0014,'ch_FLT',0.0014,...
         'stop_STR','2011-12-31 23:00:00','min_layer_thick_FLT',0.1,...
         'max_layer_thick_FLT',mxLyr,'dt_FLT',86400,'nsave_INT',1,...
-        'coef_mix_KH_FLT',0.3,'coef_mix_conv_FLT',0.33,...
-        'coef_wind_stir_FLT',0.48,'coef_mix_shear_FLT',0.213,...
+        'coef_wind_drag_FLT',0.0014*Cu,...
         'bsn_len_FLT',bsn_len,'bsn_wid_FLT',bsn_wid);
     
-    disp(['lake ' num2str(j) ' of ' num2str(length(lakeIDs{1}))]);
+    disp(['lake ' num2str(j) ' of ' num2str(length(lakeIDs))]);
     disp('-----');
     %     else
     
