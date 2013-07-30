@@ -1,4 +1,8 @@
 setwd("~/WiLMA/R")
+
+library(ncdf4)
+library(rGLM)
+
 source('chained.GLM.lib.R')
 source('GLM.functions.R')
 library(stringr)
@@ -14,7 +18,7 @@ glm.path = "C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"
 model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
-nml.args = list('coef_mix_conv' = 0.33)#,'ce'=0.0016)
+nml.args = NULL #list('coef_mix_conv' = 0.125,'ce'=0.0016) 
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TRUE, header=TRUE)
@@ -63,13 +67,14 @@ for(i in 1:length(model.ids)){
     lm = lm(dat$WTEMP~dat$WTEMP_MOD-1)
     print(paste(c('linear model standard error:',summary(lm)$sigma),collapse=' '))
     plot(dat$WTEMP,dat$WTEMP_MOD)
+    lines(c(0,30),c(0,30))
   } else {stdErr = NA}
  
   print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
   #Print info on where we are
   print(paste(i,model.ids[i]))
   
-  lines(c(0,30),c(0,30))
+  
   print(getArea(WBICs[i]))
 
   cat(paste(c(WBICs[i],'\t',stdErr,'\t',length(resids),'\n'),collapse=''), file=summaryTxt,append=TRUE)
