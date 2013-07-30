@@ -8,7 +8,7 @@ Xt = 50*hc; % canopy height times 50
 
 Wstr = 2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2);
 if le(D,Xt)
-    Wstr = 0.0005;
+    Wstr = 0.001;
 end
 
 end
