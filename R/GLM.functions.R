@@ -77,6 +77,20 @@ getLatLon <- local({ lookup=NULL; function(WBIC) {
 	lookup[[WBIC]]
 }})
 
+#Return perimeter in meters
+getPerim <- local({ lookup=NULL; function(WBIC) {
+	if (is.null(lookup)) { 
+		cat('Caching perimeter info.\n')
+		d <- read.table('../supporting files/wbicAreaPerim.tsv', header=TRUE, as.is=TRUE) 
+		lookup <<- new.env()
+		
+		for(i in 1:nrow(d)){
+			lookup[[toString(d$WBIC[i])]] = d$PERIMETER[i]
+		}
+	}
+	lookup[[WBIC]]
+}})
+
 
 getWstr	<-	function(WBIC){
 	# Markfort et al. 2010
