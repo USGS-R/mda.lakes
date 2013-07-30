@@ -6,12 +6,6 @@ if(iscondor){
 }
 
 
-# Import Libraries
-library(ncdf4)
-library(rGLM)
-#source('GLM.nml.R')
-#source('GLM.nc.R')
-
 run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
   #run.dir is the home for all model inputs
   #glm.path is the path to the glm.exe (including the exe)
