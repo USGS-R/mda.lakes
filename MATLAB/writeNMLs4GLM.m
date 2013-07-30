@@ -18,13 +18,6 @@ if eq(nargin,0)
     for j = 1:length(lakeIDs)
         if isnan(getClarity(lakeIDs{j}))
             rmvI(j) = true;
-        else
-            canopy = getCanopy(lakeIDs{j},metaFile);
-            if lt(canopy,3)
-                keyboard
-            end
-            %isnan(getCanopy(lakeIDs{j},metaFile))
-            %rmvI(j) = true;
         end
     end
     lakeIDs = lakeIDs(~rmvI);
@@ -89,7 +82,7 @@ for j = 1:length(lakeIDs)
         'ce_FLT',0.0014,'ch_FLT',0.0014,...
         'stop_STR','2011-12-31 23:00:00','min_layer_thick_FLT',0.1,...
         'max_layer_thick_FLT',mxLyr,'dt_FLT',86400,'nsave_INT',1,...
-        'coef_wind_drag_FLT',0.0016*Cu,...
+        'coef_wind_drag_FLT',0.0014*Cu,...
         'bsn_len_FLT',bsn_len,'bsn_wid_FLT',bsn_wid);
     
     disp(['lake ' num2str(j) ' of ' num2str(length(lakeIDs))]);
