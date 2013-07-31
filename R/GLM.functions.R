@@ -32,7 +32,7 @@ getCanopy	<-	function(WBIC){
 	data	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',header=TRUE,sep=',')
 	useI	<-	which(dat[,1]==WBIC)
 	if(length(useI)>0){
-		canopy.height	<-	as.numeric(data[1,useI])
+		canopy.height	<-	as.numeric(data[useI,2])
 	} else {
 		canopy.height	<-	NULL
 	}
@@ -98,11 +98,12 @@ getWstr	<-	function(WBIC,method='Markfort'){
 	hc	<-	max(c(getCanopy(WBIC),1))
 	lkeArea	<-	getArea(WBIC)
 	perim	<-	getPerim(WBIC)
-	#D	<-	2*sqrt(lkeArea/pi)
+
 	Xt	<-	50*hc
 	shelArea	<-	perim*Xt
 	
 	if (method=='Markfort'){
+		D	<-	2*sqrt(lkeArea/pi)
 		if (D<Xt){
 			wind.shelter	<-	minWstr
 		} else {
