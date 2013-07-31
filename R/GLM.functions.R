@@ -94,7 +94,7 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 
 getWstr	<-	function(WBIC,method='Markfort'){
 	# Markfort et al. 2010
-	minWstr	<-	0.01
+	minWstr	<-	0.0001
 	hc	<-	max(c(getCanopy(WBIC),1))
 	lkeArea	<-	getArea(WBIC)
 
