@@ -29,10 +29,10 @@ getArea	<-	function(WBIC){
 }
 
 getCanopy	<-	function(WBIC){
-	data	<-	read.table('../supporting files/VegetationHeight_WiLMA.tsv',header=TRUE,sep='\t')
-	indx	<-	paste(c('X',WBIC),collapse='')
-	if (indx %in% names(data)){
-		canopy.height	<-	as.numeric(levels(data[1,indx])[1])
+	data	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',header=TRUE,sep=',')
+	useI	<-	which(dat[,1]==WBIC)
+	if(length(useI)>0){
+		canopy.height	<-	as.numeric(data[1,useI])
 	} else {
 		canopy.height	<-	NULL
 	}
@@ -92,18 +92,28 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 }})
 
 
-getWstr	<-	function(WBIC){
+getWstr	<-	function(WBIC,method='Markfort'){
 	# Markfort et al. 2010
+	minWstr	<-	0.01
 	hc	<-	max(c(getCanopy(WBIC),1))
 	lkeArea	<-	getArea(WBIC)
-	D	<-	2*sqrt(lkeArea/pi)
+	perim	<-	getPerim(WBIC)
+	#D	<-	2*sqrt(lkeArea/pi)
 	Xt	<-	50*hc
+	shelArea	<-	perim*Xt
 	
-	if (D<Xt){
-		wind.shelter	<-	0.01
+	wind.shelter
+	if (method=='Markfort'){
+		if (D<Xt){
+			wind.shelter	<-	minWstr
+		} else {
+			wind.shelter	<-	2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2)
+		}
 	} else {
-		wind.shelter	<-	2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2)
+		shelter	<-	(lkeArea-shelArea)/lkeArea
+		wind.shelter	<-	max(c(shelter,minWstr))
 	}
+	
 	return(wind.shelter)
 }
 
