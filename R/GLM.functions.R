@@ -100,7 +100,7 @@ getWstr	<-	function(WBIC,method='Markfort'){
 	perim	<-	getPerim(WBIC)
 
 	Xt	<-	50*hc
-	shelArea	<-	perim*Xt
+	
 	
 	if (method=='Markfort'){
 		D	<-	2*sqrt(lkeArea/pi)
@@ -110,6 +110,7 @@ getWstr	<-	function(WBIC,method='Markfort'){
 			wind.shelter	<-	2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2)
 		}
 	} else {
+		shelArea	<-	perim*hc*12.5 # 25% of Markfort, as sheltering is single direction...
 		shelter	<-	(lkeArea-shelArea)/lkeArea
 		wind.shelter	<-	max(c(shelter,minWstr))
 	}
