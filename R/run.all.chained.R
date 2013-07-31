@@ -18,7 +18,7 @@ glm.path = "C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"
 model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
-nml.args = NULL #list('coef_mix_conv' = 0.125,'ce'=0.0016) 
+
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TRUE, header=TRUE)
@@ -28,7 +28,7 @@ cat('WBIC\tStndErr\tnumPoints\n', file=summaryTxt)
 for(i in 1:length(model.ids)){
   
   driver.file = paste(driver.dir, '/', model.ids[i], '.csv', sep='')
-  
+
   file.copy(driver.file, model.dirs[i])
   
   ## Write the lake-specific ice on/off data
@@ -47,6 +47,10 @@ for(i in 1:length(model.ids)){
   
   ## Should be ready, run chained model
   #glm.path must be absolute path, not relative
+  
+  Wstr = getWstr(WBICs[i],method='JEKL')
+  nml.args = list('coef_wind_drag'=0.0016*Wstr^0.33)
+  print(nml.args)
   run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE)
   
   ## Now use calibration data to output matched modeled data for validation
