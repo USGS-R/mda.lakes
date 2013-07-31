@@ -102,7 +102,6 @@ getWstr	<-	function(WBIC,method='Markfort'){
 	Xt	<-	50*hc
 	shelArea	<-	perim*Xt
 	
-	wind.shelter
 	if (method=='Markfort'){
 		if (D<Xt){
 			wind.shelter	<-	minWstr
