@@ -30,7 +30,7 @@ getArea	<-	function(WBIC){
 
 getCanopy	<-	function(WBIC){
 	data	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',header=TRUE,sep=',')
-	useI	<-	which(dat[,1]==WBIC)
+	useI	<-	which(data[,1]==WBIC)
 	if(length(useI)>0){
 		canopy.height	<-	as.numeric(data[useI,2])
 	} else {
