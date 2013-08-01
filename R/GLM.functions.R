@@ -15,18 +15,20 @@ getBathy	<-	function(WBIC){
 	return(bathymetry)
 }
 
-getArea	<-	function(WBIC){
-	acre2m2	<-	4046.85642
-	data	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
-	useI	<- data$WBIC==as.numeric(WBIC)
-	if (any(useI)){
-		surface.area	<-	acre2m2*mean(data$acres[useI],na.rm=TRUE)
-	} else {
-		surface.area	<-	NULL
+getArea	<-	local({ lookup=NULL; function(WBIC){
+	if (is.null(lookup)) { 
+		cat('Caching area info.\n')
+		acre2m2	<-	4046.85642
+		d	<-	read.table('../supporting files/managed_lake_info.txt',
+			header=TRUE,sep='\t',quote="\"")
+		lookup <<- new.env()
+		
+		for (i in 1:nrow(d)){
+			lookup[[toString(d$WBIC[i])]]	<-	acre2m2*d$acres[i]
+		}
 	}
-	
-	return(surface.area)
-}
+	lookup[[WBIC]]
+}})
 
 getCanopy	<-	local({ lookup=NULL; function(WBIC) {
 	if (is.null(lookup)) { 
