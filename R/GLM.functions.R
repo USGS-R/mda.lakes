@@ -52,12 +52,12 @@ getClarity	<-	local({ lookup=NULL; function(WBIC){
 		d	<-	read.table('../supporting files/annual_mean_secchi.txt',
 			header=TRUE,sep='\t')
 		lookup <<- new.env()
-		unWBIC	<-	unique(as.character(WBIC))
+		unWBIC	<-	unique(as.character(d$WBIC))
 		for (i in 1:length(unWBIC)){
-			useI	<-	d['WBIC']==WBIC
+			useI	<-	d$WBIC==unWBIC[i]
 			secchi 	<-	d$secchi.m.mean[useI]
 			attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
-			lookup[[toString(unWBIC[i])]] 	<- attenuation.coefficient
+			lookup[[unWBIC[i]]] 	<- attenuation.coefficient
 		}
 	}
 	lookup[[WBIC]]
