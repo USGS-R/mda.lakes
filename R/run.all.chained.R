@@ -18,6 +18,8 @@ glm.path = "C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"
 model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
+wndRef = 0.00145
+wndMethod = 'JEKL'
 
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
@@ -48,9 +50,9 @@ for(i in 1:length(model.ids)){
   ## Should be ready, run chained model
   #glm.path must be absolute path, not relative
   
-  Wstr = getWstr(WBICs[i],method='JEKL')
-  nml.args = list('coef_wind_drag'=0.0016*Wstr^0.33)
-  print(nml.args)
+  Wstr = getWstr(WBICs[i],method=wndMethod)
+  nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33,'coef_mix_conv'=0.2,'ce'=0.00142,'ch'=0.00142)# reverting...
+  
   run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE)
   
   ## Now use calibration data to output matched modeled data for validation
@@ -72,9 +74,11 @@ for(i in 1:length(model.ids)){
     print(paste(c('linear model standard error:',summary(lm)$sigma),collapse=' '))
     plot(dat$WTEMP,dat$WTEMP_MOD)
     lines(c(0,30),c(0,30))
+    print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
+    print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
   } else {stdErr = NA}
  
-  print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
+  
   #Print info on where we are
   print(paste(i,model.ids[i]))
   

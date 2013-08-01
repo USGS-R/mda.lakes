@@ -102,7 +102,7 @@ getSDF	<-	function(WBIC){
 
 getWstr	<-	function(WBIC,method='Markfort'){
 	# Markfort et al. 2010
-	minWstr	<-	0.0001
+	minWstr	<-	0.0005
 	hc	<-	max(c(getCanopy(WBIC),1))
 	lkeArea	<-	getArea(WBIC)
 
@@ -118,7 +118,7 @@ getWstr	<-	function(WBIC,method='Markfort'){
 		}
 	} else {
 		perim	<-	getPerim(WBIC)
-		shelArea	<-	perim*hc*12.5 # 25% of Markfort, as sheltering is single direction...
+		shelArea	<-	15*sqrt(perim)*hc*50 # 25% of Markfort, as sheltering is single direction...
 		shelter	<-	(lkeArea-shelArea)/lkeArea
 		wind.shelter	<-	max(c(shelter,minWstr))
 		if (is.null(perim)){wind.shelter<-NULL}
