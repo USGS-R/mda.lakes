@@ -91,6 +91,14 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 	lookup[[WBIC]]
 }})
 
+getSDF	<-	function(WBIC){
+	perim	<-	getPerim(WBIC)
+	area	<-	getArea(WBIC)
+	circle.perim	<-	2*pi*sqrt(area/pi)
+	SDF	<-	perim/circle.perim
+	return(SDF)
+}
+
 
 getWstr	<-	function(WBIC,method='Markfort'){
 	# Markfort et al. 2010
