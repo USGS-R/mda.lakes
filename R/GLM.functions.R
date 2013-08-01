@@ -28,16 +28,20 @@ getArea	<-	function(WBIC){
 	return(surface.area)
 }
 
-getCanopy	<-	function(WBIC){
-	data	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',header=TRUE,sep=',')
-	useI	<-	which(data[,1]==WBIC)
-	if(length(useI)>0){
-		canopy.height	<-	as.numeric(data[useI,2])
-	} else {
-		canopy.height	<-	NULL
+getCanopy	<-	local({ lookup=NULL; function(WBIC) {
+	if (is.null(lookup)) { 
+		cat('Caching canopy info.\n')
+		d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
+			header=TRUE,sep=',')
+		lookup <<- new.env()
+		
+		for (i in 1:nrow(d)){
+			lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
+		}
 	}
-	return(canopy.height)
-}
+	lookup[[WBIC]]
+}})
+
 
 getClarity	<-	function(WBIC){
 	secchiConv	<-	1.7
@@ -83,13 +87,13 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 		cat('Caching perimeter info.\n')
 		d <- read.table('../supporting files/wbicAreaPerim.tsv', header=TRUE, as.is=TRUE) 
 		lookup <<- new.env()
-		
 		for(i in 1:nrow(d)){
 			lookup[[toString(d$WBIC[i])]] = d$PERIMETER[i]
 		}
 	}
 	lookup[[WBIC]]
 }})
+
 
 getSDF	<-	function(WBIC){
 	perim	<-	getPerim(WBIC)
