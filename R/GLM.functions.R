@@ -45,18 +45,24 @@ getCanopy	<-	local({ lookup=NULL; function(WBIC) {
 }})
 
 
-getClarity	<-	function(WBIC){
-	secchiConv	<-	1.7
-	data	<-	read.table('../supporting files/annual_mean_secchi.txt',header=TRUE,sep='\t')
-	useI	<- data['WBIC']==WBIC
-	if (any(useI)){
-		secchi 	<-	data$secchi.m.mean[useI]
-		attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
-	} else {
-		attenuation.coefficient	<-	NULL
+getClarity	<-	local({ lookup=NULL; function(WBIC){
+	if (is.null(lookup)){
+		cat('Caching clarity info.\n')
+		secchiConv	<-	1.7
+		d	<-	read.table('../supporting files/annual_mean_secchi.txt',
+			header=TRUE,sep='\t')
+		lookup <<- new.env()
+		unWBIC	<-	unique(as.character(WBIC))
+		for (i in 1:length(unWBIC)){
+			useI	<-	d['WBIC']==WBIC
+			secchi 	<-	d$secchi.m.mean[useI]
+			attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
+			lookup[[toString(unWBIC[i])]] 	<- attenuation.coefficient
+		}
 	}
-	return(attenuation.coefficient)
-}
+	lookup[[WBIC]]
+}})
+
 
 getElevation	<-	function(WBIC){
 	data	<-	read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
