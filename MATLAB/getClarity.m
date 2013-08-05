@@ -17,7 +17,7 @@ reader = '%s %s %s %s %s %s %s %s %s %s';
 
 fID = fopen(SecchiFile);
 dat = textscan(fID,reader,'Delimiter','\t','HeaderLines',1);
-fclose all;
+fclose(fID);
 
 WBICs = dat{wbic_i};
 secchis = dat{secc_i};
