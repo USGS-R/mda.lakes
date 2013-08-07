@@ -227,10 +227,22 @@ getFirstDayAboveT <-  function(GLMwtr,temperature,anyDep=TRUE){
   }
   if (anyDep==TRUE){
     tempRef <-  getDailyTempMax(GLMwtr)
-    lastIdx <-  min(which(tempRef>temperature))
+    tmpIdx = which(tempRef>temperature)
+    
+    #Check that we have at least one timepoint matching criteria
+    if(length(tmpIdx) < 1){
+      return(NA)
+    }
+    lastIdx <-  min(tmpIdx)
   }
   else{
     tempRef <-  getDailyTempMin(GLMwtr)
+    tmpIdx = which(tempRef>temperature)
+    
+    #Check that we have at least one timepoint matching criteria
+    if(length(tmpIdx) < 1){
+      return(NA)
+    }
     lastIdx <-  min(which(tempRef>temperature))
   }
   firstDOYabove  <-  GLMwtr[timeID][lastIdx,]
