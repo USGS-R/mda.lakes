@@ -1,6 +1,7 @@
 # fish code for WiLMA 
 # **jread-usgs, lawinslow 2013-04-07
 
+require(rGLM)
 
 # -- shared variables --
 timeID  <-  "DateTime"
@@ -20,7 +21,7 @@ getGLMnc  <-  function(folder=folder){
 #
 ################################################################################
 getGLMwtr  <-  function(GLMnc){
-  GLMwtr <-	resampleGLM(GLMnc)
+  GLMwtr <-	getTempGLMnc(GLMnc)
   return(GLMwtr)
 }
 
@@ -299,14 +300,14 @@ getEpiMetaHypo.GLM <- function(GLMwtr, depths){
     oldD = iter_depths
     oldT = iter_wtr
     
-    smoothed = smooth.spline(iter_depths,iter_wtr, df=25)
-    iter_depths = smoothed$x
-    iter_wtr = smoothed$y
+    #smoothed = smooth.spline(iter_depths,iter_wtr, df=25)
+    #iter_depths = smoothed$x
+    #iter_wtr = smoothed$y
     
     
     ##remove this snippet
   
-		tmp = findThermoDepth(iter_wtr,iter_depths)
+		tmp = thermo.depth(iter_wtr,iter_depths)
 		SthermoD[i] = tmp$SthermoD
 		if(length(depths) != length(unique(depths))){
 			stop('argh')
@@ -314,9 +315,9 @@ getEpiMetaHypo.GLM <- function(GLMwtr, depths){
 		
 		#list(botDepth = metaBot_depth, topDepth = metaTop_depth)
 		
-		tmpMeta = findMetaTopBot(iter_wtr, SthermoD[i], iter_depths, 0.005)
-		metaBotD[i] = tmpMeta$botDepth
-		metaTopD[i] = tmpMeta$topDepth
+		tmpMeta = meta.depths(iter_wtr, iter_depths)
+		metaBotD[i] = tmpMeta[2]
+		metaTopD[i] = tmpMeta[1]
 		
     #plot(oldT, oldD)
 		#lines(iter_wtr,iter_depths)
@@ -350,5 +351,28 @@ volInTemp.GLM <- function(GLMnc, lowT, highT){
   }
   
   return(list(times,volumes))
+}
+
+
+################################################################################
+# volInTemp.GLM
+#
+# Calculates the total height of the water column within a temperature range.
+#
+################################################################################
+heightInRange.GLM <- function(GLMnc, lowT, highT){
+  
+  layZ = ncvar_get(GLMnc,"z")
+  layTemp = ncvar_get(GLMnc,"temp")
+  
+  thicks = vector(mode="double", length=ncol(layZ))*NaN
+  #times = getTimeGLMnc(GLMnc)
+  
+  for(i in 1:length(thicks)){
+    layer_dzs = diff(c(0, layZ[,i]))
+    thicks[i] = sum(layer_dzs[layTemp[,i] >= lowT & layTemp[,i] <= highT ], na.rm=TRUE)
+  }
+  
+  return(thicks)
 }
 
