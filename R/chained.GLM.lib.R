@@ -6,7 +6,7 @@ if(iscondor){
 }
 
 
-run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
+run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
   #run.dir is the home for all model inputs
   #glm.path is the path to the glm.exe (including the exe)
 	# I don't like doing this in a function, but you must 
@@ -29,6 +29,11 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
 	ice.in$DATE = as.POSIXct(ice.in$DATE)
 	ice.in = ice.in[order(ice.in$DATE), ]
 
+  #temporary hack
+  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
+    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
+  }
+  
 
 	# Find complete seasons (pairs of off/on dates)
 	s.starts = NA
@@ -82,6 +87,7 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
 		
 		#Rusn this iteration of the model.
     if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+    
 		out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
 
 		
