@@ -89,8 +89,8 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
     }
     
     
-    misc.out[['peak_temp']] = getTempMax(wtr)
-    misc.out[['durStrat']] = getStratifiedDuration(wtr, ice, minStrat=0.5)
+    misc.out[['peak_temp']] = c(misc.out[['peak_temp']], getTempMax(wtr))
+    misc.out[['durStrat']] = c(misc.out[['durStrat']], getStratifiedDuration(wtr, ice, minStrat=0.5))
     
     
     misc.out[['dateOver8.9']] = c(misc.out[['dateOver8.9']], getFirstDayAboveT(wtr, 8.9))
@@ -123,8 +123,8 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
     tmp = getEpiMetaHypo.GLM(wtr, depths)
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
     
-    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]]))
-    misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(tmp$metaTopD[start.end[1]:start.end[2]]))
+    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]], na.rm=TRUE))
+    misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(tmp$metaTopD[start.end[1]:start.end[2]], na.rm=TRUE))
     
     
     #Cleanup this memory hog
@@ -151,6 +151,7 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
   }
   misc.names = names(misc.out)
   for(i in 1:length(misc.names)){
+    
     fOutput[[misc.names[i]]] = misc.out[[misc.names[i]]]
   }
   
