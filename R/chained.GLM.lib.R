@@ -7,6 +7,7 @@ if(iscondor){
 
 
 run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
+  require(rGLM)
   #run.dir is the home for all model inputs
   #glm.path is the path to the glm.exe (including the exe)
 	# I don't like doing this in a function, but you must 

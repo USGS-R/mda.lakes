@@ -280,6 +280,48 @@ getStratifiedStartEnd <-  function(GLMwtr,GLMice,minStrat){
 }
 
 ################################################################################
+# This function conservatively estimates the mix start and end date
+# Unlike finding the first and last possible date with minStrat delT, this
+# finds the latest spring mixing (delT < minStrat) and latest fall
+# mixing (delT < minStrat)
+################################################################################
+getUnmixedStartEnd <-  function(GLMwtr, GLMice, minStrat, arr.ind=FALSE){
+  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+    stop("GLM ice time series must be equal or shorter than one year")
+  }
+  # advised that the input is shortened to the ice-free period,
+  startDate <- getIceOffDate(GLMice,GLMwtr)
+  stopDate <- getIceOnDate(GLMice,GLMwtr)
+  
+  tempMxMn <- cbind(getDailyTempMax(GLMwtr),getDailyTempMin(GLMwtr))
+  
+  tempMxMn[GLMwtr$DateTime < startDate | GLMwtr$DateTime > stopDate , ] = NA
+  
+  #Ok, work out from the middle and find the closest day where
+  # the lake did not meet the stratification criteria
+  strat.end = floor(nrow(tempMxMn)/2)
+  strat.start = floor(nrow(tempMxMn)/2)
+  for(i in strat.end:nrow(tempMxMn)){
+    if(is.na(tempMxMn[i,1]) | tempMxMn[i,1]-tempMxMn[i,2]<=minStrat){
+      strat.end = i - 1
+      break
+    }
+  }
+  for(i in seq(strat.start, 1, by=-1)){
+    if(is.na(tempMxMn[i,1]) | tempMxMn[i,1]-tempMxMn[i,2]<=minStrat){
+      strat.start = i + 1
+      break
+    }
+  }
+  if(arr.ind){
+    return(c(strat.start, strat.end))
+  }else{
+    return(GLMwtr$DateTime[c(strat.start, strat.end)])
+  }
+  
+}
+
+################################################################################
 # GetEpiMetaHypo.GLM
 #
 # Get EpiMetaHypo layer depths from the water temperature profile.
@@ -287,6 +329,8 @@ getStratifiedStartEnd <-  function(GLMwtr,GLMice,minStrat){
 ################################################################################
 
 getEpiMetaHypo.GLM <- function(GLMwtr, depths){
+  require(rLakeAnalyzer)
+  
 	n = nrow(GLMwtr)
 	metaTopD = vector(mode="double", length=n)
 	SthermoD = vector(mode="double", length=n)
@@ -314,12 +358,9 @@ getEpiMetaHypo.GLM <- function(GLMwtr, depths){
     #smoothed = smooth.spline(iter_depths,iter_wtr, df=25)
     #iter_depths = smoothed$x
     #iter_wtr = smoothed$y
-    
-    
-    ##remove this snippet
   
-		tmp = thermo.depth(iter_wtr,iter_depths)
-		SthermoD[i] = tmp$SthermoD
+  
+		SthermoD[i] = thermo.depth(iter_wtr, iter_depths, seasonal=TRUE)
 		if(length(depths) != length(unique(depths))){
 			stop('argh')
 		}	
@@ -386,4 +427,6 @@ heightInRange.GLM <- function(GLMnc, lowT, highT){
   
   return(thicks)
 }
+
+
 
