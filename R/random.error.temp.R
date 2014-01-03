@@ -8,6 +8,7 @@ val.file	<-	"../supporting files/Epilimnion.tsv"
 
 lyrDz	<-	0.25
 threshold <- 8.9
+error.range <- c(4,45)
 year = 2009
 quantiles <- c(0.025,0.25,0.5,0.75,0.975)
 n=1000
@@ -36,37 +37,65 @@ get.DoY.exceed  <-	function(temps,threshold=8.9,start.DoY=1){
   dates	<-	temps$DateTime
   DoY	<- as.numeric(strftime(dates, format = "%j"))
   exceed.idx <- which(temps$wtr_0>=threshold)
-  first.exceed <- min(exceed.idx)
-  return(DoY[first.exceed])
+  if (length(exceed.idx)==0){
+    return(DoY=NA)
+  } else {
+    first.exceed <- min(exceed.idx)
+    return(DoY[first.exceed])
+  }
 }
 
 random.error.temp	<-	function(WBIC,year,errors,n=1000){
 	# do not assume the lake is there or that it is complete
 	folder	<-	paste("../supporting files/10-06Final/WBIC_",WBIC,'/',sep='')
 	file	<-	paste('output',year,'.nc4',sep='')
-	GLMnc	<-	getGLMnc(file,folder=folder)
-	temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='surface',z.out=0)
+  # does the file exist?
+	if (file %in% list.files(path = paste(folder))){
+	  cat('WBIC ');cat(WBIC); cat(' processing.')
+	  GLMnc  <-	getGLMnc(file,folder=folder)
+	  cat('.')
+	  temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='surface',z.out=0)
+	  
+	  resampled.errors <- sample(temp.errors, size=n, replace = TRUE)
+	  DoY <- vector(length=n)
+	  for (i in 1:n){
+	    DoY[i] <- get.DoY.exceed(temps,threshold=threshold+resampled.errors[i]) # check: is this supposed to be + or -?
+	  }
+	  cat('.\n')
+	  return(DoY)
+	} else {
+    return(FALSE)
+	}
+	
   
-	resampled.errors <- sample(temp.errors, size=n, replace = TRUE)
-  DoY <- vector(length=n)
-  for (i in 1:n){
-    DoY[i] <- get.DoY.exceed(temps,threshold=threshold+resampled.errors[i]) # check: is this supposed to be + or -?
-  }
-	return(DoY)
 }
 
 lake.ids <- get.lakes(year=year)
 num.lakes <- length(lake.ids)
+active.lakes <- vector(length=num.lakes)
 exceed.matrix <- array(dim=c(num.lakes,length(quantiles))) # contains 3 quantiles for parameter exceedence 
-temp.errors  <-  get.errors(file=val.file,error.range=c(4,45))
+temp.errors  <-  get.errors(file=val.file,error.range=error.range)
 
-for (j in 1:num.lakes){
+for (j in 218:num.lakes){ # STARTING LATE!!!
   DoY <- random.error.temp(lake.ids[j],year,errors=temp.errors,n=n)
-  exceed.matrix[j,] <- as.numeric(quantile(DoY,quantiles))
-  cat('done with WBIC ')
-  cat(lake.ids[j])
-  cat('\n')
+  if (any(is.na(DoY))){DoY=FALSE}
+  if (!DoY){
+    #active.lakes will remain FALSE
+    cat('WBIC ')
+    cat(lake.ids[j])
+    cat(' is missing\n')
+  } else {
+    exceed.matrix[j,] <- as.numeric(quantile(DoY,quantiles))
+    cat('done with WBIC ')
+    cat(lake.ids[j])
+    cat('\n')
+    active.lakes[j] = TRUE
+  }
+  
 }
+
+exceed.matrix = exceed.matrix[active.lakes,]
+lake.ids = lake.ids[active.lakes,]
 
 write.out <- data.frame(lake.ids=lake.ids,exceed.matrix)
 # need to name the columns
