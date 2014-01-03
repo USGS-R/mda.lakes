@@ -79,7 +79,7 @@ temp.errors  <-  get.errors(file=val.file,error.range=error.range)
 for (j in 218:num.lakes){ # STARTING LATE!!!
   DoY <- random.error.temp(lake.ids[j],year,errors=temp.errors,n=n)
   if (any(is.na(DoY))){DoY=FALSE}
-  if (!DoY){
+  if (!DoY[1]){
     #active.lakes will remain FALSE
     cat('WBIC ')
     cat(lake.ids[j])
