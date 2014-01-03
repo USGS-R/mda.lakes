@@ -5,13 +5,12 @@ require(rGLM)
 nc.dir	<-	"../supporting files/10-06Final"
 val.file	<-	"../supporting files/Epilimnion.tsv"
 
-
+year<- 2002
 lyrDz	<-	0.25
 threshold <- 8.9
 error.range <- c(4,45)
-year = 2009
 quantiles <- c(0.025,0.25,0.5,0.75,0.975)
-n=1000
+n=10000
 file.out <- paste("../supporting files/exceed_",threshold,"C_errors_",year,'.tsv',sep='')
 
 get.lakes <- function(year){
@@ -24,11 +23,13 @@ get.lakes <- function(year){
   return(lake.ids)
 }
 
-get.errors	<-	function(file=val.file,error.range=c(7.14,10.66)){
+get.errors	<-	function(file=val.file,error.range=c(7.14,10.66),n=10000){
 	# truncate according to range in OBSERVATIONAL values
   dat   <- read.delim(file)
   use.idx <- which((dat$observed>=error.range[1]) & (dat$observed<=error.range[2]))
   errors <-  dat$observed[use.idx]-dat$modeled[use.idx]
+  resampled.errors <- sample(errors, size=n, replace = TRUE)
+  errors <- as.numeric(quantile(resampled.errors,quantiles))
   return(errors)
 }
 
@@ -45,8 +46,9 @@ get.DoY.exceed  <-	function(temps,threshold=8.9,start.DoY=1){
   }
 }
 
-random.error.temp	<-	function(WBIC,year,errors,n=1000){
-	# do not assume the lake is there or that it is complete
+random.error.temp	<-	function(WBIC,year,errors){
+	# do not assume the lake is there or that it is complete 
+  # errors is now specific adjustment errors
 	folder	<-	paste("../supporting files/10-06Final/WBIC_",WBIC,'/',sep='')
 	file	<-	paste('output',year,'.nc4',sep='')
   # does the file exist?
@@ -56,10 +58,10 @@ random.error.temp	<-	function(WBIC,year,errors,n=1000){
 	  cat('.')
 	  temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='surface',z.out=0)
 	  
-	  resampled.errors <- sample(temp.errors, size=n, replace = TRUE)
-	  DoY <- vector(length=n)
-	  for (i in 1:n){
-	    DoY[i] <- get.DoY.exceed(temps,threshold=threshold+resampled.errors[i]) # check: is this supposed to be + or -?
+	  
+	  DoY <- vector(length=length(errors))
+	  for (i in 1:length(errors)){
+	    DoY[i] <- get.DoY.exceed(temps,threshold=threshold+errors[i]) # check: is this supposed to be + or -?
 	  }
 	  cat('.\n')
 	  return(DoY)
@@ -74,18 +76,18 @@ lake.ids <- get.lakes(year=year)
 num.lakes <- length(lake.ids)
 active.lakes <- vector(length=num.lakes)
 exceed.matrix <- array(dim=c(num.lakes,length(quantiles))) # contains 3 quantiles for parameter exceedence 
-temp.errors  <-  get.errors(file=val.file,error.range=error.range)
+temp.errors  <-  get.errors(file=val.file,error.range=error.range) # only once!
 
-for (j in 218:num.lakes){ # STARTING LATE!!!
-  DoY <- random.error.temp(lake.ids[j],year,errors=temp.errors,n=n)
+for (j in 1:num.lakes){
+  DoY <- random.error.temp(lake.ids[j],year,errors=temp.errors)
   if (any(is.na(DoY))){DoY=FALSE}
   if (!DoY[1]){
-    #active.lakes will remain FALSE
+    # active.lakes will remain FALSE
     cat('WBIC ')
     cat(lake.ids[j])
     cat(' is missing\n')
   } else {
-    exceed.matrix[j,] <- as.numeric(quantile(DoY,quantiles))
+    exceed.matrix[j,] <- DoY
     cat('done with WBIC ')
     cat(lake.ids[j])
     cat('\n')
@@ -95,7 +97,7 @@ for (j in 218:num.lakes){ # STARTING LATE!!!
 }
 
 exceed.matrix = exceed.matrix[active.lakes,]
-lake.ids = lake.ids[active.lakes,]
+lake.ids = lake.ids[active.lakes]
 
 write.out <- data.frame(lake.ids=lake.ids,exceed.matrix)
 # need to name the columns
