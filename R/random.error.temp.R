@@ -1,6 +1,7 @@
 # this takes a single lake WBIC, a simulation year, an array of temperature errors (to be randomly sampled from), and the number of realizations
 
 source("GLM.functions.R")
+source("mem.functions.R")
 require(rGLM)
 nc.dir	<-	"../supporting files/10-06Final"
 val.file	<-	"../supporting files/Epilimnion.tsv"
@@ -57,7 +58,7 @@ random.error.temp	<-	function(WBIC,year,errors){
 	  GLMnc  <-	getGLMnc(file,folder=folder)
 	  cat('.')
 	  temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='surface',z.out=0)
-	  
+	  rm(GLMnc)
 	  
 	  DoY <- vector(length=length(errors))
 	  for (i in 1:length(errors)){
@@ -74,6 +75,7 @@ random.error.temp	<-	function(WBIC,year,errors){
 
 lake.ids <- get.lakes(year=year)
 num.lakes <- length(lake.ids)
+lake.ids <- lake.ids
 active.lakes <- vector(length=num.lakes)
 exceed.matrix <- array(dim=c(num.lakes,length(quantiles))) # contains 3 quantiles for parameter exceedence 
 temp.errors  <-  get.errors(file=val.file,error.range=error.range) # only once!
