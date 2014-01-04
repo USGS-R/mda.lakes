@@ -1,12 +1,11 @@
 # this takes a single lake WBIC, a simulation year, an array of temperature errors (to be randomly sampled from), and the number of realizations
 
 source("GLM.functions.R")
-source("mem.functions.R")
 require(rGLM)
 nc.dir	<-	"../supporting files/10-06Final"
 val.file	<-	"../supporting files/Epilimnion.tsv"
 
-year<- 2002
+year<- 2009
 lyrDz	<-	0.25
 threshold <- 8.9
 error.range <- c(4,45)
@@ -58,7 +57,7 @@ random.error.temp	<-	function(WBIC,year,errors){
 	  GLMnc  <-	getGLMnc(file,folder=folder)
 	  cat('.')
 	  temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='surface',z.out=0)
-	  rm(GLMnc)
+	  nc_close(GLMnc)
 	  
 	  DoY <- vector(length=length(errors))
 	  for (i in 1:length(errors)){
