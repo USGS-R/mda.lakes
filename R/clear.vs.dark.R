@@ -29,8 +29,8 @@ clearest<-  all.out[clarity.sort$ix[1:floor(length(clarity.sort$ix)*.25)]]
 darkest <- all.out[clarity.sort$ix[floor(length(clarity.sort$ix)*.75):length(clarity.sort$ix)]]
 
 # --- for each WBIC, find the range (the number to be stored) ---
-year.cold <- 2009
-year.warm <- 2002
+year.cold <- 1996
+year.warm <- 1998
 lyrDz = 0.25
 file.cold <- paste('output',year.cold,'.nc4',sep='')
 file.warm <- paste('output',year.warm,'.nc4',sep='')
@@ -41,6 +41,7 @@ for (i in 1:length(clearest.range)){
   folder = paste("../supporting files/10-06Final/",clearest[i],'/',sep='')
   GLMnc <- getGLMnc(file.warm,folder=folder)
   temps <- getTempGLMnc(GLMnc,lyrDz)
+	nc_close(GLMnc)
   warm.temp <- mean(as.numeric(as.matrix(temps[-1,2:length(names(temps))])),na.rm=TRUE)
   
   GLMnc <- getGLMnc(file.cold,folder=folder)
@@ -57,6 +58,7 @@ for (i in 1:length(darkest.range)){
   folder = paste("../supporting files/10-06Final/",darkest[i],'/',sep='')
   GLMnc <- getGLMnc(file.warm,folder=folder)
   temps <- getTempGLMnc(GLMnc,lyrDz)
+	nc_close(GLMnc)
   warm.temp <- mean(as.numeric(as.matrix(temps[-1,2:length(names(temps))])),na.rm=TRUE)
   
   GLMnc <- getGLMnc(file.cold,folder=folder)
@@ -66,4 +68,3 @@ for (i in 1:length(darkest.range)){
     
 }
 write.table(x=darkest.range,file="../supporting files/dark.range.tsv",sep='\t',col.names='temp.range')
-"../supporting files/10-06Final/WBIC_991700/outputyear.nc4"
