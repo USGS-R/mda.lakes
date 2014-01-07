@@ -5,7 +5,7 @@ require(rGLM)
 nc.dir	<-	"../supporting files/10-06Final"
 val.file	<-	"../supporting files/Epilimnion.tsv"
 
-year<- 2009
+year<- 1996
 lyrDz	<-	0.25
 threshold <- 8.9
 error.range <- c(4,45)
