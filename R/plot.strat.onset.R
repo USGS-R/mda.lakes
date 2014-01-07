@@ -1,12 +1,12 @@
 require(ggplot2)
-year	<-	"1998"
-threshold	<-	8.9
+year	<-	"1996"
 lW = 3
 cex.box = 1.8
 cex.ttl = 1.8
 plt.rng.x	= c(75,140)
+seq.range = seq(70,365,1)
 
-DoY.file	<-	paste("../supporting files/exceed_",threshold,"C_errors_",year,'.tsv',sep='')
+DoY.file	<-	paste("../supporting files/strat.onset",year,'.tsv',sep='')
 air.file	<-	"../supporting files/obs_Tair_WI_state.csv"
 
 
@@ -14,19 +14,19 @@ air.file	<-	"../supporting files/obs_Tair_WI_state.csv"
 plot_colors <- c("black", "firebrick", "grey20")
 
 
-png(filename = paste("../",year,"exceed",threshold,".png",sep=''),
+png(filename = paste("../",year,"onset",".png",sep=''),
     width = 8, height = 7.25, units = "in", res=200)
 
     
 
 # Trim off excess margin space (bottom, left, top, right)
 par(mai=c(1, 1, .25, 1))
-seq.range = seq(70,155,1)
+
 # Graph autos using a y axis that uses the full range of value
 # in autos_data. Label axes with smaller font and use larger 
 # line widths.
 plot(c(NA,1),c(0,1), type="l", col=plot_colors[1], 
-	axes=F, ann=T, xlab="Day of year > 8.9° C",
+	axes=F, ann=T, xlab="Day of year stratification onset",
 	ylim=c(0,100), xlim=plt.rng.x,
 	ylab="Percentage of lakes (%)", cex.lab=cex.ttl, lwd=lW,
 	xaxs="i", yaxs="i") 
@@ -65,30 +65,11 @@ air.temps	<-	air.temps[use.idx]
 DoY	<-	read.delim(DoY.file,sep='\t')
 
 
-# 95 percentiles
-h.low = hist(DoY$exceed8.9.C.2.5..,seq.range,plot=FALSE)
-x.low = h.low$breaks[-1]+diff(seq.range[1:2])*.5
-y.low = cumsum(h.low$counts/sum(h.low$counts))*100
-
-h.high = hist(DoY$exceed8.9.C.97.5..,seq.range,plot=FALSE)
-y.high = rev(cumsum(h.high$counts/sum(h.low$counts))*100)
-x.high = rev(x.low)
-polygon(x=c(x.low,x.high), y=c(y.low,y.high), col = "grey80",border=NA)
-
-# quartiles
-h.low = hist(DoY$exceed8.9.C.25..,seq.range,plot=FALSE)
-x.low = h.low$breaks[-1]+diff(seq.range[1:2])*.5
-y.low = cumsum(h.low$counts/sum(h.low$counts))*100
-
-h.high = hist(DoY$exceed8.9.C.75..,seq.range,plot=FALSE)
-y.high = rev(cumsum(h.high$counts/sum(h.low$counts))*100)
-x.high = rev(x.low)
-polygon(x=c(x.low,x.high), y=c(y.low,y.high), col = "grey40",border=NA)
 
 # warm median --
-dg = hist(DoY$exceed8.9.C.50..,seq.range,plot=FALSE)
-lines(dg$breaks[-1]+diff(seq.range[1:2])*.5,cumsum(dg$counts/sum(dg$counts))*100,type="l", lwd=5, 
-       	col=plot_colors[1])
+dg = hist(DoY$strat.onset.DoY,seq.range,plot=FALSE)
+lines(dg$breaks[-1]+diff(seq.range[1:2])*.5,cumsum(dg$counts/length(DoY$strat.onset.DoY))*100,type="l", lwd=5, #
+       	col=plot_colors[1]) # COUNTS NANS!
 
 # plot air temp
 par(new=TRUE)
