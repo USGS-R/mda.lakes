@@ -167,6 +167,7 @@ getZmean	<-	function(WBIC){
 }
 
 getIceOn	<-	function(WBIC,year){
+  early.freeze	<-	8	# month of year
 	# the ice on for each lake for a given year
 	# ice on is assumed to either happen during the same calendar year, or within the NEXT year
 	empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE) 
@@ -174,28 +175,19 @@ getIceOn	<-	function(WBIC,year){
 	for (j in 1:length(WBIC)){
 		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
 			substr(empir.ice$DATE,1,4)==as.character(year)) 
-		early.freeze	<-	8	# month of year
-		pos.results	<-	empir.ice$DATE[use.i]
-		if (as.numeric(substr(pos.results[1],6,7)) > early.freeze & length(pos.results==1)){
-			# the most common result, single value for single year that is after July
-			ice.on[j]	<-	pos.results[1]
-		} else if (length(pos.results==1)){
-			use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
-				substr(empir.ice$DATE,1,4)==as.character(year+1))
-			pos.results	<-	empir.ice$DATE[use.i]
-			if (as.numeric(substr(pos.results[1],6,7)) < early.freeze){
-				ice.on[j]	<-	pos.results[1]
-			} else if (as.numeric(substr(pos.results[2],6,7)) < early.freeze) {
-				ice.on[j]	<-	pos.results[2]
-			} else {
-				ice.on[j]	<-	NA
-			}
+    if (!any(use.i))
+    {
+      # not found for this year
+      use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
+        substr(empir.ice$DATE,1,4)==as.character(year+1)) 
+      pos.results  <-  empir.ice$DATE[use.i]
+      ice.on<- pos.results[1]
+    } else {
+      # found for this year, but could be 2 matches
+      pos.results  <-	empir.ice$DATE[use.i]
+      ice.on<- tail(pos.results,1)
+    }
 
-		} else if (as.numeric(substr(pos.results[2],6,7)) > early.freeze){
-			ice.on[j]	<-	pos.results[2]
-		} else 	{
-			ice.on[j]	<-	NA
-		}
 	}
 	return(ice.on)
 }
