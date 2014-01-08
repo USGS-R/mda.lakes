@@ -205,10 +205,10 @@ getIceOff	<-	function(WBIC,year) {
 	# ice off is assumed to happen during the same calendar year
 
 	empir.ice	<-	read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
-	ice.on	<-	vector(length=length(WBIC))
+	ice.off	<-	vector(length=length(WBIC))
 	for (j in 1:length(WBIC)){
 		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="off" & substr(empir.ice$DATE,1,4)==as.character(year)
-		ice.on[j]	<-	empir.ice$DATE[use.i]
+		ice.off[j]	<-	empir.ice$DATE[use.i]
 	}
-	return(ice.on)
+	return(ice.off)
 }
