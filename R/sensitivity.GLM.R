@@ -2,6 +2,7 @@ library(rGLM)
 library(stringr)
 
 model.dirs	<-	Sys.glob('../GLM/Run/WBIC_*')	# where the .nml files are
+empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 
 sensitivity.GLM	<-	function(model.dirs,param,range,n=10,driver.dir='D:/WiLMA/Driver files'){
 	# model.dirs:	a character array with folder IDs for each simulation
@@ -10,8 +11,10 @@ sensitivity.GLM	<-	function(model.dirs,param,range,n=10,driver.dir='D:/WiLMA/Dri
 	# n:		number of values of param to apply over range
 	
 	glm.path	<-	"C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"	# where glm.exe is
+	model.ids <- basename(model.dirs)
 	WBICs	<-	str_extract(model.ids,'\\d+')  # WBICS as strings
 	
+
 	num.lakes	<-	length(WBICs)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
 	new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
@@ -20,7 +23,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,n=10,driver.dir='D:/WiLMA/Dri
 	for (j in 1:num.lakes){
 		driver.file	<-	paste(driver.dir, '/', model.ids[j], '.csv', sep='')
 		file.copy(driver.file, model.dirs[j])
-		setwd(run.dir[j])	# set to this lake's run directory
+		setwd(model.dirs[j])	# set to this lake's run directory
 		source.nml	<-	read.nml('glm.nml','./')
 		# IF there is already a glm.nml, that means the last one might have failed...replace?
 		file.copy('glm.nml', 'glm.nml.orig')
