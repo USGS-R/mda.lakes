@@ -1,4 +1,5 @@
 library(rGLM)
+library(stringr)
 
 model.dirs	<-	Sys.glob('../GLM/Run/WBIC_*')	# where the .nml files are
 
