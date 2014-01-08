@@ -175,19 +175,17 @@ getIceOn	<-	function(WBIC,year){
 	for (j in 1:length(WBIC)){
 		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
 			substr(empir.ice$DATE,1,4)==as.character(year)) 
-    if (!any(use.i))
-    {
-      # not found for this year
-      use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
-        substr(empir.ice$DATE,1,4)==as.character(year+1)) 
-      pos.results  <-  empir.ice$DATE[use.i]
-      ice.on<- pos.results[1]
-    } else {
-      # found for this year, but could be 2 matches
-      pos.results  <-	empir.ice$DATE[use.i]
-      ice.on<- tail(pos.results,1)
-    }
-
+    	if (!any(use.i)){
+      		# not found for this year
+      		use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
+        		substr(empir.ice$DATE,1,4)==as.character(year+1)) 
+      		pos.results  <-  empir.ice$DATE[use.i]
+      		ice.on[j]<- pos.results[1]
+    	} else {
+      		# found for this year, but could be 2 matches
+      		pos.results  <-	empir.ice$DATE[use.i]
+      		ice.on[j]<- tail(pos.results,1)
+    	}
 	}
 	return(ice.on)
 }
