@@ -61,12 +61,15 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 	# open .nc file, extract response variable value
 	# ....
   lyrDz <- 0.25
-  GLMnc  <-  getGLMnc(file='output.nc',folder='./')
-  temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN?
-  nc_close(GLMnc)
-	if (remove){
-		# delete nc file ...
-	}
+  if ('output.nc' %in% dir('./')){
+    GLMnc  <-  getGLMnc(file='output.nc',folder='./')
+    temps  <-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN?
+    nc_close(GLMnc)
+    if (remove){
+      # delete nc file ...
+    }
+  } else {temps=data.frame('DateTime'=NA,'wtr_'=NA)}
+  
 	return(temps)
 }
 
