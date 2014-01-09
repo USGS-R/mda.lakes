@@ -22,10 +22,11 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	origin	<-	getwd()
 	
 	for (j in 1:num.lakes){
-    cat(model.ids[j])
+	  setwd(origin)
+    cat(model.ids[j]);cat(' ')
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
     if (driver.file %in% dir(driver.dir) & !any(is.na(c(ice.off[j],ice.on[j])))){
-      file.copy(driver.file, model.dirs[j])
+      file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
       setwd(model.dirs[j])	# set to this lake's run directory
       # IF there is already a glm.nml, that means the last one might have failed...replace?
       file.copy('glm.nml', 'glm.nml.orig')
@@ -41,13 +42,13 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
         out = system2(glm.path, wait=TRUE, stdout=TRUE,stderr=TRUE)	# runs and writes .nc to directory
         hypo.temps<- get.sim.temps(run.dir[j])
         response.matrix[j,i]	<-	 mean(hypo.temps[,2],na.rm=TRUE)
-        cat('done with j=');cat(j);cat('of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
+        cat('done with j=');cat(j);cat(' of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
       }
       file.rename('glm.nml.orig', 'glm.nml')
-      setwd(origin)
+      
     } else {
       cat('skipping ');cat(model.ids[j]);cat('\n')
-      response.matrix[j,] <- NA
+      response.matrix[j,] <- NA # will already be NA because it is built as such
     }
 	}	
 	response.matrix = data.frame(response.matrix)
