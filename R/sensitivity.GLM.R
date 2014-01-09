@@ -4,7 +4,7 @@ source("GLM.functions.R")
 
 model.dirs	<-	Sys.glob('../GLM/Run/WBIC_*')	# where the .nml files are
 
-sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLMA/Driver files'){
+sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLMA/Driver files/'){
 	# model.dirs:	a character array with folder IDs for each simulation
 	# param:	parameter to be evaluated
 	# range:	range of parameter to evaluated
@@ -23,26 +23,34 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	
 	for (j in 1:num.lakes){
     cat(model.ids[j])
-		driver.file	<-	paste(driver.dir, '/', model.ids[j], '.csv', sep='')
-		file.copy(driver.file, model.dirs[j])
-		setwd(model.dirs[j])	# set to this lake's run directory
-		# IF there is already a glm.nml, that means the last one might have failed...replace?
-		file.copy('glm.nml', 'glm.nml.orig')
-		source.nml	<-	read.nml('glm.nml','./')
-		source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
-		source.nml  <-  set.nml(source.nml,'stop', ice.on[j])  # set to empir ice on for year
-
-		for (i in 1:n){
-			source.nml	<-	set.nml(source.nml,param,new.params[i])	# set to new param value
-			
-			write.nml(source.nml, 'glm.nml', './')
-			out = system2(glm.path, wait=TRUE, stdout=TRUE,stderr=TRUE)	# runs and writes .nc to directory
-      hypo.temps<- get.sim.temps(run.dir[j])
-			response.matrix[j,i]	<-	 mean(hypo.temps[,2],na.rm=TRUE)
-      cat('done with j=');cat(j);cat('of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
-		}
-		file.rename('glm.nml.orig', 'glm.nml')
-    setwd(origin)
+		driver.file	<-	paste(model.ids[j], '.csv', sep='')
+    if (driver.file %in% driver.dir & !any(is.na(c(ice.off[j],ice.on[j])))){
+      file.copy(driver.file, model.dirs[j])
+      setwd(model.dirs[j])	# set to this lake's run directory
+      # IF there is already a glm.nml, that means the last one might have failed...replace?
+      file.copy('glm.nml', 'glm.nml.orig')
+      source.nml	<-	read.nml('glm.nml','./')
+      #ice.off and on can be NA*******
+      source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
+      source.nml  <-  set.nml(source.nml,'stop', ice.on[j])  # set to empir ice on for year
+      
+      for (i in 1:n){
+        source.nml	<-	set.nml(source.nml,param,new.params[i])	# set to new param value
+        
+        write.nml(source.nml, 'glm.nml', './')
+        out = system2(glm.path, wait=TRUE, stdout=TRUE,stderr=TRUE)	# runs and writes .nc to directory
+        hypo.temps<- get.sim.temps(run.dir[j])
+        response.matrix[j,i]	<-	 mean(hypo.temps[,2],na.rm=TRUE)
+        cat('done with j=');cat(j);cat('of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
+      }
+      file.rename('glm.nml.orig', 'glm.nml')
+      setwd(origin)
+    } else {
+      cat('skipping WBIC');cat(model.ids[j]);cat('\n')
+      response.matrix[j,] <- NA
+    }
+		
+		
 		
 	}	
 	response.matrix = data.frame(response.matrix)
