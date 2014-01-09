@@ -24,7 +24,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	for (j in 1:num.lakes){
     cat(model.ids[j])
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
-    if (driver.file %in% driver.dir & !any(is.na(c(ice.off[j],ice.on[j])))){
+    if (driver.file %in% dir(driver.dir) & !any(is.na(c(ice.off[j],ice.on[j])))){
       file.copy(driver.file, model.dirs[j])
       setwd(model.dirs[j])	# set to this lake's run directory
       # IF there is already a glm.nml, that means the last one might have failed...replace?
@@ -46,12 +46,9 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
       file.rename('glm.nml.orig', 'glm.nml')
       setwd(origin)
     } else {
-      cat('skipping WBIC');cat(model.ids[j]);cat('\n')
+      cat('skipping ');cat(model.ids[j]);cat('\n')
       response.matrix[j,] <- NA
     }
-		
-		
-		
 	}	
 	response.matrix = data.frame(response.matrix)
   names(response.matrix) <- paste(param,'_',new.params,sep='')
