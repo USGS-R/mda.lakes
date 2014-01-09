@@ -179,7 +179,10 @@ getIceOn	<-	function(WBIC,year){
       		# not found for this year
       		use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
         		substr(empir.ice$DATE,1,4)==as.character(year+1)) 
-      		pos.results  <-  empir.ice$DATE[use.i]
+			if (any(use.i)){
+				pos.results  <-  empir.ice$DATE[use.i]
+			} else {pos.results=NA}
+      		
       		ice.on[j]<- pos.results[1]
     	} else {
       		# found for this year, but could be 2 matches
@@ -198,7 +201,13 @@ getIceOff	<-	function(WBIC,year) {
 	ice.off	<-	vector(length=length(WBIC))
 	for (j in 1:length(WBIC)){
 		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="off" & substr(empir.ice$DATE,1,4)==as.character(year)
-		ice.off[j]	<-	empir.ice$DATE[use.i]
+		if (any(use.i)){
+			pos.results	<-	empir.ice$DATE[use.i]
+			ice.off[j]	<-	pos.results[1] # warn if length(pos.results)==2?
+		} else { 
+			ice.off[j]	<-	NA
+		}
+		
 	}
 	return(ice.off)
 }
