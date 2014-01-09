@@ -2,7 +2,7 @@ library(rGLM)
 library(stringr)
 source("GLM.functions.R")
 
-model.dirs	<-	Sys.glob('../GLM/Run/WBIC_*')	# where the .nml files are
+model.dirs	<-	Sys.glob('D:/WiLMA/GLM/Run/WBIC_*')	# where the .nml files are
 
 sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLMA/Driver files/'){
 	# model.dirs:	a character array with folder IDs for each simulation
@@ -39,6 +39,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
         source.nml	<-	set.nml(source.nml,param,new.params[i])	# set to new param value
         
         write.nml(source.nml, 'glm.nml', './')
+        # use system(intern=FALSE)?
         out = system2(glm.path, wait=TRUE, stdout=TRUE,stderr=TRUE)	# runs and writes .nc to directory
         hypo.temps<- get.sim.temps(run.dir[j])
         response.matrix[j,i]	<-	 mean(hypo.temps[,2],na.rm=TRUE)
@@ -61,7 +62,7 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 	# open .nc file, extract response variable value
 	# ....
   lyrDz <- 0.25
-  if ('output.nc' %in% dir('./')){
+  if ('output.nc' %in% dir('./') & file.info("./output.nc")$size/1000000 > 1){
     GLMnc  <-  getGLMnc(file='output.nc',folder='./')
     temps  <-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN?
     nc_close(GLMnc)
