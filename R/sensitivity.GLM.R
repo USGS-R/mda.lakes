@@ -1,10 +1,10 @@
 library(rGLM)
 library(stringr)
+source("GLM.functions.R")
 
 model.dirs	<-	Sys.glob('../GLM/Run/WBIC_*')	# where the .nml files are
-empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 
-sensitivity.GLM	<-	function(model.dirs,param,range,n=10,driver.dir='D:/WiLMA/Driver files'){
+sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLMA/Driver files'){
 	# model.dirs:	a character array with folder IDs for each simulation
 	# param:	parameter to be evaluated
 	# range:	range of parameter to evaluated
@@ -14,7 +14,8 @@ sensitivity.GLM	<-	function(model.dirs,param,range,n=10,driver.dir='D:/WiLMA/Dri
 	model.ids <- basename(model.dirs)
 	WBICs	<-	str_extract(model.ids,'\\d+')  # WBICS as strings
 	
-
+  ice.on <- getIceOn(WBICs,year)
+	ice.off <- getIceOff(WBICs,year)
 	num.lakes	<-	length(WBICs)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
 	new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
@@ -24,25 +25,42 @@ sensitivity.GLM	<-	function(model.dirs,param,range,n=10,driver.dir='D:/WiLMA/Dri
 		driver.file	<-	paste(driver.dir, '/', model.ids[j], '.csv', sep='')
 		file.copy(driver.file, model.dirs[j])
 		setwd(model.dirs[j])	# set to this lake's run directory
-		source.nml	<-	read.nml('glm.nml','./')
 		# IF there is already a glm.nml, that means the last one might have failed...replace?
 		file.copy('glm.nml', 'glm.nml.orig')
+		source.nml	<-	read.nml('glm.nml','./')
+		source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
+		source.nml  <-  set.nml(source.nml,'stop', ice.on[j])  # set to empir ice on for year
+
 		for (i in 1:n){
 			source.nml	<-	set.nml(source.nml,param,new.params[i])	# set to new param value
+			
 			write.nml(source.nml, 'glm.nml', './')
 			out = system2(glm.path, wait=TRUE, stdout=TRUE,stderr=TRUE)	# runs and writes .nc to directory
-			response.matrix[j,i]	<-	get.response.val(run.dir[j])
+      hypo.temps<- get.sim.temps(run.dir[j])
+			response.matrix[j,i]	<-	 mean(hypo.temps[,2],na.rm=TRUE)
+      cat('done with j=');cat(j);cat(' and i=');cat(i);cat('\n')
 		}
+		file.rename('glm.nml.orig', 'glm.nml')
+    setwd(origin)
+		
 	}	
+  return(response.matrix)
 }
 
-get.response.val	<-	function(run.dir,remove=TRUE){
+get.sim.temps	<-	function(run.dir,remove=FALSE){
 	# open .nc file, extract response variable value
 	# ....
-	# nc_close
-
+  lyrDz <- 0.25
+  GLMnc  <-  getGLMnc(file='output.nc',folder='./')
+  temps	<-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN?
 	if (remove){
 		# delete nc file ...
 	}
-	return(value)
+	return(temps)
 }
+
+param = 'Kw'
+response.matrix <- sensitivity.GLM(model.dirs,param='Kw',range=c(0.2,5),year=1996,n=3)
+WBICs  <-	str_extract(model.ids,'\\d+')  # WBICS as strings
+write.out <- cbind(WBICs,response.matrix)
+write.table(write.out,file=paste('sensitivity_',param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
