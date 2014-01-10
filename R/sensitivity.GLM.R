@@ -1,8 +1,9 @@
 library(rGLM)
 library(stringr)
 source("GLM.functions.R")
-
+wndRef = 0.00140
 model.dirs	<-	Sys.glob('D:/WiLMA/GLM/Run/WBIC_*')	# where the .nml files are
+stop.mmdd <- '09-30'
 
 sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLMA/Driver files/'){
 	# model.dirs:	a character array with folder IDs for each simulation
@@ -15,7 +16,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	WBICs	<-	str_extract(model.ids,'\\d+')  # WBICS as strings
 	
   ice.on <- getIceOn(WBICs,year)
-	ice.off <- getIceOff(WBICs,year)
+	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.time
 	num.lakes	<-	length(WBICs)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
 	new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
@@ -25,18 +26,31 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	  setwd(origin)
     cat(model.ids[j]);cat(' ')
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
-    if (driver.file %in% dir(driver.dir) & !any(is.na(c(ice.off[j],ice.on[j])))){
+    if (driver.file %in% dir(driver.dir) & !is.na(ice.on[j])){
+      if (param=='hc'){
+        Wstr<- vector(length=n)
+        for (i in 1:n){Wstr[i]<-getWstr(WBIC=WBICs[j],canopy=new.params[i])}
+      }
+      
       file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
       setwd(model.dirs[j])	# set to this lake's run directory
       # IF there is already a glm.nml, that means the last one might have failed...replace?
       file.copy('glm.nml', 'glm.nml.orig')
       source.nml	<-	read.nml('glm.nml','./')
       #ice.off and on can be NA*******
+      stop.date <- paste(substr(ice.off[j],1,4),'-',stop.mmdd,sep='')
       source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
-      source.nml  <-  set.nml(source.nml,'stop', ice.on[j])  # set to empir ice on for year
+      source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
       
       for (i in 1:n){
-        source.nml	<-	set.nml(source.nml,param,new.params[i])	# set to new param value
+        if (param=='hc'){
+          # lake-specific calculation
+          param.value <- wndRef*Wstr[i]^0.33
+          source.nml  <-	set.nml(source.nml,argName="coef_wind_drag",param.value)	# set to new param value
+        } else {
+          source.nml  <-	set.nml(source.nml,argName=param,new.params[i])	# set to new param value
+        }
+        
         
         write.nml(source.nml, 'glm.nml', './')
         # use system(intern=FALSE)?
@@ -44,18 +58,20 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
           
           out = system(glm.path, intern=FALSE, show.output.on.console =FALSE)  # runs and writes .nc to directory
           hypo.temps<- get.sim.temps(run.dir[j])
-          mean(hypo.temps[,2],na.rm=TRUE)
+          season.hyp <- tail(hypo.temps[,2],91)
+          mean(season.hyp,na.rm=TRUE)
         }, warning = function(war) {
           print(paste("MY_WARNING:  ",war))
           # warning handler picks up where error was generated
           hypo.temps<- get.sim.temps(run.dir[j])
-          return(mean(hypo.temps[,2],na.rm=TRUE))
+          season.hyp <- tail(hypo.temps[,2],91)
+          return(mean(season.hyp,na.rm=TRUE))
           
         }, error = function(err) {
           print(paste("MY_ERROR:  ",err))
           return(NA)
           
-        }}) # END tryCatch
+        }) # END tryCatch
         #print(sim.val)
         response.matrix[j,i]  <-   sim.val
         cat('done with j=');cat(j);cat(' of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
@@ -80,7 +96,7 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
   lyrDz <- 0.25
   if ('output.nc' %in% dir('./') & file.info("./output.nc")$size/1000000 > 1){
     GLMnc  <-  getGLMnc(file='output.nc',folder='./')
-    temps  <-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN?
+    temps  <-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN? # getting back elv>0?
     nc_close(GLMnc)
     if (remove){
       # delete nc file ...
@@ -90,6 +106,7 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 	return(temps)
 }
 
-response.matrix <- sensitivity.GLM(model.dirs,param='Kw',range=c(0.2,5),year=1996,n=10)
+sens.param<-'Kw'
+response.matrix <- sensitivity.GLM(model.dirs[1:100],param=sens.param,range=c(.2,5),year=1996,n=10)
 
-write.table(response.matrix,file=paste('sensitivity_',param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
+write.table(response.matrix,file=paste('sensitivity_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
