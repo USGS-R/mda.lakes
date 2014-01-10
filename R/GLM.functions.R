@@ -112,10 +112,15 @@ getSDF	<-	function(WBIC){
 }
 
 
-getWstr	<-	function(WBIC,method='Markfort'){
+getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 	# Markfort et al. 2010
 	minWstr	<-	0.0001
-	hc	<-	max(c(getCanopy(WBIC),1))
+	if (is.null(canopy)){
+		hc	<-	max(c(getCanopy(WBIC),1))
+	} else {
+		hc	<-	canopy
+	}
+	
 	lkeArea	<-	getArea(WBIC)
 
 	Xt	<-	50*hc
