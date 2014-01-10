@@ -40,9 +40,24 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
         
         write.nml(source.nml, 'glm.nml', './')
         # use system(intern=FALSE)?
-        out = system2(glm.path, wait=TRUE, stdout=TRUE,stderr=TRUE)	# runs and writes .nc to directory
-        hypo.temps<- get.sim.temps(run.dir[j])
-        response.matrix[j,i]	<-	 mean(hypo.temps[,2],na.rm=TRUE)
+        sim.val <- tryCatch({
+          
+          out = system(glm.path, intern=FALSE, show.output.on.console =FALSE)  # runs and writes .nc to directory
+          hypo.temps<- get.sim.temps(run.dir[j])
+          mean(hypo.temps[,2],na.rm=TRUE)
+        }, warning = function(war) {
+          print(paste("MY_WARNING:  ",war))
+          # warning handler picks up where error was generated
+          hypo.temps<- get.sim.temps(run.dir[j])
+          return(mean(hypo.temps[,2],na.rm=TRUE))
+          
+        }, error = function(err) {
+          print(paste("MY_ERROR:  ",err))
+          return(NA)
+          
+        }}) # END tryCatch
+        #print(sim.val)
+        response.matrix[j,i]  <-   sim.val
         cat('done with j=');cat(j);cat(' of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
       }
       file.rename('glm.nml.orig', 'glm.nml')
@@ -52,6 +67,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
       response.matrix[j,] <- NA # will already be NA because it is built as such
     }
 	}	
+	setwd(origin)
 	response.matrix = data.frame(response.matrix)
   names(response.matrix) <- paste(param,'_',new.params,sep='')
   response.matrix <- cbind("WBICs"=WBICs,response.matrix)
