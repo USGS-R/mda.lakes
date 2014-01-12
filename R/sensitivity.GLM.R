@@ -10,7 +10,6 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
 	# param:	parameter to be evaluated
 	# param.seq:	parameter values (if mode==absolute) to evaluated
 
-	if (!any(sens.mode=='absolute' | sens.mode=='relative')){stop(paste('mode ',sens.mode,' not supported',sep=''))}
 	
 	driver.dir	<-	'D:/WiLMA/Driver files/'
 	glm.path	<-	"C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"	# where glm.exe is
@@ -85,6 +84,10 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
 }
 
 get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
+	
+	if (!any(sens.mode=='absolute' | sens.mode=='relative')){
+		stop(paste('mode ',sens.mode,' not supported',sep=''))
+	}
 	
 	argName	<-	param.name
 
