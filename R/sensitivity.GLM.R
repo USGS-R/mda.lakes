@@ -5,12 +5,12 @@ source("GLM.functions.R")
 model.dirs	<-	Sys.glob('D:/WiLMA/GLM/Run/WBIC_*')	# where the .nml files are
 stop.mmdd <- '09-30'
 
-sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
+sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='relative'){
 	# model.dirs:	a character array with folder IDs for each simulation
 	# param:	parameter to be evaluated
 	# param.seq:	parameter values (if mode==absolute) to evaluated
 
-	if (!any(mode=='absolute' | mode=='relative')){stop(paste('mode ',mode,' not supported',sep=''))}
+	if (!any(sens.mode=='absolute' | sens.mode=='relative')){stop(paste('mode ',sens.mode,' not supported',sep=''))}
 	
 	driver.dir	<-	'D:/WiLMA/Driver files/'
 	glm.path	<-	"C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"	# where glm.exe is
@@ -32,9 +32,10 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 		# ****driver can be missing, ice.off and on can be NA****
     	if (driver.file %in% dir(driver.dir) & !is.na(ice.off[j])){
 
-      		param.list	<-	get.params(param.name=param,param.seq=param.seq,WBIC=WBICs[j],mode=mode)
+      		param.list	<-	get.params(param.name=param.name,param.seq=param.seq,WBIC=WBICs[j],sens.mode=sens.mode)
 			argName	<-	param.list$argName
 			new.params	<-	param.list$argVals
+          print(param.list)
 			
 			file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
 			setwd(model.dirs[j])	# set to this lake's run directory
@@ -80,16 +81,16 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	} # done with all lake simes
 	setwd(origin)
 	response.matrix = data.frame(response.matrix)
-  	names(response.matrix) <- paste(param,'_',mode,'_',param.seq,sep='')
+  	names(response.matrix) <- paste(param.name,'_',sens.mode,'_',param.seq,sep='')
   	response.matrix <- cbind("WBICs"=WBICs,response.matrix)
   	return(response.matrix)
 }
 
-get.params	<-	function(param.name,param.seq,WBIC,mode='relative'){
+get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 	
 	argName	<-	param.name
 
-	if (mode=='absolute'){
+	if (sens.mode=='absolute'){
 		argVals	<-	param.seq
 		if (param.name=='hc'){ # don't switch these up for others that don't need the function
 			argName="coef_wind_drag"
@@ -136,7 +137,6 @@ sens.param	<-	'Kw'
 sens.mode	<-	'relative'
 calc.sens	<-	c(0.5,1,1.5,2)
 param.seq	<-	sort(c(calc.sens-sens.bump,calc.sens+sens.bump))
-sens.mode	<-	'relative'
-response.matrix <- sensitivity.GLM(model.dirs[1:10],param=sens.param,param.seq=param.seq,mode=sens.mode,year=1996)
+response.matrix <- sensitivity.GLM(model.dirs[1:2],param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.mode,'_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
