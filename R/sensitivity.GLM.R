@@ -17,8 +17,8 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	model.ids	<-	basename(model.dirs)
 	WBICs	<-	str_extract(model.ids,'\\d+')  # WBICS as strings
 	
-	ice.on <- getIceOn(WBICs,year)
-	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.mmdd
+	#ice.on <- getIceOn(WBICs,year)  # not needed if stopping at stop.mmdd
+	ice.off <- getIceOff(WBICs,year)
 	num.lakes	<-	length(WBICs)
 	num.params	<-	length(param.seq)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=num.params)
@@ -30,7 +30,7 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
 		
 		# ****driver can be missing, ice.off and on can be NA****
-    	if (driver.file %in% dir(driver.dir) & !is.na(ice.on[j])){
+    	if (driver.file %in% dir(driver.dir) & !is.na(ice.off[j])){
 
       		param.list	<-	get.params(param.name=param,param.seq=param.seq,WBIC=WBICs[j],mode=mode)
 			argName	<-	param.list$argName
