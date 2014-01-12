@@ -35,7 +35,6 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
       		param.list	<-	get.params(param.name=param.name,param.seq=param.seq,WBIC=WBICs[j],sens.mode=sens.mode)
 			argName	<-	param.list$argName
 			new.params	<-	param.list$argVals
-          print(param.list)
 			
 			file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
 			setwd(model.dirs[j])	# set to this lake's run directory
@@ -50,7 +49,6 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
       
       		for (i in 1:num.params){
 				source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
-
 				write.nml(source.nml, 'glm.nml', './')
 
 				sim.val <- tryCatch({
@@ -110,7 +108,8 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 				argVals[i]	<-	getCD(Wstr=Wstr)
 			}
 		} else if (param.name=='Kw'){
-			Kd	<-	getClarity(WBIC,default.if.null=TRUE)
+			Kd	<-	getClarity(WBIC)
+      if (is.null(Kd)){Kd=0.63}
 			argVals	<-	param.seq*Kd
 		}
 	}
@@ -138,6 +137,6 @@ sens.param	<-	'Kw'
 sens.mode	<-	'relative'
 calc.sens	<-	c(0.5,1,1.5,2)
 param.seq	<-	sort(c(calc.sens-sens.bump,calc.sens+sens.bump))
-response.matrix <- sensitivity.GLM(model.dirs[1:2],param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
+response.matrix <- sensitivity.GLM(model.dirs,param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.mode,'_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
