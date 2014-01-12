@@ -5,18 +5,21 @@ wndRef = 0.00140
 model.dirs	<-	Sys.glob('D:/WiLMA/GLM/Run/WBIC_*')	# where the .nml files are
 stop.mmdd <- '09-30'
 
-sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLMA/Driver files/'){
+sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	# model.dirs:	a character array with folder IDs for each simulation
 	# param:	parameter to be evaluated
-	# range:	range of parameter to evaluated
-	# n:		number of values of param to apply over range
+	# param.seq:	parameter values (if mode==absolute) to evaluated
+
 	
+	if (mode!='absolute' | mode!='relative'){stope(paste('mode ',mode,' not supported',sep=''))}
+	
+	driver.dir	<-	'D:/WiLMA/Driver files/'
 	glm.path	<-	"C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"	# where glm.exe is
-	model.ids <- basename(model.dirs)
+	model.ids	<-	basename(model.dirs)
 	WBICs	<-	str_extract(model.ids,'\\d+')  # WBICS as strings
 	
 	ice.on <- getIceOn(WBICs,year)
-	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.time
+	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.mmdd
 	num.lakes	<-	length(WBICs)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
 	new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
@@ -26,6 +29,11 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 		setwd(origin)
 		cat(model.ids[j]);cat(' ')
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
+		if (mod=="relative"){
+			new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
+		}
+		
+		# ****driver can be missing, ice.off and on can be NA****
     	if (driver.file %in% dir(driver.dir) & !is.na(ice.on[j])){
 			if (param=='hc'){
 				Wstr<- vector(length=n)
@@ -37,7 +45,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 			# IF there is already a glm.nml, that means the last one might have failed...replace?
 			file.copy('glm.nml', 'glm.nml.orig')
 			source.nml	<-	read.nml('glm.nml','./')
-			#ice.off and on can be NA*******
+			
 			stop.date <- paste(substr(ice.off[j],1,4),'-',stop.mmdd,sep='')
 			source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
 			source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
@@ -86,6 +94,35 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
   	return(response.matrix)
 }
 
+get.params	<-	function(param.name,param.seq,WBIC,mode='relative'){
+	if (mode='absolute'){
+		argVals	<-	seq(from=range[1],to=range[2],length.out=n)
+		if (param.name=='hc'){ # don't switch these up for others that don't need the function
+			argName="coef_wind_drag"
+			for (i in 1:n){
+				argVals[i]	<-	getWstr(WBIC=WBIC,canopy=argVals[i])
+			}
+		}
+	} else {
+		
+	}
+	
+		
+		
+		for (i in 1:n){
+			if (mode=='absolute'){
+				Wstr[i]	<-	getWstr(WBIC=WBIC,canopy=new.params[i])
+			} else {
+				initial.val	<-	getCanopy(WBIC)
+				Wstr[i]	<-	getWstr(WBIC=WBIC,canopy=new.params[i])
+			}
+					
+		}
+	}
+
+	return(list(argName=argName,argVals=argVals))
+}
+
 get.sim.temps	<-	function(run.dir,remove=FALSE){
 	# open .nc file, extract response variable value
 	# ....
@@ -103,6 +140,6 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 }
 
 sens.param<-'Kw'
-response.matrix <- sensitivity.GLM(model.dirs,param=sens.param,range=c(0.2,4),year=1996,n=20)
+response.matrix <- sensitivity.GLM(model.dirs,param=sens.param,param.seq=seq(0.2,4,length.out=10),year=1996)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
