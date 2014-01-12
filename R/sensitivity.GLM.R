@@ -21,7 +21,7 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.mmdd
 	num.lakes	<-	length(WBICs)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
-	new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
+	num.params	<-	length(param.seq)
 	origin	<-	getwd()
 	
 	for (j in 1:num.lakes){
@@ -47,7 +47,7 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 			source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
 			source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
       
-      		for (i in 1:n){
+      		for (i in 1:num.params){
 				source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
 
 				write.nml(source.nml, 'glm.nml', './')
