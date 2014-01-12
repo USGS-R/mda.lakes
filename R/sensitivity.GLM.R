@@ -10,8 +10,7 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	# param:	parameter to be evaluated
 	# param.seq:	parameter values (if mode==absolute) to evaluated
 
-	
-	if (mode!='absolute' | mode!='relative'){stope(paste('mode ',mode,' not supported',sep=''))}
+	if (!any(mode=='absolute' | mode=='relative')){stop(paste('mode ',mode,' not supported',sep=''))}
 	
 	driver.dir	<-	'D:/WiLMA/Driver files/'
 	glm.path	<-	"C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"	# where glm.exe is
@@ -137,6 +136,7 @@ sens.param	<-	'Kw'
 sens.mode	<-	'relative'
 calc.sens	<-	c(0.5,1,1.5,2)
 param.seq	<-	sort(c(calc.sens-sens.bump,calc.sens+sens.bump))
+sens.mode	<-	'relative'
 response.matrix <- sensitivity.GLM(model.dirs[1:10],param=sens.param,param.seq=param.seq,mode=sens.mode,year=1996)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.mode,'_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
