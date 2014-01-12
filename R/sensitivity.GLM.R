@@ -1,7 +1,7 @@
 library(rGLM)
 library(stringr)
 source("GLM.functions.R")
-wndRef = 0.00140
+
 model.dirs	<-	Sys.glob('D:/WiLMA/GLM/Run/WBIC_*')	# where the .nml files are
 stop.mmdd <- '09-30'
 
@@ -29,19 +29,17 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 		setwd(origin)
 		cat(model.ids[j]);cat(' ')
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
-		if (mod=="relative"){
-			new.params	<-	seq(from=range[1],to=range[2],length.out=n)	# params for range, n=n
-		}
 		
 		# ****driver can be missing, ice.off and on can be NA****
     	if (driver.file %in% dir(driver.dir) & !is.na(ice.on[j])){
-			if (param=='hc'){
-				Wstr<- vector(length=n)
-        		for (i in 1:n){Wstr[i]<-getWstr(WBIC=WBICs[j],canopy=new.params[i])}
-      		}
-      
+
+      		param.list	<-	get.params(param.name=param,param.seq=param.seq,WBIC=WBICs[j],mode=mode)
+			argName	<-	param.list$argName
+			new.params	<-	param.list$argVals
+			
 			file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
 			setwd(model.dirs[j])	# set to this lake's run directory
+			
 			# IF there is already a glm.nml, that means the last one might have failed...replace?
 			file.copy('glm.nml', 'glm.nml.orig')
 			source.nml	<-	read.nml('glm.nml','./')
@@ -51,14 +49,8 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 			source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
       
       		for (i in 1:n){
-				if (param=='hc'){
-					# lake-specific calculation
-					param.value <- wndRef*Wstr[i]^0.33
-					source.nml  <-	set.nml(source.nml,argName="coef_wind_drag",param.value)	# set to new param value
-				} else {
-          			source.nml  <-	set.nml(source.nml,argName=param,new.params[i])	# set to new param value
-				}
-			
+				source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
+
 				write.nml(source.nml, 'glm.nml', './')
 
 				sim.val <- tryCatch({
@@ -89,37 +81,38 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	} # done with all lake simes
 	setwd(origin)
 	response.matrix = data.frame(response.matrix)
-  	names(response.matrix) <- paste(param,'_',new.params,sep='')
+  	names(response.matrix) <- paste(param,'_',mode,'_',param.seq,sep='')
   	response.matrix <- cbind("WBICs"=WBICs,response.matrix)
   	return(response.matrix)
 }
 
 get.params	<-	function(param.name,param.seq,WBIC,mode='relative'){
-	if (mode='absolute'){
-		argVals	<-	seq(from=range[1],to=range[2],length.out=n)
+	
+	argName	<-	param.name
+
+	if (mode=='absolute'){
+		argVals	<-	param.seq
 		if (param.name=='hc'){ # don't switch these up for others that don't need the function
 			argName="coef_wind_drag"
-			for (i in 1:n){
-				argVals[i]	<-	getWstr(WBIC=WBIC,canopy=argVals[i])
+			for (i in 1:length(param.seq)){
+				Wstr	<-	getWstr(WBIC=WBIC,canopy=argVals[i])
+				argVals[i]	<-	getCD(Wstr=Wstr)
 			}
 		}
 	} else {
-		
-	}
-	
-		
-		
-		for (i in 1:n){
-			if (mode=='absolute'){
-				Wstr[i]	<-	getWstr(WBIC=WBIC,canopy=new.params[i])
-			} else {
-				initial.val	<-	getCanopy(WBIC)
-				Wstr[i]	<-	getWstr(WBIC=WBIC,canopy=new.params[i])
+		argVals	<-	param.seq*NA
+		if (param.name=='hc'){ # canopy height
+			initial.val	<-	getCanopy(WBIC)
+			print(initial.val)
+			for (i in 1:length(param.seq)){
+				Wstr	<-	getWstr(WBIC=WBIC,canopy=initial.val*param.seq[i])
+				print(Wstr)
+				argVals[i]	<-	getCD(Wstr=Wstr)
 			}
-					
+		} else if (param.name=='Kw'){
+			argVals	<-	param.seq*getClarity(WBIC)
 		}
 	}
-
 	return(list(argName=argName,argVals=argVals))
 }
 
@@ -139,7 +132,11 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 	return(temps)
 }
 
-sens.param<-'Kw'
-response.matrix <- sensitivity.GLM(model.dirs,param=sens.param,param.seq=seq(0.2,4,length.out=10),year=1996)
+sens.bump	<-	0.01
+sens.param	<-	'Kw'
+sens.mode	<-	'relative'
+calc.sens	<-	c(0.5,1,1.5,2)
+param.seq	<-	sort(c(calc.sens-sens.bump,calc.sens+sens.bump))
+response.matrix <- sensitivity.GLM(model.dirs[1:10],param=sens.param,param.seq=param.seq,mode=sens.mode,year=1996)
 
-write.table(response.matrix,file=paste('sensitivity_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
+write.table(response.matrix,file=paste('sensitivity_',sens.mode,'_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
