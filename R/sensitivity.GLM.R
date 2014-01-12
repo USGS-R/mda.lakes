@@ -110,7 +110,8 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 				argVals[i]	<-	getCD(Wstr=Wstr)
 			}
 		} else if (param.name=='Kw'){
-			Kd	<-	getClarity(WBIC,default.if.null=TRUE)
+			Kd	<-	getClarity(WBIC)
+      if (is.null(Kd)){Kd=0.63}
 			argVals	<-	param.seq*Kd
 		}
 	}
