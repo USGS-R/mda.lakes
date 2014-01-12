@@ -107,6 +107,6 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 }
 
 sens.param<-'Kw'
-response.matrix <- sensitivity.GLM(model.dirs[1:100],param=sens.param,range=c(.2,5),year=1996,n=10)
+response.matrix <- sensitivity.GLM(model.dirs,param=sens.param,range=c(0.2,4),year=1996,n=20)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
