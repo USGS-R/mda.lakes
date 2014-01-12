@@ -45,10 +45,11 @@ getCanopy	<-	local({ lookup=NULL; function(WBIC) {
 }})
 
 
-getClarity	<-	local({ lookup=NULL; function(WBIC){
+getClarity	<-	local({ lookup=NULL; function(WBIC,default.if.null=FALSE){
 	if (is.null(lookup)){
 		cat('Caching clarity info.\n')
 		secchiConv	<-	1.7
+		default.kd	<-	0.63
 		d	<-	read.table('../supporting files/annual_mean_secchi.txt',
 			header=TRUE,sep='\t')
 		lookup <<- new.env()
@@ -60,8 +61,11 @@ getClarity	<-	local({ lookup=NULL; function(WBIC){
 			lookup[[unWBIC[i]]] 	<- attenuation.coefficient
 		}
 	}
-	lookup[[WBIC]]
-}})
+	if(is.null(lookup[[WBIC]])){
+		return(default.kd)
+	} else{return(lookup[[WBIC]])}
+	}
+})
 
 
 getElevation	<-	function(WBIC){
