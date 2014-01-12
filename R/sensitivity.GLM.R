@@ -20,8 +20,8 @@ sensitivity.GLM	<-	function(model.dirs,param,param.seq,year,mode='relative'){
 	ice.on <- getIceOn(WBICs,year)
 	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.mmdd
 	num.lakes	<-	length(WBICs)
-	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
 	num.params	<-	length(param.seq)
+	response.matrix	<-	matrix(nrow=num.lakes,ncol=num.params)
 	origin	<-	getwd()
 	
 	for (j in 1:num.lakes){
