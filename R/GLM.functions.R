@@ -110,7 +110,17 @@ getSDF	<-	function(WBIC){
 	SDF	<-	perim/circle.perim
 	return(SDF)
 }
-
+getCD	<-	function(WBIC=NULL,Wstr=NULL){
+	if (is.null(WBIC) & is.null(Wstr)){
+		stop('either WBIC or Wstr need to be defined')
+	} else if (is.null(Wstr)){
+		Wstr	<-	getWstr(WBIC)
+	}
+	
+	coef_wind_drag.ref	<-	0.00140
+	coef_wind_drag	<-	coef_wind_drag.ref*Wstr^0.33
+	return(coef_wind_drag)
+}
 
 getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 	# Markfort et al. 2010
