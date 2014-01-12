@@ -15,7 +15,7 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	model.ids <- basename(model.dirs)
 	WBICs	<-	str_extract(model.ids,'\\d+')  # WBICS as strings
 	
-  ice.on <- getIceOn(WBICs,year)
+	ice.on <- getIceOn(WBICs,year)
 	#ice.off <- getIceOff(WBICs,year) # not needed if stopping at stop.time
 	num.lakes	<-	length(WBICs)
 	response.matrix	<-	matrix(nrow=num.lakes,ncol=n)
@@ -23,85 +23,81 @@ sensitivity.GLM	<-	function(model.dirs,param,range,year,n=10,driver.dir='D:/WiLM
 	origin	<-	getwd()
 	
 	for (j in 1:num.lakes){
-	  setwd(origin)
-    cat(model.ids[j]);cat(' ')
+		setwd(origin)
+		cat(model.ids[j]);cat(' ')
 		driver.file	<-	paste(model.ids[j], '.csv', sep='')
-    if (driver.file %in% dir(driver.dir) & !is.na(ice.on[j])){
-      if (param=='hc'){
-        Wstr<- vector(length=n)
-        for (i in 1:n){Wstr[i]<-getWstr(WBIC=WBICs[j],canopy=new.params[i])}
-      }
+    	if (driver.file %in% dir(driver.dir) & !is.na(ice.on[j])){
+			if (param=='hc'){
+				Wstr<- vector(length=n)
+        		for (i in 1:n){Wstr[i]<-getWstr(WBIC=WBICs[j],canopy=new.params[i])}
+      		}
       
-      file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
-      setwd(model.dirs[j])	# set to this lake's run directory
-      # IF there is already a glm.nml, that means the last one might have failed...replace?
-      file.copy('glm.nml', 'glm.nml.orig')
-      source.nml	<-	read.nml('glm.nml','./')
-      #ice.off and on can be NA*******
-      stop.date <- paste(substr(ice.off[j],1,4),'-',stop.mmdd,sep='')
-      source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
-      source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
+			file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
+			setwd(model.dirs[j])	# set to this lake's run directory
+			# IF there is already a glm.nml, that means the last one might have failed...replace?
+			file.copy('glm.nml', 'glm.nml.orig')
+			source.nml	<-	read.nml('glm.nml','./')
+			#ice.off and on can be NA*******
+			stop.date <- paste(substr(ice.off[j],1,4),'-',stop.mmdd,sep='')
+			source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
+			source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
       
-      for (i in 1:n){
-        if (param=='hc'){
-          # lake-specific calculation
-          param.value <- wndRef*Wstr[i]^0.33
-          source.nml  <-	set.nml(source.nml,argName="coef_wind_drag",param.value)	# set to new param value
-        } else {
-          source.nml  <-	set.nml(source.nml,argName=param,new.params[i])	# set to new param value
-        }
-        
-        
-        write.nml(source.nml, 'glm.nml', './')
-        # use system(intern=FALSE)?
-        sim.val <- tryCatch({
-          
-          out = system(glm.path, intern=FALSE, show.output.on.console =FALSE)  # runs and writes .nc to directory
-          hypo.temps<- get.sim.temps(run.dir[j])
-          season.hyp <- tail(hypo.temps[,2],91)
-          mean(season.hyp,na.rm=TRUE)
-        }, warning = function(war) {
-          print(paste("MY_WARNING:  ",war))
-          # warning handler picks up where error was generated
-          hypo.temps<- get.sim.temps(run.dir[j])
-          season.hyp <- tail(hypo.temps[,2],91)
-          return(mean(season.hyp,na.rm=TRUE))
-          
-        }, error = function(err) {
-          print(paste("MY_ERROR:  ",err))
-          return(NA)
-          
-        }) # END tryCatch
-        #print(sim.val)
-        response.matrix[j,i]  <-   sim.val
-        cat('done with j=');cat(j);cat(' of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
-      }
-      file.rename('glm.nml.orig', 'glm.nml')
-      
-    } else {
-      cat('skipping ');cat(model.ids[j]);cat('\n')
-      response.matrix[j,] <- NA # will already be NA because it is built as such
-    }
-	}	
+      		for (i in 1:n){
+				if (param=='hc'){
+					# lake-specific calculation
+					param.value <- wndRef*Wstr[i]^0.33
+					source.nml  <-	set.nml(source.nml,argName="coef_wind_drag",param.value)	# set to new param value
+				} else {
+          			source.nml  <-	set.nml(source.nml,argName=param,new.params[i])	# set to new param value
+				}
+			
+				write.nml(source.nml, 'glm.nml', './')
+
+				sim.val <- tryCatch({
+						out = system(glm.path, intern=FALSE, show.output.on.console =FALSE)  # runs and writes .nc to directory
+						hypo.temps<- get.sim.temps(run.dir[j])
+						season.hyp <- tail(hypo.temps[,2],91)
+						mean(season.hyp,na.rm=TRUE)
+					}, warning = function(war) {
+						print(paste("MY_WARNING:  ",war))
+						# warning handler picks up where error was generated
+						hypo.temps<- get.sim.temps(run.dir[j])
+						season.hyp <- tail(hypo.temps[,2],91)
+						return(mean(season.hyp,na.rm=TRUE))
+					}, error = function(err) {
+						print(paste("MY_ERROR:  ",err))
+						return(NA)
+					}
+				) # END tryCatch
+				response.matrix[j,i]  <-   sim.val
+				cat('done with j=');cat(j);cat(' of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
+			}
+			# after all param sims, rename .orig to .nml
+      		file.rename('glm.nml.orig', 'glm.nml')
+		} else { # driver fails or file does not exist
+			cat('skipping ');cat(model.ids[j]);cat('\n')
+			response.matrix[j,] <- NA # will already be NA because it is built as such
+    	}
+	} # done with all lake simes
 	setwd(origin)
 	response.matrix = data.frame(response.matrix)
-  names(response.matrix) <- paste(param,'_',new.params,sep='')
-  response.matrix <- cbind("WBICs"=WBICs,response.matrix)
-  return(response.matrix)
+  	names(response.matrix) <- paste(param,'_',new.params,sep='')
+  	response.matrix <- cbind("WBICs"=WBICs,response.matrix)
+  	return(response.matrix)
 }
 
 get.sim.temps	<-	function(run.dir,remove=FALSE){
 	# open .nc file, extract response variable value
 	# ....
-  lyrDz <- 0.25
-  if ('output.nc' %in% dir('./') & file.info("./output.nc")$size/1000000 > 1){
-    GLMnc  <-  getGLMnc(file='output.nc',folder='./')
-    temps  <-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN? # getting back elv>0?
-    nc_close(GLMnc)
-    if (remove){
-      # delete nc file ...
-    }
-  } else {temps=data.frame('DateTime'=NA,'wtr_'=NA)}
+	lyrDz <- 0.25
+	if ('output.nc' %in% dir('./') & file.info("./output.nc")$size/1000000 > 1){
+		GLMnc  <-  getGLMnc(file='output.nc',folder='./')
+		temps  <-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0) # DO JAS MEAN? # getting back elv>0?
+		nc_close(GLMnc)
+		if (remove){
+      		# delete nc file ...
+		}
+  	} else {temps=data.frame('DateTime'=NA,'wtr_'=NA)}
   
 	return(temps)
 }
