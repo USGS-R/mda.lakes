@@ -135,7 +135,7 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 }
 
 sens.bump	<-	0.01
-sens.param	<-	'Kw'
+sens.param	<-	'hc'
 sens.mode	<-	'relative'
 calc.sens	<-	c(0.5,1,1.5,2)
 param.seq	<-	sort(c(calc.sens-sens.bump,calc.sens+sens.bump))
