@@ -134,11 +134,10 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 	return(temps)
 }
 
-sens.bump	<-	0.01
+
 sens.param	<-	'hc'
 sens.mode	<-	'relative'
-calc.sens	<-	c(0.5,1,1.5,2)
-param.seq	<-	sort(c(calc.sens-sens.bump,calc.sens+sens.bump))
+param.seq	<-	c(0.25,0.5,.75, 1,1.25, 1.5,2,4)
 response.matrix <- sensitivity.GLM(model.dirs,param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.mode,'_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
