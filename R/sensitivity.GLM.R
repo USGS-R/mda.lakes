@@ -104,7 +104,7 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 		argVals	<-	param.seq*NA
 		if (param.name=='hc'){ # canopy height
 		  argName="coef_wind_drag"
-			initial.val	<-	getCanopy(WBIC)
+			initial.val	<-	getCanopy(WBIC,default.if.null=TRUE)
 			print(initial.val)
 			for (i in 1:length(param.seq)){
 				Wstr	<-	getWstr(WBIC=WBIC,canopy=initial.val*param.seq[i])
