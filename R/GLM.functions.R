@@ -30,20 +30,31 @@ getArea	<-	local({ lookup=NULL; function(WBIC){
 	lookup[[WBIC]]
 }})
 
-getCanopy	<-	local({ lookup=NULL; function(WBIC) {
-	if (is.null(lookup)) { 
-		cat('Caching canopy info.\n')
-		d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
-			header=TRUE,sep=',')
-		lookup <<- new.env()
+getCanopy	<-	local(
+	{ lookup=NULL; 
+		canopy	<-	function(WBIC) {
+			if (is.null(lookup)) { 
+				cat('Caching canopy info.\n')
+				d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
+					header=TRUE,sep=',')
+					lookup <<- new.env()
 		
-		for (i in 1:nrow(d)){
-			lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
+				for (i in 1:nrow(d)){
+					lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
+				}
+			}
+			return(lookup[[WBIC]])
+		}
+		default.hc	<-	function(WBIC,default.if.null=FALSE){
+			default.hc	<-	0.5
+			if (is.null(canopy(WBIC)) & default.if.null==TRUE){
+				return(default.hc)
+			} else {
+				return(canopy(WBIC))
+			}
 		}
 	}
-	lookup[[WBIC]]
-}})
-
+)
 
 getClarity	<-	local(
 	{ lookup=NULL
