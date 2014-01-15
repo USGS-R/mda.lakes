@@ -58,14 +58,14 @@ getCanopy	<-	local(
 
 getClarity	<-	local(
 	{ lookup=NULL
-		clarity	<-	function(WBIC){
+		function(WBIC,default.if.null=FALSE){
 			if (is.null(lookup)){
 				cat('Caching clarity info.\n')
 				secchiConv	<-	1.7
-				
 				d	<-	read.table('../supporting files/annual_mean_secchi.txt',
 				header=TRUE,sep='\t')
 				lookup <<- new.env()
+				default.kd	<-	0.63
 				unWBIC	<-	unique(as.character(d$WBIC))
 				for (i in 1:length(unWBIC)){
 					useI	<-	d$WBIC==unWBIC[i]
@@ -74,14 +74,13 @@ getClarity	<-	local(
 					lookup[[unWBIC[i]]] 	<- attenuation.coefficient
 				}
 			}
-			return(lookup[[WBIC]])
-		}
-		default.kd	<-	function(WBIC,default.if.null=FALSE){
+			wbic.val = lookup[[as.character(WBIC)]]
 			default.kd	<-	0.63
-			if (is.null(clarity(WBIC)) & default.if.null==TRUE){
+			
+			if (is.null(wbic.val) & default.if.null==TRUE){
 				return(default.kd)
 			} else {
-				return(clarity(WBIC))
+			    return(wbic.val)
 			}
 		}
 	}
