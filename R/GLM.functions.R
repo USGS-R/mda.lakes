@@ -58,6 +58,9 @@ getCanopy	<-	local(
 
 getClarity	<-	local(
 	{ lookup=NULL
+		
+		default.kd	<-	0.63
+		
 		function(WBIC,default.if.null=FALSE){
 			if (is.null(lookup)){
 				cat('Caching clarity info.\n')
@@ -74,17 +77,16 @@ getClarity	<-	local(
 				}
 			}
 			wbic.val = lookup[[as.character(WBIC)]]
-			default.kd	<-	0.63
-			
+
 			if (is.null(wbic.val) & default.if.null==TRUE){
 				return(default.kd)
-			} else {
-			    return(wbic.val)
-			}
+			} else {return(wbic.val)}
 		}
 	}
 )
-
+getClarity('994800')
+getClarity('asdf')
+getClarity("asdf",TRUE)
 getElevation	<-	function(WBIC){
 	data	<-	read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
 	indx	<-	paste(c('X',WBIC),collapse='')
