@@ -65,7 +65,6 @@ getClarity	<-	local(
 				d	<-	read.table('../supporting files/annual_mean_secchi.txt',
 				header=TRUE,sep='\t')
 				lookup <<- new.env()
-				default.kd	<-	0.63
 				unWBIC	<-	unique(as.character(d$WBIC))
 				for (i in 1:length(unWBIC)){
 					useI	<-	d$WBIC==unWBIC[i]
