@@ -31,38 +31,39 @@ getArea	<-	local({ lookup=NULL; function(WBIC){
 }})
 
 getCanopy	<-	local(
-	{ lookup=NULL; 
-		canopy	<-	function(WBIC) {
+	{ lookup=NULL 
+		
+		default.hc	<-	0.5
+		
+		function(WBIC,default.if.null=FALSE) {
 			if (is.null(lookup)) { 
 				cat('Caching canopy info.\n')
 				d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
 					header=TRUE,sep=',')
-					lookup <<- new.env()
+				lookup <<- new.env()
 		
 				for (i in 1:nrow(d)){
 					lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
 				}
 			}
-			return(lookup[[WBIC]])
-		}
-		default.hc	<-	function(WBIC,default.if.null=FALSE){
-			default.hc	<-	0.5
-			if (is.null(canopy(WBIC)) & default.if.null==TRUE){
+			wbic.val = lookup[[as.character(WBIC)]]
+
+			if (is.null(wbic.val) & default.if.null==TRUE){
 				return(default.hc)
-			} else {
-				return(canopy(WBIC))
-			}
+				} else {return(wbic.val)}
 		}
 	}
 )
 
 getClarity	<-	local(
 	{ lookup=NULL
-		clarity	<-	function(WBIC){
+		
+		default.kd	<-	0.63
+		
+		function(WBIC,default.if.null=FALSE){
 			if (is.null(lookup)){
 				cat('Caching clarity info.\n')
 				secchiConv	<-	1.7
-				
 				d	<-	read.table('../supporting files/annual_mean_secchi.txt',
 				header=TRUE,sep='\t')
 				lookup <<- new.env()
@@ -74,15 +75,11 @@ getClarity	<-	local(
 					lookup[[unWBIC[i]]] 	<- attenuation.coefficient
 				}
 			}
-			return(lookup[[WBIC]])
-		}
-		default.kd	<-	function(WBIC,default.if.null=FALSE){
-			default.kd	<-	0.63
-			if (is.null(clarity(WBIC)) & default.if.null==TRUE){
+			wbic.val = lookup[[as.character(WBIC)]]
+
+			if (is.null(wbic.val) & default.if.null==TRUE){
 				return(default.kd)
-			} else {
-				return(clarity(WBIC))
-			}
+			} else {return(wbic.val)}
 		}
 	}
 )
