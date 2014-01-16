@@ -57,7 +57,7 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
       
       		for (i in 1:num.params){
 				if (param.name=='RT'){
-					source.nml	<-	set.up.RT.run(source.nml,param.seq,temp.scheme="air")
+					source.nml	<-	set.up.RT.run(WBICs[j],source.nml,param.seq,temp.scheme="air") # some of this should happen outside this inner loop
 					
 				} else {
 					source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
@@ -134,7 +134,7 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 	return(list(argName=argName,argVals=argVals))
 }
 
-set.up.RT.run	<-	function(source.nml,param.seq,temp.scheme="air"){
+set.up.RT.run	<-	function(WBIC,source.nml,param.seq,temp.scheme="air"){
 	# modify all related RT elements in nml:
 	# INFLOW
 	source.nml  <-	set.nml(source.nml,argName="inflow_factor",param.seq[i])
@@ -151,7 +151,14 @@ set.up.RT.run	<-	function(source.nml,param.seq,temp.scheme="air"){
 	# bsn_len_outl? bsn_wid_outl?
 	
 	# get inflow and outflow files set in proper directory
+	RT	<-	get.residence.time(WBIC,default.if.null=TRUE)	# will return ave RT if null
+	flow	<-	get.flow.RT(source.nml,RT) 	# daily flow average to attain RT value
+	time	<-	seq.Date(from=as.Date(source.nml$time$start),to=as.Date(source.nml$time$stop),by=1)
 	
+	temperature	<-	rep(5,length(time)) # USE get.air.temps.....
+	flow	<-	rep(flow,length(time))
+	write.flow(time,flow,temperature,dir='./',file.in=inflow.csv,file.out=outflow.csv)
+	 #### 
 	return(source.nml)
 }
 
