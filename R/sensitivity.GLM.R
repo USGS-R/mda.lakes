@@ -118,6 +118,39 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 	return(list(argName=argName,argVals=argVals))
 }
 
+get.flow.RT	<-	function(nml,RT){
+	# calculates flow (ML/day) required for a given residence time (RT; in days)
+	
+	#from nml, get hypso curve, initial height and calculate an estimate of volume
+	m2.conv	<-	1000
+	ML.conv	<-	1/1000
+	area	<-	nml$morphometry$A*m2.conv	# area of each slice in m2
+	height	<-	nml$morphometry$H-nml$morphometry$base_elev # in meters
+	
+	volume	<-	sum(area[-1]*diff(height))*ML.conv	# in ML (verified for Mendota)
+	
+	flow	<-	volume/RT
+	return(flow)
+}
+
+get.air.temps	<-	function(time,dir,file.met){
+	# opens GLM met driver file, extracts air temps for a given set of dates (time)
+	# interpolates over NAs if found
+	return(air.temps)
+}
+write.flow	<-	function(time,flow,temperature,dir,file.in=inflow.csv,file.out=outflow.csv){
+	# time is an array of daily times (e.g., "2011-01-03")
+	# flow is an array of daily streamflow in ML/day (Convert from m3/s by multiplying by 86.4)
+	# temperature is an array of daily stream temperatures (same length as time)
+	
+	# write.flow() writes inflow and outflow files for GLM input
+	write.inflow	<-	data.frame("time"=time,"inflow"=flow,"temperature"=temperature)
+	write.outflow	<-	data.frame("time"=time,"outflow"=flow)
+	
+	write.table(write.inflow,file=paste(dir,file.in,sep=''),quote=FALSE,sep=',',row.names=FALSE)
+	write.table(write.outflow,file=paste(dir,file.out,sep=''),quote=FALSE,sep=',',row.names=FALSE)
+}
+
 get.sim.temps	<-	function(run.dir,remove=FALSE){
 	# open .nc file, extract response variable value
 	# ....
