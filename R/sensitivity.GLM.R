@@ -30,24 +30,38 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
 		
 		# ****driver can be missing, ice.off and on can be NA****
     	if (driver.file %in% dir(driver.dir) & !is.na(ice.off[j])){
-
-      		param.list	<-	get.params(param.name=param.name,param.seq=param.seq,WBIC=WBICs[j],sens.mode=sens.mode)
-			argName	<-	param.list$argName
-			new.params	<-	param.list$argVals
 			
+			if (param.name!='RT'){
+				param.list	<-	get.params(param.name=param.name,param.seq=param.seq,WBIC=WBICs[j],sens.mode=sens.mode)
+				argName	<-	param.list$argName
+				new.params	<-	param.list$argVals
+			} else if (param.name=='RT.air'){
+				param.name = 'RT'
+				temp.scheme="air"
+			} else if (param.name=='RT.ave'){
+				param.name = 'RT'
+				temp.scheme="ave"
+			}
+			
+		
 			file.copy(paste(driver.dir,driver.file,sep=''), model.dirs[j])
 			setwd(model.dirs[j])	# set to this lake's run directory
-			
 			# IF there is already a glm.nml, that means the last one might have failed...replace?
 			file.copy('glm.nml', 'glm.nml.orig')
 			source.nml	<-	read.nml('glm.nml','./')
+
 			
 			stop.date <- paste(substr(ice.off[j],1,4),'-',stop.mmdd,sep='')
 			source.nml  <-  set.nml(source.nml,'start', ice.off[j])	# set to empir ice on for year [HANDLE NAs?]
 			source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
       
       		for (i in 1:num.params){
-				source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
+				if (param.name=='RT'){
+					source.nml	<-	set.up.RT.run(source.nml,param.seq,temp.scheme="air")
+					
+				} else {
+					source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
+				}
 				write.nml(source.nml, 'glm.nml', './')
 
 				sim.val <- tryCatch({
@@ -89,6 +103,8 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 		stop(paste('mode ',sens.mode,' not supported',sep=''))
 	}
 	
+	if (param.name='RT'){stop('RT param not supported yet')}
+	
 	argName	<-	param.name
 
 	if (sens.mode=='absolute'){
@@ -118,6 +134,27 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 	return(list(argName=argName,argVals=argVals))
 }
 
+set.up.RT.run	<-	function(source.nml,param.seq,temp.scheme="air"){
+	# modify all related RT elements in nml:
+	# INFLOW
+	source.nml  <-	set.nml(source.nml,argName="inflow_factor",param.seq[i])
+	source.nml  <-	set.nml(source.nml,argName="num_inflows",1)
+	source.nml  <-	set.nml(source.nml,argName="num_inflows",c("inflow"))
+	source.nml  <-	set.nml(source.nml,argName="inflow_fl",c("inflow.csv"))
+	source.nml  <-	set.nml(source.nml,argName="inflow_varnum",2)
+	source.nml  <-	set.nml(source.nml,argName="inflow_vars",c("FLOW","TEMP"))
+	# OUTFLOW
+	source.nml  <-	set.nml(source.nml,argName="outflow_factor",param.seq[i])
+	source.nml  <-	set.nml(source.nml,argName="num_outlet",1)
+	out.elv	<-	source.nml$morphometry$base_elev+source.nml$init_profiles$lake_depth
+	source.nml  <-	set.nml(source.nml,argName="outl_elvs",out.elv)
+	# bsn_len_outl? bsn_wid_outl?
+	
+	# get inflow and outflow files set in proper directory
+	
+	return(source.nml)
+}
+
 get.flow.RT	<-	function(nml,RT){
 	# calculates flow (ML/day) required for a given residence time (RT; in days)
 	
@@ -135,7 +172,7 @@ get.flow.RT	<-	function(nml,RT){
 
 get.air.temps	<-	function(time,dir,file.met){
 	# opens GLM met driver file, extracts air temps for a given set of dates (time)
-	# interpolates over NAs if found
+	# interpolates over NAs if found (???)
 	return(air.temps)
 }
 write.flow	<-	function(time,flow,temperature,dir,file.in=inflow.csv,file.out=outflow.csv){
@@ -168,7 +205,7 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 }
 
 
-sens.param	<-	'hc'
+sens.param	<-	'RT.air'
 sens.mode	<-	'relative'
 param.seq	<-	seq(.3,1.7,by=0.1)
 response.matrix <- sensitivity.GLM(model.dirs,param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
