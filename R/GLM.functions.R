@@ -15,42 +15,98 @@ getBathy	<-	function(WBIC){
 	return(bathymetry)
 }
 
-getArea	<-	function(WBIC){
-	acre2m2	<-	4046.85642
-	data	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
-	useI	<- data$WBIC==as.numeric(WBIC)
-	if (any(useI)){
-		surface.area	<-	acre2m2*mean(data$acres[useI],na.rm=TRUE)
-	} else {
-		surface.area	<-	NULL
+getArea	<-	local({ lookup=NULL; function(WBIC){
+	if (is.null(lookup)) { 
+		cat('Caching area info.\n')
+		acre2m2	<-	4046.85642
+		d	<-	read.table('../supporting files/managed_lake_info.txt',
+			header=TRUE,sep='\t',quote="\"")
+		lookup <<- new.env()
+		
+		for (i in 1:nrow(d)){
+			lookup[[toString(d$WBIC[i])]]	<-	acre2m2*d$acres[i]
+		}
 	}
-	
-	return(surface.area)
-}
+	lookup[[WBIC]]
+}})
 
-getCanopy	<-	function(WBIC){
-	data	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',header=TRUE,sep=',')
-	useI	<-	which(dat[,1]==WBIC)
-	if(length(useI)>0){
-		canopy.height	<-	as.numeric(data[useI,2])
-	} else {
-		canopy.height	<-	NULL
-	}
-	return(canopy.height)
-}
+getResidenceTime	<-	local(
+	{ lookup=NULL 
+		
+		default.RT	<-	157.2 # days
+		
+		function(WBIC,default.if.null=FALSE) {
+			if (is.null(lookup)) { 
+				cat('Caching residence time info.\n')
+				d	<-	read.table('../supporting files/Res.time.Diebel.csv',
+					header=TRUE,sep=',')
+				lookup <<- new.env()
+				for (i in 1:nrow(d)){
+					lookup[[toString(d$WBIC[i])]]	<-	d$med.RT.days[i]
+				}
+			}
+			wbic.val = lookup[[as.character(WBIC)]]
 
-getClarity	<-	function(WBIC){
-	secchiConv	<-	1.7
-	data	<-	read.table('../supporting files/annual_mean_secchi.txt',header=TRUE,sep='\t')
-	useI	<- data['WBIC']==WBIC
-	if (any(useI)){
-		secchi 	<-	data$secchi.m.mean[useI]
-		attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
-	} else {
-		attenuation.coefficient	<-	NULL
+			if (is.null(wbic.val) & default.if.null==TRUE){
+				return(default.RT)
+				} else {return(wbic.val)}
+		}
 	}
-	return(attenuation.coefficient)
-}
+)
+
+getCanopy	<-	local(
+	{ lookup=NULL 
+		
+		default.hc	<-	0.5
+		
+		function(WBIC,default.if.null=FALSE) {
+			if (is.null(lookup)) { 
+				cat('Caching canopy info.\n')
+				d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
+					header=TRUE,sep=',')
+				lookup <<- new.env()
+		
+				for (i in 1:nrow(d)){
+					lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
+				}
+			}
+			wbic.val = lookup[[as.character(WBIC)]]
+
+			if (is.null(wbic.val) & default.if.null==TRUE){
+				return(default.hc)
+				} else {return(wbic.val)}
+		}
+	}
+)
+
+getClarity	<-	local(
+	{ lookup=NULL
+		
+		default.kd	<-	0.63
+		
+		function(WBIC,default.if.null=FALSE){
+			if (is.null(lookup)){
+				cat('Caching clarity info.\n')
+				secchiConv	<-	1.7
+				d	<-	read.table('../supporting files/annual_mean_secchi.txt',
+				header=TRUE,sep='\t')
+				lookup <<- new.env()
+				unWBIC	<-	unique(as.character(d$WBIC))
+				for (i in 1:length(unWBIC)){
+					useI	<-	d$WBIC==unWBIC[i]
+					secchi 	<-	d$secchi.m.mean[useI]
+					attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
+					lookup[[unWBIC[i]]] 	<- attenuation.coefficient
+				}
+			}
+			wbic.val = lookup[[as.character(WBIC)]]
+
+			if (is.null(wbic.val) & default.if.null==TRUE){
+				return(default.kd)
+			} else {return(wbic.val)}
+		}
+	}
+)
 
 getElevation	<-	function(WBIC){
 	data	<-	read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
@@ -83,7 +139,6 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 		cat('Caching perimeter info.\n')
 		d <- read.table('../supporting files/wbicAreaPerim.tsv', header=TRUE, as.is=TRUE) 
 		lookup <<- new.env()
-		
 		for(i in 1:nrow(d)){
 			lookup[[toString(d$WBIC[i])]] = d$PERIMETER[i]
 		}
@@ -92,10 +147,34 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 }})
 
 
-getWstr	<-	function(WBIC,method='Markfort'){
+getSDF	<-	function(WBIC){
+	perim	<-	getPerim(WBIC)
+	area	<-	getArea(WBIC)
+	circle.perim	<-	2*pi*sqrt(area/pi)
+	SDF	<-	perim/circle.perim
+	return(SDF)
+}
+getCD	<-	function(WBIC=NULL,Wstr=NULL){
+	if (is.null(WBIC) & is.null(Wstr)){
+		stop('either WBIC or Wstr need to be defined')
+	} else if (is.null(Wstr)){
+		Wstr	<-	getWstr(WBIC)
+	}
+	
+	coef_wind_drag.ref	<-	0.00140
+	coef_wind_drag	<-	coef_wind_drag.ref*Wstr^0.33
+	return(coef_wind_drag)
+}
+
+getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 	# Markfort et al. 2010
-	minWstr	<-	0.01
-	hc	<-	max(c(getCanopy(WBIC),1))
+	minWstr	<-	0.0001
+	if (is.null(canopy)){
+		hc	<-	max(c(getCanopy(WBIC),1))
+	} else {
+		hc	<-	canopy
+	}
+	
 	lkeArea	<-	getArea(WBIC)
 
 	Xt	<-	50*hc
@@ -146,6 +225,48 @@ getZmean	<-	function(WBIC){
 	return(mean.depth)
 }
 
+getIceOn	<-	function(WBIC,year){
+  early.freeze	<-	8	# month of year
+	# the ice on for each lake for a given year
+	# ice on is assumed to either happen during the same calendar year, or within the NEXT year
+	empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE) 
+	ice.on	<-	vector(length=length(WBIC))
+	for (j in 1:length(WBIC)){
+		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
+			substr(empir.ice$DATE,1,4)==as.character(year)) 
+    	if (!any(use.i)){
+      		# not found for this year
+      		use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
+        		substr(empir.ice$DATE,1,4)==as.character(year+1)) 
+			if (any(use.i)){
+				pos.results  <-  empir.ice$DATE[use.i]
+			} else {pos.results=NA}
+      		
+      		ice.on[j]<- pos.results[1]
+    	} else {
+      		# found for this year, but could be 2 matches
+      		pos.results  <-	empir.ice$DATE[use.i]
+      		ice.on[j]<- tail(pos.results,1)
+    	}
+	}
+	return(ice.on)
+}
 
+getIceOff	<-	function(WBIC,year) {
+	# the ice off for each lake for a given year
+	# ice off is assumed to happen during the same calendar year
 
-
+	empir.ice	<-	read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
+	ice.off	<-	vector(length=length(WBIC))
+	for (j in 1:length(WBIC)){
+		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="off" & substr(empir.ice$DATE,1,4)==as.character(year)
+		if (any(use.i)){
+			pos.results	<-	empir.ice$DATE[use.i]
+			ice.off[j]	<-	pos.results[1] # warn if length(pos.results)==2?
+		} else { 
+			ice.off[j]	<-	NA
+		}
+		
+	}
+	return(ice.off)
+}
