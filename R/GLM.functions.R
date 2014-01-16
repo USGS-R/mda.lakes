@@ -30,6 +30,30 @@ getArea	<-	local({ lookup=NULL; function(WBIC){
 	lookup[[WBIC]]
 }})
 
+getResidenceTime	<-	local(
+	{ lookup=NULL 
+		
+		default.RT	<-	157.2 # days
+		
+		function(WBIC,default.if.null=FALSE) {
+			if (is.null(lookup)) { 
+				cat('Caching residence time info.\n')
+				d	<-	read.table('../supporting files/Res.time.Diebel.csv',
+					header=TRUE,sep=',')
+				lookup <<- new.env()
+				for (i in 1:nrow(d)){
+					lookup[[toString(d$WBIC[i])]]	<-	d$med.RT.days[i]
+				}
+			}
+			wbic.val = lookup[[as.character(WBIC)]]
+
+			if (is.null(wbic.val) & default.if.null==TRUE){
+				return(default.RT)
+				} else {return(wbic.val)}
+		}
+	}
+)
+
 getCanopy	<-	local(
 	{ lookup=NULL 
 		
