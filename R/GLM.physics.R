@@ -254,8 +254,18 @@ getStratifiedDuration <-  function(GLMwtr,GLMice,minStrat){
     stop("GLM ice time series must be equal or shorter than one year")
   }
   # advised that the input is shortened to the ice-free period,
+  #Check to see if we found an ice on/off date. Sometimes, model was not
+  #started early enough or ended late enough to have on/off date
   startDate <- as.character(getIceOffDate(GLMice,GLMwtr))
+  if(is.na(startDate)){
+    startDate = as.character(min(GLMwtr[,timeID]))
+  }
+  
   stopDate <- as.character(getIceOnDate(GLMice,GLMwtr))
+  if(is.na(stopDate)){
+    stopDate = as.character(max(GLMwtr[,timeID]))
+  }
+    
   GLMwtr <- subsetTime(GLMwtr,startDate,stopDate)
   tempMxMn <- cbind(getDailyTempMax(GLMwtr),getDailyTempMin(GLMwtr)) 
   stratDur  <-  sum(tempMxMn[,1]-tempMxMn[,2]>=minStrat)
@@ -363,7 +373,7 @@ getEpiMetaHypo.GLM <- function(GLMwtr, depths){
 		SthermoD[i] = thermo.depth(iter_wtr, iter_depths, seasonal=TRUE)
 		if(length(depths) != length(unique(depths))){
 			stop('argh')
-		}	
+		}
 		
 		#list(botDepth = metaBot_depth, topDepth = metaTop_depth)
 		
@@ -390,10 +400,13 @@ getEpiMetaHypo.GLM <- function(GLMwtr, depths){
 # Calculates the total volume within a temperature range.
 #
 ################################################################################
-volInTemp.GLM <- function(GLMnc, lowT, highT){
+volInTemp.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
   
   layVol = ncvar_get(GLMnc,"V")
   layTemp = ncvar_get(GLMnc,"temp")
+  
+  layVol = layVol[, censor.days:ncol(layVol)]
+  layTemp = layTemp[, censor.days:ncol(layTemp)]
   
   volumes = vector(mode="double", length=ncol(layVol))*NaN
   times = getTimeGLMnc(GLMnc)
@@ -412,10 +425,13 @@ volInTemp.GLM <- function(GLMnc, lowT, highT){
 # Calculates the total height of the water column within a temperature range.
 #
 ################################################################################
-heightInRange.GLM <- function(GLMnc, lowT, highT){
+heightInRange.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
   
   layZ = ncvar_get(GLMnc,"z")
   layTemp = ncvar_get(GLMnc,"temp")
+  
+  layZ = layZ[, censor.days:ncol(layZ)]
+  layTemp = layTemp[, censor.days:ncol(layTemp)]
   
   thicks = vector(mode="double", length=ncol(layZ))*NaN
   #times = getTimeGLMnc(GLMnc)
