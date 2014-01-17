@@ -1,9 +1,10 @@
 ## Code to calculate important derivatives for chained runs
 
-chained.habitat.calc = function(run.path, output.path, lakeid){
+chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   
   require(stringr)
   require(rGLM)
+  require(ncdf4)
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
   years = wbics = str_extract(basename(nc.files),"[0-9]+")
@@ -46,6 +47,9 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
   
   bad = rep(FALSE, length(years))
   
+  empir.ice = read.table(file.path(run.path, 'icecal.in.tsv'), sep='\t', header=TRUE)
+  empir.ice$DATE = as.POSIXct(empir.ice$DATE)
+  
   for(i in 1:length(nc.files)){
     
     #Open the NC file and get data frame of wtr temp
@@ -62,14 +66,56 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
     ice = getGLMice(GLMnc)
     surfT = getSurfaceT(wtr)
     
-    #Iterate through all ranges and store in name-indexed list
+    raw.wtr = ncvar_get(GLMnc, 'temp')
+    run.time = getTimeGLMnc(GLMnc)
     
+    
+    #Drop the first 3 days
+    
+    wtr = wtr[4:nrow(wtr), , drop=FALSE]
+    ice = ice[4:nrow(wtr),]
+    surfT = surfT[4:nrow(wtr)]
+    raw.wtr = raw.wtr[,4:ncol(wtr), drop=FALSE] #this is a matrix with a different orientation
+    run.time = run.time[4:length(run.time)]
+    
+    censor.days = 3  #used for later functions to censor burn-in days
+    
+    #Make sure temps are in a sane range
+    if(any(raw.wtr > 50, na.rm=TRUE) | any(raw.wtr < -20, na.rm=TRUE)){
+      
+      cat('Unreasonable temp values found:', lakeid, '\n')
+      nc_close(GLMnc)
+      bad[i] = TRUE
+      next
+    }
+    
+    #Ok, sometimes the first modeled day gives a really bad temp value
+    # at the surface. Drop those!
+    if(any(raw.wtr[,1] > 13, na.rm=TRUE)){
+      cat('Unreasonable first day temps found:', lakeid, '\n')
+      nc_close(GLMnc)
+      bad[i] = TRUE
+      next
+    }
+    
+    
+    #Make sure the last date is within 2 days of one of the ice-ons
+    # If it isn't, then the model probably failed early
+    if( !any(abs(difftime(run.time[length(run.time)],empir.ice$DATE, units='days')) < 2.1) ){
+      cat('Wrong ice-off date:', lakeid, '\n')
+      nc_close(GLMnc)
+      bad[i] = TRUE
+      next
+    }
+    
+    
+    #Iterate through all ranges and store in name-indexed list
     for(j in 1:nrow(vol.tmp.ranges)){
       #Name of volume temp range
       vol.name = paste('vol', vol.tmp.ranges[j,1], vol.tmp.ranges[j,2], sep='_')
       
       #Calc 
-      tmp = volInTemp.GLM(GLMnc, vol.tmp.ranges[j,1], vol.tmp.ranges[j,2])
+      tmp = volInTemp.GLM(GLMnc, vol.tmp.ranges[j,1], vol.tmp.ranges[j,2], censor.days=censor.days)
       
       #add to vector
       volumes.out[[vol.name]] = c(volumes.out[[vol.name]], sum(tmp[[2]])*1000)
@@ -78,7 +124,7 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
     #Now do vertical length of water column in temperature range.
     for(j in 1:nrow(height.tmp.ranges)){
       height.name = paste('height', height.tmp.ranges[j,1], height.tmp.ranges[j,2], sep='_')
-      tmp = heightInRange.GLM(GLMnc, height.tmp.ranges[j,1], height.tmp.ranges[j,2])
+      tmp = heightInRange.GLM(GLMnc, height.tmp.ranges[j,1], height.tmp.ranges[j,2], censor.days=censor.days)
       
       heights.out[[height.name]] = c(heights.out[[height.name]], mean(tmp, na.rm=TRUE))
     }
@@ -90,6 +136,7 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
     
     
     misc.out[['peak_temp']] = c(misc.out[['peak_temp']], getTempMax(wtr))
+    
     misc.out[['durStrat']] = c(misc.out[['durStrat']], getStratifiedDuration(wtr, ice, minStrat=0.5))
     
     
@@ -126,6 +173,15 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
     misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]], na.rm=TRUE))
     misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(tmp$metaTopD[start.end[1]:start.end[2]], na.rm=TRUE))
     
+    dd10 = surfT - 10
+    dd5  = surfT - 5
+    misc.out[['degree_days_5c']] = c(misc.out[['degree_days_5c']], sum(dd5[dd5 > 0], na.rm=TRUE))
+    misc.out[['degree_days_10c']] = c(misc.out[['degree_days_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
+    
+    vols = ncvar_get(GLMnc,'Tot_V')
+    
+    #Units are in ML, so 1ML = 1000 m^3
+    misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE)*1000)
     
     #Cleanup this memory hog
     nc_close(GLMnc)
@@ -156,7 +212,11 @@ chained.habitat.calc = function(run.path, output.path, lakeid){
   }
   
   #Output!!
-  write.table(fOutput, output.path, row.names=FALSE, sep='\t')
+  if(!is.null(output.path)){
+    write.table(fOutput, output.path, row.names=FALSE, sep='\t')
+  }else{
+    return(fOutput)
+  }
 }
 
 

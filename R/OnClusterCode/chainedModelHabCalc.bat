@@ -11,13 +11,13 @@ R CMD BATCH habitat.calc.condor.R
 :: Cleanup!
 ::del output.nc
 del.RData
-del hdf5*
-del nc*
-del zlib*
-del msvcp100.dll
-del msvcr100.dll
-del netcdf.dll
-del szip.dll
-del libcurl.dll
+::del hdf5*
+::del nc*
+::del zlib*
+::del msvcp100.dll
+::del msvcr100.dll
+::del netcdf.dll
+::del szip.dll
+::del libcurl.dll
 del *.nc
-del lake.csv
+::del lake.csv
