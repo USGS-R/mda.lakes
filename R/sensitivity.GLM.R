@@ -197,10 +197,14 @@ get.air.temps	<-	function(met.file,time){
   met.time<-as.Date(met$time)
   air.temps<-met$AirTemp
   
-  use.i <- which(time %in% met.time)
+  air.temps.out <- vector(length=length(time))
+  for (j in 1:length(time)){
+    air.temps.out[j] <- air.temps[time[j]==met.time]
+  }
+  
 	# opens GLM met driver file, extracts air temps for a given set of dates (time)
 	# interpolates over NAs if found (???)
-	return(air.temps[use.i])
+	return(air.temps.out)
 }
 write.flow	<-	function(time,flow,temperature,directory,file.in="inflow.csv",file.out="outflow.csv"){
 	# time is an array of daily times (e.g., "2011-01-03")
@@ -235,6 +239,6 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 sens.param	<-	'RT.air'
 sens.mode	<-	'relative'
 param.seq	<-	seq(.3,1.7,by=0.1)
-response.matrix <- sensitivity.GLM(model.dirs,param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
+response.matrix <- sensitivity.GLM(model.dirs[1:5],param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
 
 write.table(response.matrix,file=paste('sensitivity_',sens.mode,'_',sens.param,'.tsv',sep=''),quote=FALSE,sep='\t',row.names=FALSE)
