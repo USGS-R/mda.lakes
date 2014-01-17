@@ -31,16 +31,22 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
 		# ****driver can be missing, ice.off and on can be NA****
     	if (driver.file %in% dir(driver.dir) & !is.na(ice.off[j])){
 			
-			if (param.name!='RT'){
+			if (substr(param.name,1,2)!='RT'){
 				param.list	<-	get.params(param.name=param.name,param.seq=param.seq,WBIC=WBICs[j],sens.mode=sens.mode)
 				argName	<-	param.list$argName
 				new.params	<-	param.list$argVals
 			} else if (param.name=='RT.air'){
+			  RT<-getResidenceTime(WBICs[j],default.if.null=TRUE)
 				param.name = 'RT'
 				temp.scheme="air"
+        print("scheme is air")
+        cat(" RT is ");cat(RT);cat('\n')
 			} else if (param.name=='RT.ave'){
+			  RT<-getResidenceTime(WBICs[j],default.if.null=TRUE)
 				param.name = 'RT'
 				temp.scheme="ave"
+			  print("scheme is ave")
+			  cat(" RT is ");cat(RT);cat('\n')
 			}
 			
 		
@@ -56,15 +62,16 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
 			source.nml  <-  set.nml(source.nml,'stop', stop.date)  # set to empir ice on for year
       
       		for (i in 1:num.params){
-				if (param.name=='RT'){
-					source.nml	<-	set.up.RT.run(WBICs[j],source.nml,param.seq,temp.scheme="air") # some of this should happen outside this inner loop
-					
-				} else {
-					source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
-				}
-				write.nml(source.nml, 'glm.nml', './')
+				
 
 				sim.val <- tryCatch({
+				  if (head(param.name,2)=='RT'){
+				    source.nml	<-	set.up.RT.run(WBICs[j],source.nml,param.val=param.seq[i],temp.scheme,RT=RT) # some of this should happen outside this inner loop
+				    
+				  } else {
+				    source.nml  <-	set.nml(source.nml,argName=argName,new.params[i])	# set to new param value
+				  }
+				  write.nml(source.nml, 'glm.nml', './')
 						out = system(glm.path, intern=FALSE, show.output.on.console =FALSE)  # runs and writes .nc to directory
 						hypo.temps<- get.sim.temps(run.dir[j])
 						season.hyp <- tail(hypo.temps[,2],91)
@@ -81,6 +88,7 @@ sensitivity.GLM	<-	function(model.dirs,param.name,param.seq,year,sens.mode='rela
 					}
 				) # END tryCatch
 				response.matrix[j,i]  <-   sim.val
+        print(sim.val)
 				cat('done with j=');cat(j);cat(' of ');cat(num.lakes);cat(' and i=');cat(i);cat('\n')
 			}
 			# after all param sims, rename .orig to .nml
@@ -103,7 +111,7 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 		stop(paste('mode ',sens.mode,' not supported',sep=''))
 	}
 	
-	if (param.name='RT'){stop('RT param not supported yet')}
+	if (param.name=='RT'){stop('RT param not supported yet')}
 	
 	argName	<-	param.name
 
@@ -134,30 +142,37 @@ get.params	<-	function(param.name,param.seq,WBIC,sens.mode='relative'){
 	return(list(argName=argName,argVals=argVals))
 }
 
-set.up.RT.run	<-	function(WBIC,source.nml,param.seq,temp.scheme="air"){
+set.up.RT.run	<-	function(WBIC,source.nml,param.val,temp.scheme="air",RT){
 	# modify all related RT elements in nml:
 	# INFLOW
-	source.nml  <-	set.nml(source.nml,argName="inflow_factor",param.seq[i])
+	source.nml  <-	set.nml(source.nml,argName="inflow_factor",param.val)
 	source.nml  <-	set.nml(source.nml,argName="num_inflows",1)
-	source.nml  <-	set.nml(source.nml,argName="num_inflows",c("inflow"))
-	source.nml  <-	set.nml(source.nml,argName="inflow_fl",c("inflow.csv"))
+	source.nml  <-	set.nml(source.nml,argName="names_of_strms",c("inflow"))
+	source.nml  <-	set.nml(source.nml,argName="inflow_fl","inflow.csv")
 	source.nml  <-	set.nml(source.nml,argName="inflow_varnum",2)
-	source.nml  <-	set.nml(source.nml,argName="inflow_vars",c("FLOW","TEMP"))
+	#source.nml  <-	set.nml(source.nml,argName="inflow_vars","FLOW,TEMP") # already set to FLOW,TEMP...getting odd error for type
 	# OUTFLOW
-	source.nml  <-	set.nml(source.nml,argName="outflow_factor",param.seq[i])
+	source.nml  <-	set.nml(source.nml,argName="outflow_factor",param.val)
 	source.nml  <-	set.nml(source.nml,argName="num_outlet",1)
 	out.elv	<-	source.nml$morphometry$base_elev+source.nml$init_profiles$lake_depth
 	source.nml  <-	set.nml(source.nml,argName="outl_elvs",out.elv)
 	# bsn_len_outl? bsn_wid_outl?
 	
 	# get inflow and outflow files set in proper directory
-	RT	<-	get.residence.time(WBIC,default.if.null=TRUE)	# will return ave RT if null
-	flow	<-	get.flow.RT(source.nml,RT) 	# daily flow average to attain RT value
+  flow	<-	get.flow.RT(source.nml,RT) 	# daily flow average to attain RT value
 	time	<-	seq.Date(from=as.Date(source.nml$time$start),to=as.Date(source.nml$time$stop),by=1)
+	if (temp.scheme=="air"){
+	  temperature  <-	get.air.temps(paste("WBIC_",WBIC,'.csv',sep=''),time)
+	} else if (temp.scheme=="ave"){
+    ave.time <-  seq.Date(from=as.Date("1990-01-01"),to=as.Date("1999-12-31"),by=1)
+    temperature <- get.air.temps(paste("WBIC_",WBIC,'.csv',sep=''),ave.time)
+    temperature <- rep(mean(temperature,na.rm=TRUE),length(time))
+	}
 	
-	temperature	<-	rep(5,length(time)) # USE get.air.temps.....
+  
+  temperature[temperature<0]=0
 	flow	<-	rep(flow,length(time))
-	write.flow(time,flow,temperature,dir='./',file.in=inflow.csv,file.out=outflow.csv)
+	write.flow(time,flow,temperature,directory=paste(getwd(),'/',sep=''),file.in="inflow.csv",file.out="outflow.csv")
 	 #### 
 	return(source.nml)
 }
@@ -177,22 +192,27 @@ get.flow.RT	<-	function(nml,RT){
 	return(flow)
 }
 
-get.air.temps	<-	function(time,dir,file.met){
+get.air.temps	<-	function(met.file,time){
+  met<-read.table(file=met.file,header=TRUE,sep=',')
+  met.time<-as.Date(met$time)
+  air.temps<-met$AirTemp
+  
+  use.i <- which(time %in% met.time)
 	# opens GLM met driver file, extracts air temps for a given set of dates (time)
 	# interpolates over NAs if found (???)
-	return(air.temps)
+	return(air.temps[use.i])
 }
-write.flow	<-	function(time,flow,temperature,dir,file.in=inflow.csv,file.out=outflow.csv){
+write.flow	<-	function(time,flow,temperature,directory,file.in="inflow.csv",file.out="outflow.csv"){
 	# time is an array of daily times (e.g., "2011-01-03")
 	# flow is an array of daily streamflow in ML/day (Convert from m3/s by multiplying by 86.4)
 	# temperature is an array of daily stream temperatures (same length as time)
 	
 	# write.flow() writes inflow and outflow files for GLM input
-	write.inflow	<-	data.frame("time"=time,"inflow"=flow,"temperature"=temperature)
-	write.outflow	<-	data.frame("time"=time,"outflow"=flow)
+	write.inflow	<-	data.frame("time"=time,"FLOW"=flow,"TEMP"=temperature)
+	write.outflow	<-	data.frame("time"=time,"FLOW"=flow)
 	
-	write.table(write.inflow,file=paste(dir,file.in,sep=''),quote=FALSE,sep=',',row.names=FALSE)
-	write.table(write.outflow,file=paste(dir,file.out,sep=''),quote=FALSE,sep=',',row.names=FALSE)
+	write.table(write.inflow,file=paste(directory,file.in,sep=''),quote=FALSE,sep=',',row.names=FALSE)
+	write.table(write.outflow,file=paste(directory,file.out,sep=''),quote=FALSE,sep=',',row.names=FALSE)
 }
 
 get.sim.temps	<-	function(run.dir,remove=FALSE){
