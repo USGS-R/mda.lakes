@@ -128,22 +128,25 @@ output.cal.chained = function(run.dir){
 	  wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
 	}
 	
-
+  # build data.frame same as cal.data
 	lake.mod.data = data.frame(WBIC=lake.cal.data$WBIC, 
 							   DATETIME=lake.cal.data$DATETIME, 
 							   DEPTH=lake.cal.data$DEPTH, 
 							   WTEMP=lake.cal.data$DEPTH*NaN)
 
+  # add additional row for modeled temp which is NaN
 	lake.cal.data$WTEMP_MOD = NaN
-
-	tmp = wtr[as.POSIXct(wtr[,1])==lake.cal.dates,]
-
+  
+  # trim down data.frame for model to just contain the sample dates
+	tmp = wtr[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+  
+  # lookup matches for depth and time
 	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
-	datesLookup = match(lake.cal.data$DATETIME, lake.cal.dates)
+	datesLookup = match(as.Date(lake.cal.data$DATETIME),as.Date(tmp[,1]))
 
 
 	for(j in 1:nrow(lake.cal.data)){
-	  lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], depthLookup[j]]
+	  lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], (depthLookup[j]+1)]
 	}
 
   #Close these pesky memory hogs
