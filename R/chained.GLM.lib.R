@@ -121,6 +121,8 @@ output.cal.chained = function(run.dir){
 	lake.cal.data = cal.d
 	lake.cal.dates = unique(lake.cal.data$DATETIME)
 	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
+  
+  # create single wtr data.frame for all years (all nc files)
 	wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
 	for(i in 2:length(glm.ncs)){
 	  wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
@@ -134,7 +136,7 @@ output.cal.chained = function(run.dir){
 
 	lake.cal.data$WTEMP_MOD = NaN
 
-	tmp = wtr[as.Date(wtr$[,1])==lake.cal.dates,]
+	tmp = wtr[as.POSIXct(wtr[,1])==lake.cal.dates,]
 
 	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
 	datesLookup = match(lake.cal.data$DATETIME, lake.cal.dates)
