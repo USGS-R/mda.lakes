@@ -116,15 +116,16 @@ output.cal.chained = function(run.dir){
 	}
 
 	## Subsample run to get water temp data at 4D obs points
-
-	wtr = getTempGLMnc(glm.ncs[[1]])
-	for(i in 2:length(glm.ncs)){
-		wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]], lyr.elevations=getElevGLM(wtr)))
-	}
-
+  
+	
 	lake.cal.data = cal.d
 	lake.cal.dates = unique(lake.cal.data$DATETIME)
 	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
+	wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
+	for(i in 2:length(glm.ncs)){
+	  wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
+	}
+	
 
 	lake.mod.data = data.frame(WBIC=lake.cal.data$WBIC, 
 							   DATETIME=lake.cal.data$DATETIME, 
@@ -133,7 +134,7 @@ output.cal.chained = function(run.dir){
 
 	lake.cal.data$WTEMP_MOD = NaN
 
-	tmp = subsampleGLM(wtr, lake.cal.dates, sort(lake.cal.depths))
+	tmp = wtr[as.Date(wtr$[,1])==lake.cal.dates,]
 
 	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
 	datesLookup = match(lake.cal.data$DATETIME, lake.cal.dates)
