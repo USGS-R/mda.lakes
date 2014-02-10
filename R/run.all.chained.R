@@ -19,7 +19,7 @@ model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
 wndRef = 0.00145
-wndMethod = 'JEKL'
+wndMethod = 'Hondzo'
 
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
@@ -51,7 +51,7 @@ for(i in 1:length(model.ids)){
   #glm.path must be absolute path, not relative
   
   Wstr = getWstr(WBICs[i],method=wndMethod)
-  nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33,'coef_mix_conv'=0.2,'ce'=0.00142,'ch'=0.00142)# reverting...
+  nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
   
   run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE)
   

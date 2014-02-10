@@ -73,7 +73,10 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
 	  source.nml <- set.nml(source.nml,'start',strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"))
 	  source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
 	  source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
-		if (!is.null(nml.args)){
+		
+    # this should handle a list now...test in future
+    
+    if (!is.null(nml.args)){
       for (a in 1:length(nml.args)){
         source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
       }
