@@ -146,7 +146,7 @@ output.cal.chained = function(run.dir){
 		wtr.tmp = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
 		nc_close(glm.ncs[[1]])
 		# trim it down to matching dates
-		wtr = wtr.tmp[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+		wtr = wtr.tmp[as.Date(wtr.tmp[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
     
     	if (length(nc.files)>1){
       		for(i in 2:length(glm.ncs)){
