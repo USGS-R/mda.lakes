@@ -144,6 +144,7 @@ output.cal.chained = function(run.dir){
     
     	# create single wtr data.frame for all years (all nc files)
 		wtr.tmp = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
+		nc_close(glm.ncs[[1]])
 		# trim it down to matching dates
 		wtr = wtr.tmp[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
     
@@ -154,14 +155,13 @@ output.cal.chained = function(run.dir){
 				# trim it down to matching dates
 				wtr.tmp = wtr.tmp[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
         		wtr = rbind(wtr,wtr.tmp)
+				#Close these pesky memory hogs
+				nc_close(glm.ncs[[i]])
       		}
     	}
     
     	# add additional row for modeled temp which is NA
     	lake.cal.data$WTEMP_MOD = NA
-    
-    	# trim down data.frame for model to just contain the sample dates
-    	tmp = wtr[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
     
     	# lookup matches for depth and time
     	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
@@ -170,11 +170,6 @@ output.cal.chained = function(run.dir){
     
     	for(j in 1:nrow(lake.cal.data)){
       		lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], (depthLookup[j]+1)]
-    	}
-    
-    	#Close these pesky memory hogs
-    	for(i in 1:length(glm.ncs)){
-      		nc_close(glm.ncs[[i]])
     	}
     
     	#out.fname = paste(runs.dir, '/WBIC_', cal.wbics[i], '/cal.csv', sep='')
