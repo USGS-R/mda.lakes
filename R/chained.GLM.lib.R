@@ -146,12 +146,7 @@ output.cal.chained = function(run.dir){
 	for(i in 2:length(glm.ncs)){
 	  wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
 	}
-	
-  # build data.frame same as cal.data
-	lake.mod.data = data.frame(WBIC=lake.cal.data$WBIC, 
-							   DATETIME=lake.cal.data$DATETIME, 
-							   DEPTH=lake.cal.data$DEPTH, 
-							   WTEMP=lake.cal.data$DEPTH*NaN)
+
 
   # add additional row for modeled temp which is NaN
 	lake.cal.data$WTEMP_MOD = NaN
