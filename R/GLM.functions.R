@@ -176,6 +176,10 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 	}
 	
 	lkeArea	<-	getArea(WBIC)
+  
+  if(is.na(lkeArea)){
+    return(NA)
+  }
 
 	Xt	<-	50*hc
 	
