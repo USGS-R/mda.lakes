@@ -19,7 +19,7 @@ model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
 wndRef = 0.00145
-wndMethod = 'Hondzo'
+wndMethod = 'Markfort'
 
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
