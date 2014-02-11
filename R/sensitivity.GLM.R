@@ -230,13 +230,13 @@ get.sim.temps	<-	function(run.dir,remove=FALSE){
 		if (remove){
       		# delete nc file ...
 		}
-  	} else {temps=data.frame('DateTime'=NA,'wtr_'=NA)}
+  } else {temps=data.frame('DateTime'=NA,'wtr_'=NA)}
   
 	return(temps)
 }
 
 
-sens.param	<-	'RT.air'
+sens.param	<-	'RT.ave'
 sens.mode	<-	'relative'
 param.seq	<-	seq(.3,1.7,by=0.1)
 response.matrix <- sensitivity.GLM(model.dirs,param.name=sens.param,param.seq=param.seq,sens.mode=sens.mode,year=1996)
