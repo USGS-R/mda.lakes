@@ -53,7 +53,7 @@ for(i in 1:length(model.ids)){
   Wstr = getWstr(WBICs[i],method=wndMethod)
   nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
   
-  run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE)
+  run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE, only.cal=TRUE)
   
   ## Now use calibration data to output matched modeled data for validation
   output.cal.chained(model.dirs[i])
