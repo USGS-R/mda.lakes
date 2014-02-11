@@ -94,7 +94,7 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 		#Edit and output NML
 		source.nml <- set.nml(source.nml,argList=list('start'=strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"),
 			'stop'=strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"),
-			'output'=strftime(s.starts[i],'%Y')))
+		  'out_fn'=paste('output', strftime(s.starts[i],'%Y'), sep='')))
 		
     	# this should handle a list now...test in future
     
