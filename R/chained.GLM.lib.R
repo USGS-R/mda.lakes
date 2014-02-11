@@ -6,9 +6,11 @@ if(iscondor){
 }
 
 
-run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
-  #run.dir is the home for all model inputs
-  #glm.path is the path to the glm.exe (including the exe)
+run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.cal=FALSE){
+  	# run.dir is the home for all model inputs
+  	# glm.path is the path to the glm.exe (including the exe)
+	# only.cal is boolean to only run cal/val years
+	
 	# I don't like doing this in a function, but you must 
 	# to properly run GLM
 	origin = getwd()
@@ -50,6 +52,8 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
 			season.i = season.i + 1
 		}
 	}
+	
+	# all the seasonal start dates
 	s.starts = s.starts[1:length(s.ends)]
 
 	# Figure out the years to model with start/end dates
@@ -70,21 +74,17 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE){
 	for(i in 1:length(s.starts)){
 		
 		#Edit and output NML
-	  source.nml <- set.nml(source.nml,'start',strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"))
-	  source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
-	  source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
+		source.nml <- set.nml(source.nml,argList=list('start'=strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"),
+			'stop'=strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"),
+			'output'=strftime(s.starts[i],'%Y')))
 		
-    # this should handle a list now...test in future
+    	# this should handle a list now...test in future
     
-    if (!is.null(nml.args)){
-      for (a in 1:length(nml.args)){
-        source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
-      }
-	  }
+    	if (!is.null(nml.args)){source.nml <- set.nml(source.nml,argList=nml.args)}
 		write.nml(source.nml, 'glm.nml', './')
 		
-		#Rusn this iteration of the model.
-    if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+		#Runs this iteration of the model.
+    	if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
 		out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
 
 		
