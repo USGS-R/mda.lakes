@@ -96,9 +96,8 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 			'stop'=strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"),
 		  'out_fn'=paste('output', strftime(s.starts[i],'%Y'), sep='')))
 		
-    	# this should handle a list now...test in future
     
-    	if (!is.null(nml.args)){source.nml <- set.nml(source.nml,argList=nml.args)}
+    if (!is.null(nml.args)){source.nml <- set.nml(source.nml,argList=nml.args)}
 		write.nml(source.nml, 'glm.nml', './')
 		
 		#Runs this iteration of the model.
