@@ -165,11 +165,11 @@ output.cal.chained = function(run.dir){
     
     	# lookup matches for depth and time
     	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
-    	datesLookup = match(as.Date(lake.cal.data$DATETIME),as.Date(tmp[,1]))
+    	datesLookup = match(as.Date(lake.cal.data$DATETIME),as.Date(wtr[,1]))
     
     
     	for(j in 1:nrow(lake.cal.data)){
-      		lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], (depthLookup[j]+1)]
+      		lake.cal.data$WTEMP_MOD[j] = wtr[datesLookup[j], (depthLookup[j]+1)]
     	}
     
     	#out.fname = paste(runs.dir, '/WBIC_', cal.wbics[i], '/cal.csv', sep='')
