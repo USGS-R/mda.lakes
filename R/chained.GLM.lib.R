@@ -138,17 +138,22 @@ output.cal.chained = function(run.dir){
     	}
     
     	## Subsample run to get water temp data at 4D obs points
-    
-    
+
     	lake.cal.dates = unique(lake.cal.data$DATETIME)
     	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
     
     	# create single wtr data.frame for all years (all nc files)
-    	wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
+		wtr.tmp = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
+		# trim it down to matching dates
+		wtr = wtr.tmp[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
     
     	if (length(nc.files)>1){
       		for(i in 2:length(glm.ncs)){
-        		wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
+				# rbind is slow...
+				wtr.tmp = getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths)
+				# trim it down to matching dates
+				wtr.tmp = wtr.tmp[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+        		wtr = rbind(wtr,wtr.tmp)
       		}
     	}
     
