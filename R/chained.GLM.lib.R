@@ -85,26 +85,28 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	rmI = s.starts <= nml.start | s.ends >= nml.end
 	s.starts = s.starts[!rmI]
 	s.ends = s.ends[!rmI]
-
-
-	#Iterate runs, appending output name with year.
-	for(i in 1:length(s.starts)){
-		
-		#Edit and output NML
-		source.nml <- set.nml(source.nml,argList=list('start'=strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"),
-			'stop'=strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"),
-		  'out_fn'=paste('output', strftime(s.starts[i],'%Y'), sep='')))
-		
-    
-    if (!is.null(nml.args)){source.nml <- set.nml(source.nml,argList=nml.args)}
-		write.nml(source.nml, 'glm.nml', './')
-		
-		#Runs this iteration of the model.
-    if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
-		out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
-
-		
-	}
+  if (length(s.starts)>0){
+    #Iterate runs, appending output name with year.
+    for(i in 1:length(s.starts)){
+      
+      #Edit and output NML
+      source.nml <- set.nml(source.nml,argList=list('start'=strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"),
+                                                    'stop'=strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"),
+                                                    'out_fn'=paste('output', strftime(s.starts[i],'%Y'), sep='')))
+      
+      
+      if (!is.null(nml.args)){source.nml <- set.nml(source.nml,argList=nml.args)}
+      write.nml(source.nml, 'glm.nml', './')
+      
+      #Runs this iteration of the model.
+      if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+      out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
+      
+      
+    }
+  }
+  
+	
 	#bring the original back
 	file.rename('glm.nml.orig', 'glm.nml')
 
@@ -128,50 +130,52 @@ output.cal.chained = function(run.dir){
 	lake.cal.data = read.table('cal.in.tsv', sep='\t', header=TRUE)
 
 	nc.files = Sys.glob('output*.nc')
-	glm.ncs = list()
-
-	for(i in 1:length(nc.files)){
-		glm.ncs[[i]] = nc_open(nc.files[i])
-	}
-
-	## Subsample run to get water temp data at 4D obs points
-  
-	
-	lake.cal.dates = unique(lake.cal.data$DATETIME)
-	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
-  
-  # create single wtr data.frame for all years (all nc files)
-	wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
-  
-  if (length(nc.files)>1){
-    for(i in 2:length(glm.ncs)){
-      wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
+  if (length(nc.files>1)){
+    glm.ncs = list()
+    
+    for(i in 1:length(nc.files)){
+      glm.ncs[[i]] = nc_open(nc.files[i])
     }
+    
+    ## Subsample run to get water temp data at 4D obs points
+    
+    
+    lake.cal.dates = unique(lake.cal.data$DATETIME)
+    lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
+    
+    # create single wtr data.frame for all years (all nc files)
+    wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
+    
+    if (length(nc.files)>1){
+      for(i in 2:length(glm.ncs)){
+        wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
+      }
+    }
+    
+    # add additional row for modeled temp which is NaN
+    lake.cal.data$WTEMP_MOD = NaN
+    
+    # trim down data.frame for model to just contain the sample dates
+    tmp = wtr[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+    
+    # lookup matches for depth and time
+    depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
+    datesLookup = match(as.Date(lake.cal.data$DATETIME),as.Date(tmp[,1]))
+    
+    
+    for(j in 1:nrow(lake.cal.data)){
+      lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], (depthLookup[j]+1)]
+    }
+    
+    #Close these pesky memory hogs
+    for(i in 1:length(glm.ncs)){
+      nc_close(glm.ncs[[i]])
+    }
+    
+    #out.fname = paste(runs.dir, '/WBIC_', cal.wbics[i], '/cal.csv', sep='')
+    write.table(lake.cal.data, 'cal.out.tsv', row.names=FALSE, sep='\t')
   }
-
-  # add additional row for modeled temp which is NaN
-	lake.cal.data$WTEMP_MOD = NaN
-  
-  # trim down data.frame for model to just contain the sample dates
-	tmp = wtr[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
-  
-  # lookup matches for depth and time
-	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
-	datesLookup = match(as.Date(lake.cal.data$DATETIME),as.Date(tmp[,1]))
-
-
-	for(j in 1:nrow(lake.cal.data)){
-	  lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], (depthLookup[j]+1)]
-	}
-
-  #Close these pesky memory hogs
-	for(i in 1:length(glm.ncs)){
-	  nc_close(glm.ncs[[i]])
-	}
-  
-	#out.fname = paste(runs.dir, '/WBIC_', cal.wbics[i], '/cal.csv', sep='')
-	write.table(lake.cal.data, 'cal.out.tsv', row.names=FALSE, sep='\t')
-
+	
 	
 	
 	setwd(origin)
