@@ -61,21 +61,24 @@ for(i in 1:length(model.ids)){
   ## Delete the output *.nc files if you want
   unlink(Sys.glob(file.path(model.dirs[i], '*.nc')))
   
-  dat = read.table(file.path(model.dirs[i], 'cal.out.tsv'),header=TRUE)
+  if(file.exists(file.path(model.dirs[i], 'cal.out.tsv')){
   
-  
-  
-  resids = dat$WTEMP-dat$WTEMP_MOD
-  resids = resids[!is.na(resids)]
-  if (length(resids)>3){
-    stdErr = sqrt(sum(resids^2)/length(resids))
-    lm = lm(dat$WTEMP~dat$WTEMP_MOD-1)
-    print(paste(c('linear model standard error:',summary(lm)$sigma),collapse=' '))
-    plot(dat$WTEMP,dat$WTEMP_MOD)
-    lines(c(0,30),c(0,30))
-    print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
-    print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
-  } else {stdErr = NA}
+    dat = read.table(file.path(model.dirs[i], 'cal.out.tsv'),header=TRUE)
+    
+    
+    
+    resids = dat$WTEMP-dat$WTEMP_MOD
+    resids = resids[!is.na(resids)]
+    if (length(resids)>3){
+      stdErr = sqrt(sum(resids^2)/length(resids))
+      lm = lm(dat$WTEMP~dat$WTEMP_MOD-1)
+      print(paste(c('linear model standard error:',summary(lm)$sigma),collapse=' '))
+      plot(dat$WTEMP,dat$WTEMP_MOD)
+      lines(c(0,30),c(0,30))
+      print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
+      print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
+    }
+  }else {stdErr = NA}
   
   
   #Print info on where we are
