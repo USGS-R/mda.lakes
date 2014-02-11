@@ -173,6 +173,9 @@ lkeSz = lkeSz(~nanI,:);
 % all temps nanI
 nanI = isnan(allTemp(:,1)) | isnan(allTemp(:,2));
 allTemp = allTemp(~nanI,:);
+res = allTemp(:,1)-allTemp(:,2);
+allTemp_SE = sqrt(sum(res.^2)/length(res));
+disp(allTemp_SE)
 %% create stats panel:
 
 cmap = colormap(jet(100));
