@@ -88,7 +88,6 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 
 
 	#Iterate runs, appending output name with year.
-
 	for(i in 1:length(s.starts)){
 		
 		#Edit and output NML

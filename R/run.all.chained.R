@@ -7,7 +7,7 @@ source('chained.GLM.lib.R')
 source('GLM.functions.R')
 library(stringr)
 
-summaryTxt = '../GLM/Run/summary.txt'
+summaryTxt = '../GLM/Run/summaryTEST.txt'
 
 ## Run all GLM models
 origin = getwd()
@@ -28,9 +28,8 @@ wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TR
 cat('WBIC\tStndErr\tnumPoints\n', file=summaryTxt)
 
 for(i in 1:length(model.ids)){
-  
   driver.file = paste(driver.dir, '/', model.ids[i], '.csv', sep='')
-
+  
   file.copy(driver.file, model.dirs[i])
   
   ## Write the lake-specific ice on/off data
@@ -77,18 +76,16 @@ for(i in 1:length(model.ids)){
     print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
     print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
   } else {stdErr = NA}
- 
+  
   
   #Print info on where we are
   print(paste(i,model.ids[i]))
   
   
   print(getArea(WBICs[i]))
-
+  
   cat(paste(c(WBICs[i],'\t',stdErr,'\t',length(resids),'\n'),collapse=''), file=summaryTxt,append=TRUE)
   dat = read.table(summaryTxt,header=TRUE)
   print(paste('mean SE:',mean(dat$StndErr,na.rm=TRUE),', median SE:',median(dat$StndErr,na.rm=TRUE),sep=''))
-
 }
-
 
