@@ -101,7 +101,7 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 		write.nml(source.nml, 'glm.nml', './')
 		
 		#Runs this iteration of the model.
-    	if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+    if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
 		out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
 
 		
@@ -126,7 +126,7 @@ output.cal.chained = function(run.dir){
 	  stop('No Cal Data for this lake')
 	}
 
-	cal.d = read.table('cal.in.tsv', sep='\t', header=TRUE)
+	lake.cal.data = read.table('cal.in.tsv', sep='\t', header=TRUE)
 
 	nc.files = Sys.glob('output*.nc')
 	glm.ncs = list()
@@ -138,7 +138,6 @@ output.cal.chained = function(run.dir){
 	## Subsample run to get water temp data at 4D obs points
   
 	
-	lake.cal.data = cal.d
 	lake.cal.dates = unique(lake.cal.data$DATETIME)
 	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
   
