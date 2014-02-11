@@ -63,7 +63,7 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 		}
 		
 		cal.d = read.table('cal.in.tsv', sep='\t', header=TRUE)
-		lake.cal.dates = unique(lake.cal.data$DATETIME)
+		lake.cal.dates = unique(cal.d$DATETIME)
 		
 		for (j in 1:length(s.starts)){
 			if (any(as.Date(lake.cal.dates)>=as.Date(s.starts[j]) & as.Date(lake.cal.dates)<=as.Date(s.ends[j]))){
