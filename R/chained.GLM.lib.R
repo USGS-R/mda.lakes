@@ -143,7 +143,7 @@ output.cal.chained = function(run.dir){
   # create single wtr data.frame for all years (all nc files)
 	wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
   
-  if (length(nc.file)>1){
+  if (length(nc.files)>1){
     for(i in 2:length(glm.ncs)){
       wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
     }
