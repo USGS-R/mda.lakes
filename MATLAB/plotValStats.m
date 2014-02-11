@@ -81,8 +81,8 @@ for lk = 1:length(WBICs)
                 wtrO = tWtrO(useI);
                 wtrM = wtrM(dupI);
                 wtrO = wtrO(dupI);
-                rhoMod = waterdensity(wtrM);
-                rhoObs = waterdensity(wtrO);
+                rhoMod = waterDensity(wtrM);
+                rhoObs = waterDensity(wtrO);
                 
                 if ge(length(dep),minDep)
                     bI = length(rhoObs);
