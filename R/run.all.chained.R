@@ -53,10 +53,10 @@ for (m in 1:length(h_s.mult)){
 	  #glm.path must be absolute path, not relative
 
 		h_s	<-	getCanopy(WBICs[i],default.if.null=TRUE)
-	  	Wstr = getWstr(WBICs[i],method=wndMethod,canopy=h_s)
-	  nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
+	  	Wstr = getWstr(WBICs[i],method=wndMethod,canopy=h_s*h_s.mult[m])
+	  	nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
 
-	  run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE, only.cal=TRUE)
+	  	run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE, only.cal=TRUE)
 
 	  ## Now use calibration data to output matched modeled data for validation
 	  output.cal.chained(model.dirs[i])
