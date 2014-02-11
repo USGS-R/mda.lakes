@@ -81,7 +81,10 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
 	  source.nml <- set.nml(source.nml,'start',strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"))
 	  source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
 	  source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
-		if (!is.null(nml.args)){
+		
+    # this should handle a list now...test in future
+    
+    if (!is.null(nml.args)){
       for (a in 1:length(nml.args)){
         source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
       }
@@ -237,31 +240,37 @@ output.cal.chained = function(run.dir){
 	}
 
 	## Subsample run to get water temp data at 4D obs points
-
-	wtr = getTempGLMnc(glm.ncs[[1]])
-	for(i in 2:length(glm.ncs)){
-		wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]], lyr.elevations=getElevGLM(wtr)))
-	}
-
+  
+	
 	lake.cal.data = cal.d
 	lake.cal.dates = unique(lake.cal.data$DATETIME)
 	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
-
+  
+  # create single wtr data.frame for all years (all nc files)
+	wtr = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
+	for(i in 2:length(glm.ncs)){
+	  wtr = rbind(wtr, getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths))
+	}
+	
+  # build data.frame same as cal.data
 	lake.mod.data = data.frame(WBIC=lake.cal.data$WBIC, 
 							   DATETIME=lake.cal.data$DATETIME, 
 							   DEPTH=lake.cal.data$DEPTH, 
 							   WTEMP=lake.cal.data$DEPTH*NaN)
 
+  # add additional row for modeled temp which is NaN
 	lake.cal.data$WTEMP_MOD = NaN
-
-	tmp = subsampleGLM(wtr, lake.cal.dates, sort(lake.cal.depths))
-
+  
+  # trim down data.frame for model to just contain the sample dates
+	tmp = wtr[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+  
+  # lookup matches for depth and time
 	depthLookup = match(lake.cal.data$DEPTH, lake.cal.depths)
-	datesLookup = match(lake.cal.data$DATETIME, lake.cal.dates)
+	datesLookup = match(as.Date(lake.cal.data$DATETIME),as.Date(tmp[,1]))
 
 
 	for(j in 1:nrow(lake.cal.data)){
-	  lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], depthLookup[j]]
+	  lake.cal.data$WTEMP_MOD[j] = tmp[datesLookup[j], (depthLookup[j]+1)]
 	}
 
   #Close these pesky memory hogs

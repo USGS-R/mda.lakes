@@ -187,6 +187,9 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 		} else {
 			wind.shelter	<-	2/pi*acos(Xt/D)-(2*Xt/(pi*D^2))*sqrt(D^2-Xt^2)
 		}
+	} else if (method=="Hondzo") {
+		lkeArea.km2 = lkeArea*1.0e-6 # to km2
+		wind.shelter= 1.0 - exp(-0.3*lkeArea.km2)
 	} else {
 		perim	<-	getPerim(WBIC)
 		shelArea	<-	perim*hc*12.5 # 25% of Markfort, as sheltering is single direction...
