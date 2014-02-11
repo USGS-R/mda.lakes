@@ -43,8 +43,10 @@ HypAve  = NaN(length(WBICs)*100,2);
 SurTemp = NaN(length(WBICs)*100,2);
 AveTemp = NaN(length(WBICs)*100,2);
 lkeSz   = NaN(length(WBICs)*100,1);
+allTemp = NaN(length(WBICs)*1000,2);
 
 cnt = 0;
+atCnt = 0;
 %% get unique lakes
 
 for lk = 1:length(WBICs)
@@ -81,9 +83,11 @@ for lk = 1:length(WBICs)
                 wtrO = tWtrO(useI);
                 wtrM = wtrM(dupI);
                 wtrO = wtrO(dupI);
+                allTemp(atCnt+1:atCnt+length(wtrM),2) = wtrM;
+                allTemp(atCnt+1:atCnt+length(wtrM),1) = wtrO;
                 rhoMod = waterDensity(wtrM);
                 rhoObs = waterDensity(wtrO);
-                
+                atCnt = atCnt+length(wtrM);
                 if ge(length(dep),minDep)
                     bI = length(rhoObs);
                     for d = 2:length(rhoObs)
@@ -164,6 +168,11 @@ EpiAve = EpiAve(~nanI,:);
 HypAve = HypAve(~nanI,:);
 ThrmZ =  ThrmZ(~nanI,:);
 lkeSz = lkeSz(~nanI,:);
+
+
+% all temps nanI
+nanI = isnan(allTemp(:,1)) | isnan(allTemp(:,2));
+allTemp = allTemp(~nanI,:);
 %% create stats panel:
 
 cmap = colormap(jet(100));
