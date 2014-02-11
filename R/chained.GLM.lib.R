@@ -55,7 +55,25 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	
 	# all the seasonal start dates
 	s.starts = s.starts[1:length(s.ends)]
-
+	if (only.cal){
+		# only sim years where val dates fall within s.starts and s.ends
+		sim.idx	<-	vector(length=length(s.starts))
+		if(!file.exists('cal.in.tsv')){
+			stop('No Cal Data for this lake')
+		}
+		
+		cal.d = read.table('cal.in.tsv', sep='\t', header=TRUE)
+		lake.cal.dates = unique(lake.cal.data$DATETIME)
+		
+		for (j in 1:length(s.starts)){
+			if (any(as.Date(lake.cal.dates)>=as.Date(s.starts[j]) & as.Date(lake.cal.dates)<=as.Date(s.ends[j]))){
+				sim.idx[j] = TRUE
+			}
+		}
+		# trim off sim years that don't have validation samples
+		s.starts	<-	s.starts[sim.idx]
+		s.ends	<-	s.ends[sim.idx]
+	}
 	# Figure out the years to model with start/end dates
 	# Find start/stop dates in existing NML
 	nml.start = as.POSIXct(source.nml$time$start)
