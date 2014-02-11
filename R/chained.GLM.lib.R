@@ -76,8 +76,8 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	}
 	# Figure out the years to model with start/end dates
 	# Find start/stop dates in existing NML
-	nml.start = as.POSIXct(source.nml$time$start)
-	nml.end = as.POSIXct(source.nml$time$stop)
+	nml.start = as.POSIXct(get.nml(source.nml,'start'))
+	nml.end = as.POSIXct(get.nml(source.nml,'stop'))
 
 
 	# Intersect the two (Max of starts, min of ends)
