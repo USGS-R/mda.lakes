@@ -60,8 +60,8 @@ for(i in 1:length(model.ids)){
   
   ## Delete the output *.nc files if you want
   unlink(Sys.glob(file.path(model.dirs[i], '*.nc')))
-  
-  if(file.exists(file.path(model.dirs[i], 'cal.out.tsv')){
+  stdErr = NA
+  if(file.exists(file.path(model.dirs[i], 'cal.out.tsv'))){
   
     dat = read.table(file.path(model.dirs[i], 'cal.out.tsv'),header=TRUE)
     
@@ -78,7 +78,7 @@ for(i in 1:length(model.ids)){
       print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
       print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
     }
-  }else {stdErr = NA}
+  }
   
   
   #Print info on where we are
