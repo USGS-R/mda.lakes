@@ -7,7 +7,7 @@ source('chained.GLM.lib.R')
 source('GLM.functions.R')
 library(stringr)
 
-summaryTxt = '../GLM/Run/summary.txt'
+
 
 ## Run all GLM models
 origin = getwd()
@@ -24,71 +24,78 @@ wndMethod = 'Markfort'
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TRUE, header=TRUE)
+h_s.mult=c(1.25,1.5,1.75,2.0,2.5)
+for (m in 1:length(h_s.mult)){
+	summaryTxt = paste('../GLM/Run/summary_hs.',as.character(h_s.mult[m]),'.txt',sep='')
+	print(summaryTxt)
+	cat('WBIC\tStndErr\tnumPoints\n', file=summaryTxt)
 
-cat('WBIC\tStndErr\tnumPoints\n', file=summaryTxt)
+	for(i in 1:length(model.ids)){
+	  driver.file = paste(driver.dir, '/', model.ids[i], '.csv', sep='')
 
-for(i in 1:length(model.ids)){
-  
-  driver.file = paste(driver.dir, '/', model.ids[i], '.csv', sep='')
+	  file.copy(driver.file, model.dirs[i])
 
-  file.copy(driver.file, model.dirs[i])
-  
-  ## Write the lake-specific ice on/off data
-  lake.ice.info = empir.ice[empir.ice$WBIC == as.numeric(WBICs[i]), ]
-  if(nrow(lake.ice.info) == 0){
-    next
-  }
-  write.table(lake.ice.info, file.path(model.dirs[i], 'icecal.in.tsv'), row.names=FALSE, sep='\t')
-  
-  ## Write the lake-specific validation observation data
-  lake.wtemp.obs = wtemp.obs[wtemp.obs$WBIC == as.numeric(WBICs[i]),]
-  if(nrow(lake.wtemp.obs) == 0){
-    next
-  }
-  write.table(lake.wtemp.obs, file.path(model.dirs[i], 'cal.in.tsv'), row.names=FALSE, sep='\t')
-  
-  ## Should be ready, run chained model
-  #glm.path must be absolute path, not relative
-  
-  Wstr = getWstr(WBICs[i],method=wndMethod)
-  nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
-  
-  run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE)
-  
-  ## Now use calibration data to output matched modeled data for validation
-  output.cal.chained(model.dirs[i])
-  
-  
-  ## Delete the output *.nc files if you want
-  unlink(Sys.glob(file.path(model.dirs[i], '*.nc')))
-  
-  dat = read.table(file.path(model.dirs[i], 'cal.out.tsv'),header=TRUE)
-  
-  
-  
-  resids = dat$WTEMP-dat$WTEMP_MOD
-  resids = resids[!is.na(resids)]
-  if (length(resids)>3){
-    stdErr = sqrt(sum(resids^2)/length(resids))
-    lm = lm(dat$WTEMP~dat$WTEMP_MOD-1)
-    print(paste(c('linear model standard error:',summary(lm)$sigma),collapse=' '))
-    plot(dat$WTEMP,dat$WTEMP_MOD)
-    lines(c(0,30),c(0,30))
-    print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
-    print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
-  } else {stdErr = NA}
- 
-  
-  #Print info on where we are
-  print(paste(i,model.ids[i]))
-  
-  
-  print(getArea(WBICs[i]))
+	  ## Write the lake-specific ice on/off data
+	  lake.ice.info = empir.ice[empir.ice$WBIC == as.numeric(WBICs[i]), ]
+	  if(nrow(lake.ice.info) == 0){
+	    next
+	  }
+	  write.table(lake.ice.info, file.path(model.dirs[i], 'icecal.in.tsv'), row.names=FALSE, sep='\t')
 
-  cat(paste(c(WBICs[i],'\t',stdErr,'\t',length(resids),'\n'),collapse=''), file=summaryTxt,append=TRUE)
-  dat = read.table(summaryTxt,header=TRUE)
-  print(paste('mean SE:',mean(dat$StndErr,na.rm=TRUE),', median SE:',median(dat$StndErr,na.rm=TRUE),sep=''))
+	  ## Write the lake-specific validation observation data
+	  lake.wtemp.obs = wtemp.obs[wtemp.obs$WBIC == as.numeric(WBICs[i]),]
+	  if(nrow(lake.wtemp.obs) == 0){
+	    next
+	  }
+	  write.table(lake.wtemp.obs, file.path(model.dirs[i], 'cal.in.tsv'), row.names=FALSE, sep='\t')
 
+	  ## Should be ready, run chained model
+	  #glm.path must be absolute path, not relative
+
+		h_s	<-	getCanopy(WBICs[i],default.if.null=TRUE)
+	  	Wstr = getWstr(WBICs[i],method=wndMethod,canopy=h_s*h_s.mult[m])
+	  	nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
+
+	  	run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE, only.cal=TRUE)
+
+	  	## Now use calibration data to output matched modeled data for validation
+	  	output.cal.chained(model.dirs[i])
+
+
+	  	## Delete the output *.nc files if you want
+	  	unlink(Sys.glob(file.path(model.dirs[i], '*.nc')))
+		
+		# RSME set to NA for this lake initially
+	  	stdErr = NA
+	  	if(file.exists(file.path(model.dirs[i], 'cal.out.tsv'))){
+
+	    	dat = read.table(file.path(model.dirs[i], 'cal.out.tsv'),header=TRUE)
+
+
+
+	    	resids = dat$WTEMP-dat$WTEMP_MOD
+	    	resids = resids[!is.na(resids)]
+	    	if (length(resids)>3){
+	      		stdErr = sqrt(sum(resids^2)/length(resids))
+	      		lm = lm(dat$WTEMP~dat$WTEMP_MOD-1)
+	      		print(paste(c('linear model standard error:',summary(lm)$sigma),collapse=' '))
+	      		plot(dat$WTEMP,dat$WTEMP_MOD)
+	      		lines(c(0,30),c(0,30))
+	      		print(paste(c('obs vs model standard error:',stdErr,', from',length(resids),'points'),collapse=' '))
+	      		print(paste(nml.args$coef_wind_drag,'vs Markfort',getWstr(WBICs[i])^0.33*wndRef,sep=' '))
+	    	}
+	  	}
+
+	  #Print info on where we are
+	  print(paste(i,model.ids[i]))
+
+
+	  print(getArea(WBICs[i]))
+
+	  cat(paste(c(WBICs[i],'\t',stdErr,'\t',length(resids),'\n'),collapse=''), file=summaryTxt,append=TRUE)
+	  dat = read.table(summaryTxt,header=TRUE)
+	  print(paste('mean SE:',mean(dat$StndErr,na.rm=TRUE),', median SE:',median(dat$StndErr,na.rm=TRUE),sep=''))
+	}
 }
 
 
