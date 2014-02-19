@@ -146,14 +146,14 @@ output.cal.chained = function(run.dir){
 		wtr.tmp = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
 		nc_close(glm.ncs[[1]])
 		# trim it down to matching dates
-		wtr = wtr.tmp[as.Date(wtr.tmp[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+		wtr = wtr.tmp[as.Date(wtr.tmp[,1]) %in% as.Date(lake.cal.dates),]
     
     	if (length(nc.files)>1){
       		for(i in 2:length(glm.ncs)){
 				# rbind is slow...
 				wtr.tmp = getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths)
 				# trim it down to matching dates
-				wtr.tmp = wtr.tmp[as.Date(wtr[,1],origin="CDT") %in% as.Date(lake.cal.dates),]
+				wtr.tmp = wtr.tmp[as.Date(wtr.tmp[,1]) %in% as.Date(lake.cal.dates),]
         		wtr = rbind(wtr,wtr.tmp)
 				#Close these pesky memory hogs
 				nc_close(glm.ncs[[i]])
