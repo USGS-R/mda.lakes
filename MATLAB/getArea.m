@@ -15,7 +15,7 @@ reader = '%s %s %s %s %s %s %s %s %s %s %s %s';
 
 fID = fopen(metaFile);
 dat = textscan(fID,reader,'Delimiter','\t','HeaderLines',1);
-fclose all;
+fclose(fID);
 
 WBICs = dat{wbic_i};
 areas = dat{lkeA_i};

@@ -188,7 +188,8 @@
    inflow_factor = 0.52
    inflow_fl      = 'inflow.csv'
    inflow_varnum  = 2
-   inflow_vars    = 'FLOW',            'TEMP'
+   inflow_vars    = 'FLOW',            
+   'TEMP'
 /
 
 !-------------------------------------------------------------------------------

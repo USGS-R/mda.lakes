@@ -1,0 +1,91 @@
+## Run all condor
+## This submit file creates condor submit files for workflow that
+## does a few things. 
+
+library(stringr)
+source('htcondor-R.R')
+
+home.dir = getwd()
+run.dir = 'D:/WilmaRuns/09-18Final'
+driver.dir = 'D:/WilmaDrivers/07-30'
+
+runs = Sys.glob(file.path(run.dir, 'WBIC_*'))
+model.ids = basename(runs)
+WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
+
+model.files = file.path('D:/WILMA/GLM/1.2.2', 
+                        c('glm.exe', 'hdf5_hldll.dll', 'hdf5dll.dll',
+                          'libmmd.dll', 'netcdf.dll', 'svml_dispmd.dll', 'szip.dll',
+                          'zlib1.dll'))
+#nc.files = file.path('D:/WILMA/WILMA-R/bin', 
+#                     c('netcdfBins.zip', 'bzip2.dll', 
+#                       'unzip.exe', 'zip.exe', 'zip32z64.dll'))
+
+
+key.code = file.path(home.dir, c('chained.GLM.lib.R'))
+key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.2.tar.gz',
+                                                           'ncdf4_1.4.zip', '.Renviron'))))
+
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_1.0.zip', 
+                                                           'wtr.out.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
+                                                           'stringr_0.6.2.zip')))
+
+key.code = c(key.code, file.path('D:/WiLMA/WILMA-m/R', '3dayPrefix.csv'))
+
+
+bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelWtrOut.bat'
+
+
+driver.files = paste(file.path(driver.dir,model.ids), '.csv', sep='')
+
+#fig.gen.files = file.path('D:/WILMA/WILMA-R/CreateFiguresCondor',
+#                c('create.glm.figures.R','GLMnetCDF.R','GlmPhysicalDerivatives.r','.Renviron','ncdf4_1.4.zip'))
+
+empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
+
+for(i in 1:length(runs)){
+  
+  # Write out ice on/off data for chained runs
+  lake.ice.info = empir.ice[empir.ice$WBIC == as.numeric(WBICs[i]), ]
+  if(nrow(lake.ice.info) == 0){
+    next
+  }
+  write.table(lake.ice.info, file.path(runs[i], 'icecal.in.tsv'), row.names=FALSE, sep='\t')
+  
+  info = data.frame(WBIC=WBICs[i])
+  write.table(info, file.path(runs[i], 'run.info.tsv'), row.names=FALSE)
+  
+  
+  #Write the condor submit file with all the appropriate input
+  condor.write.submit(file.path(runs[i],'condor.cmd'),
+                      executable=bat.file, 
+                      c(model.files, driver.files[i], key.code,
+                        'glm.nml', 'icecal.in.tsv', 'run.info.tsv'))
+  
+  #Submit the run!
+  setwd(runs[i])
+  system('condor_submit condor.cmd')
+  setwd(home.dir)
+}
+
+system("rundll32 user32.dll,MessageBeep -1")
+Sys.sleep(1)
+system("rundll32 user32.dll,MessageBeep -1")
+Sys.sleep(1)
+system("rundll32 user32.dll,MessageBeep -1")
+
+################################################################################
+## Just some quick re-run code.
+################################################################################
+
+for(i in 1:length(runs)){
+  if(!file.exists(file.path(runs[i],'habitat.out.tsv'))){
+    cat('Resubmitting', runs[i], '\n')
+    setwd(runs[i])
+    system('condor_submit condor.cmd')
+    setwd(home.dir)
+  }
+}
+
+
+
