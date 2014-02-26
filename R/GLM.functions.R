@@ -205,18 +205,22 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 	return(wind.shelter)
 }
 
-getZmax	<-	function(WBIC){
-	ft2m	<-	0.3048
-	data	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
-	useI	<- data$WBIC==as.numeric(WBIC)
-	if (any(useI)){
-		max.depth	<-	ft2m*mean(data$max.depth.ft[useI],na.rm=TRUE)
-	} else {
-		max.depth	<-	NULL
-	}
-	
-	return(max.depth)
-}
+
+getZmax <- local({ lookup=NULL; function(WBIC) {
+  if (is.null(lookup)) { 
+    cat('Caching depth info.\n')
+    ft2m  <-	0.3048
+    d	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
+    
+    lookup <<- new.env()
+    for(i in 1:nrow(d)){
+      lookup[[toString(d$WBIC[i])]] = ft2m*mean(d$max.depth.ft[i],na.rm=TRUE)
+    }
+  }
+  lookup[[WBIC]]
+}})
+
+
 
 getZmean	<-	function(WBIC){
 	ft2m	<-	0.3048
