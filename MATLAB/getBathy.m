@@ -15,6 +15,7 @@ fID = fopen([rootDir '/Bathy/' WBIC '.bth']);
 if gt(fID,0)
     % parse..
     dat = textscan(fID,'%f %f','Delimiter','\t','HeaderLines',1);
+    fclose(fID);
     bthH = dat{1}';
     bthA = dat{2}';
     fromBth = true;
@@ -32,6 +33,6 @@ else
 end
 bth = [bthH; bthA];
 
-fclose all;
+
 
 

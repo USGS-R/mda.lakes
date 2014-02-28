@@ -5,12 +5,12 @@ if(iscondor){
 	install.packages("ncdf4_1.4.zip", lib='./rLibs', repos=NULL)
 }
 
+Sys.setenv(TZ='GMT')
 
 run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.cal=FALSE){
   	# run.dir is the home for all model inputs
   	# glm.path is the path to the glm.exe (including the exe)
 	# only.cal is boolean to only run cal/val years
-	
 	# I don't like doing this in a function, but you must 
 	# to properly run GLM
 	origin = getwd()
@@ -31,6 +31,11 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	ice.in$DATE = as.POSIXct(ice.in$DATE)
 	ice.in = ice.in[order(ice.in$DATE), ]
 
+  #temporary hack
+  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
+    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
+  }
+  
 
 	# Find complete seasons (pairs of off/on dates)
 	s.starts = NA
@@ -86,6 +91,7 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	s.starts = s.starts[!rmI]
 	s.ends = s.ends[!rmI]
 
+<<<<<<< HEAD
     #Iterate runs, appending output name with year.
     for(i in seq_len(length(s.starts))){
       
@@ -110,6 +116,118 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	file.rename('glm.nml.orig', 'glm.nml')
 
 	setwd(origin)
+}
+
+
+run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
+  require(rGLM)
+  #run.dir is the home for all model inputs
+  #glm.path is the path to the glm.exe (including the exe)
+  # I don't like doing this in a function, but you must 
+  # to properly run GLM
+  origin = getwd()
+  setwd(run.dir)
+  
+  ## Key Paths and parameters
+  
+  ## Open template NML file
+  source.nml = read.nml('glm.nml','./')
+  # stash original
+  file.copy('glm.nml', 'glm.nml.orig')
+  
+  # Ice on/off Dates
+  #Get the ice on/off dates
+  ice.in = read.table('icecal.in.tsv', as.is=TRUE, header=TRUE, sep='\t')
+  
+  ice.in$DATE = as.POSIXct(ice.in$DATE)
+  ice.in = ice.in[order(ice.in$DATE), ]
+  
+  #temporary hack
+  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
+    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
+  }
+  
+  
+  # Find complete seasons (pairs of off/on dates)
+  s.starts = NA
+  s.ends = NA
+  class(s.starts) = c("POSIXct", "POSIXt")
+  class(s.ends) = c("POSIXct", "POSIXt")
+  season.i = 1
+  
+  for(i in 1:nrow(ice.in)){
+    abs(as.double(ice.in$DATE[i] - s.starts[season.i], units="days")) < 365
+    #browser()
+    if(ice.in$ON.OFF[i] == 'off'){# Must start at an "off" 
+      s.starts[season.i] = ice.in$DATE[i]
+      
+    }else if(!is.na(s.starts[season.i]) && 
+               abs(as.double(ice.in$DATE[i] - s.starts[season.i], units="days")) < 365){
+      s.ends[season.i] = ice.in$DATE[i]
+      
+      season.i = season.i + 1
+    }
+  }
+  s.starts = s.starts[1:length(s.ends)]
+  
+  # Figure out the years to model with start/end dates
+  # Find start/stop dates in existing NML
+  nml.start = as.POSIXct(source.nml$time$start)
+  nml.end = as.POSIXct(source.nml$time$stop)
+  
+  
+  # Intersect the two (Max of starts, min of ends)
+  # If we have ice-off before nml.start or ice-on after nml.end, truncate
+  rmI = s.starts <= nml.start | s.ends >= nml.end
+  s.starts = s.starts[!rmI]
+  s.ends = s.ends[!rmI]
+  
+  # Prep prefix met data
+  prefix = read.csv('3dayPrefix.csv', header=TRUE)
+  
+  full.met = read.csv(get.nml(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
+  #stash original
+  file.copy(get.nml(source.nml, 'meteo_fl'), 'met.csv.orig')
+  
+  
+  #Let's change that prefix data!
+  
+  for(i in 1:length(s.starts)){
+    startI = which(strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S") == full.met$time)
+    full.met[(startI-3):(startI-1),-1] = prefix
+    
+    
+  }
+  #Write the met data with the new prefixes before iceoffs
+  write.csv(full.met, get.nml(source.nml, 'meteo_fl'), row.names=FALSE, quote=FALSE)
+  
+  
+  #Iterate runs, appending output name with year.
+  for(i in 1:length(s.starts)){  
+    
+    #Edit and output NML, start this thing 3 days early
+    source.nml <- set.nml(source.nml,'start',strftime(s.starts[i]-as.difftime(3, unit="days"), format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
+    if (!is.null(nml.args)){
+      for (a in 1:length(nml.args)){
+        source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
+      }
+    }
+    write.nml(source.nml, 'glm.nml', './')
+    
+    #Rusn this iteration of the model.
+    if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+    
+    out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
+    cat(out,'\n')
+    
+  }
+  #bring the original back
+  file.rename('glm.nml.orig', 'glm.nml')
+  file.rename('met.csv.orig', get.nml(source.nml, 'meteo_fl'))
+  
+  setwd(origin)
 }
 
 
@@ -178,5 +296,51 @@ output.cal.chained = function(run.dir){
 	
 	setwd(origin)
 
+}
+
+
+get.wtr.chained.prefix = function(run.dir){
+  
+  require(ncdf4)
+  require(rGLM)
+  origin = getwd()
+  setwd(run.dir)
+  #output.cal.chained
+  #This tries to take calibration data and join it with model output data
+  # THis particular version deals with the damn chained runs
+  
+  
+  nc.files = Sys.glob('output*.nc')
+  glm.ncs = list()
+  
+  for(i in 1:length(nc.files)){
+    glm.ncs[[i]] = nc_open(nc.files[i])
+  }
+  
+  ## Subsample run to get water temp data at 4D obs points
+  
+  wtr = getTempGLMnc(glm.ncs[[1]], 0.25)
+  wtr = wtr[4:nrow(wtr), ] #Drop the first three burn-in days
+  
+  for(i in 2:length(glm.ncs)){
+    tryCatch({
+      tmp = getTempGLMnc(glm.ncs[[i]], lyr.elevations=getElevGLM(wtr))
+      
+      wtr = rbind(wtr, tmp[4:nrow(tmp), ]) #Drop the first three days which were "burn-in" days
+      
+    }, error=function(e){}) #If we error, just skip this year
+  }
+
+  #write.table(wtr, 'output.wtr', sep='\t', col.names=TRUE, row.names=FALSE)
+  
+  #Close these pesky memory hogs
+  for(i in 1:length(glm.ncs)){
+    nc_close(glm.ncs[[i]])
+  }
+  
+  setwd(origin)
+  
+  return(wtr)
+  
 }
 

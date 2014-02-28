@@ -11,22 +11,27 @@ end
 if eq(nargin,1)
     SecchiFile = ['../supporting files' del 'annual_mean_secchi.txt'];
 end
-wbic_i = 1;
-secc_i = 9;
-reader = '%s %s %s %s %s %s %s %s %s %s';
 
-fID = fopen(SecchiFile);
-dat = textscan(fID,reader,'Delimiter','\t','HeaderLines',1);
-fclose all;
+persistent WBICs secchis;
 
-WBICs = dat{wbic_i};
-secchis = dat{secc_i};
+if( isempty(WBICs))
+    wbic_i = 1;
+    secc_i = 9;
+    reader = '%s %s %s %s %s %s %s %s %s %s';
+
+    fID = fopen(SecchiFile);
+    dat = textscan(fID,reader,'Delimiter','\t','HeaderLines',1);
+    fclose(fID);
+
+    WBICs = dat{wbic_i};
+    secchis = dat{secc_i};
+end
 
 useI = strcmp(WBICs,WBIC);
 if any(useI)
-    secchis = str2double(secchis(useI));
-    secchis = secchis(~isnan(secchis));
-    Secchi = mean(secchis);
+    secchis_match = str2double(secchis(useI));
+    secchis_match = secchis_match(~isnan(secchis_match));
+    Secchi = mean(secchis_match);
 else
     Secchi = NaN;
 end
