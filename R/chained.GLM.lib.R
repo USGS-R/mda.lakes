@@ -91,7 +91,6 @@ run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.c
 	s.starts = s.starts[!rmI]
 	s.ends = s.ends[!rmI]
 
-<<<<<<< HEAD
     #Iterate runs, appending output name with year.
     for(i in seq_len(length(s.starts))){
       
