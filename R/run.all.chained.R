@@ -24,7 +24,7 @@ wndMethod = 'Markfort'
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TRUE, header=TRUE)
-h_s.mult=c(1.25,1.5,1.75,2.0,2.5)
+h_s.mult=c(0.75,1.25,1.5,1.75,2,1)
 for (m in 1:length(h_s.mult)){
 	summaryTxt = paste('../GLM/Run/summary_hs.',as.character(h_s.mult[m]),'.txt',sep='')
 	print(summaryTxt)
