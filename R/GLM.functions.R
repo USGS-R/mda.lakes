@@ -59,16 +59,36 @@ getCanopy	<-	local(
 		
 		default.hc	<-	0.5
 		
-		function(WBIC,default.if.null=FALSE) {
+		function(WBIC,default.if.null=FALSE,method="ASTER") {
 			if (is.null(lookup)) { 
-				cat('Caching canopy info.\n')
-				d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
-					header=TRUE,sep=',')
-				lookup <<- new.env()
-		
-				for (i in 1:nrow(d)){
-					lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
-				}
+        if (method=='ASTER'){
+          cat('Caching canopy info.\n')
+          d	<-	read.table('../supporting files/canopyht_zonal_no_zero_num5_positivehts.csv',
+                          header=TRUE,sep=',')
+          lookup <<- new.env()
+          
+          for (i in 1:nrow(d)){
+            lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
+          }
+        } else if (method=="landcover"){
+          cat('Caching landcover info.\n')
+          d  <-	read.table('../supporting files/buffers_land_cover.csv',
+                           header=TRUE,sep=',')
+          lookup <<- new.env()
+          
+          for (i in 1:nrow(d)){
+            #100 urban
+            #110 ag
+            #150 grassland
+            #160 forest 
+            #200 open water
+            #210 wetland
+            table.lc = data.frame("lc_200"=0.5,"lc_160"=11.5,"lc_100"=0.5,"lc_150"=0.65,"lc_110"=0.8,"lc_210"=0.5)
+            val = table.lc[paste("lc_",as.character(d[i,2]),sep='')]
+            lookup[[toString(d$WBDY_WBIC[i])]]	<-	as.numeric(val)
+          }
+        }
+				
 			}
 			wbic.val = lookup[[as.character(WBIC)]]
 
