@@ -5,17 +5,19 @@ plot.fig8.GCB	<-	function(years){
 	tck	<-	0.02
 	plt.rng.x	= c(75,143)
 	seq.range = seq(70,365,1)
-	plot_colors <- c("black", "firebrick", "grey80","grey40")
+	plot_colors <- c("black", "black", "grey80","grey40")
 	
+	h_w.ratio	<-	1.0 # height to width ratio
 	fig.w	<-	3.14961
-	v.spc	<-	0.075 # inches of vertical space to separate panels (top only)
-	h.spc	<-	0.00 # inches of vertical space to separate panels (right only)
+	v.spc	<-	0.1 # inches of vertical space to separate panels (top only)
+	h.spc	<-	0.01 # inches of vertical space to separate panels (right only)
 	l.mar	<-	0.05
 	r.mar	<-	v.spc
 	t.mar	<-	0.00
-	left.spc	<-	0.25
-	pan.size	<-	(fig.w-2*(h.spc+left.spc)-r.mar-l.mar)/2
-	divs	<-	5
+	left.spc	<-	0.27
+	pan.size	<-	(fig.w-2*(h.spc+left.spc)-r.mar-l.mar)/2*h_w.ratio
+	divs	<-	4
+	par.mgp <<- c(1.05,.14,0)
 	
 	bot.buffer	<-	pan.size/divs	# inches at base to allow 
 	fig.h	<-	(pan.size+v.spc)*3+bot.buffer+t.mar
@@ -40,23 +42,25 @@ plot.fig8.GCB	<-	function(years){
 	
 	layout(panels)
 	
-	par(mai=c(.0,left.spc, v.spc, h.spc),mgp=c(.9,.14,0),omi=c(0,l.mar,t.mar,r.mar))
+	par(mai=c(.0,left.spc, v.spc, h.spc),mgp=par.mgp,omi=c(0,l.mar,t.mar,r.mar))
 	
 	# plot 1 & 4 are air temperatures
 	plot.air(years[1],col=plot_colors[2],plt.rng.x,cex.ttl,cex.box,tck,label='(a)')
  	
-	plot.exceed(years[1],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(c)')
-	par(mai=c(fig.h/((divs*3)+1),left.spc, v.spc, h.spc))
+	plot.strat(years[1],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(c)')
 	
-	plot.strat(years[1],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(e)')
+	par(mai=c(fig.h/((divs*3)+1),left.spc, v.spc, h.spc))
+	plot.exceed(years[1],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(e)')
+
 	par(mai=c(.0,left.spc, v.spc, h.spc))
 	
 	plot.air(years[2],col=plot_colors[2],plt.rng.x,cex.ttl,cex.box,tck,label='(b)')
  	
-	
-	plot.exceed(years[2],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(d)')
+	plot.strat(years[2],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(d)')
 	par(mai=c(fig.h/((divs*3)+1),left.spc, v.spc, h.spc))
-	plot.strat(years[2],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(f)')
+	plot.exceed(years[2],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(f)')
+	
+	
 
 	dev.off()
 }
@@ -67,28 +71,26 @@ plot.air	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 		ylim=c(-15,26), xlim=plt.rng.x,
 		ylab="Air temperature (°C)",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
-	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
-	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
-	axis(2,at=seq(-100, 50, 10),las=1, cex.axis=cex.box, tck=tck)
-	axis(4,at=seq(-100, 50, 10),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	
 	air.temps	<-	get.air.temp(year)
 	lines(air.temps$time,air.temps$temperature,type="l", lwd=2,
 		col=col)
 	label.loc	<-	get.text.location(par())
 	text(label.loc[1],label.loc[2],label)
 	
+	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	axis(2,at=seq(-100, 50, 10),las=1, cex.axis=cex.box, tck=tck)
+	axis(4,at=seq(-100, 50, 10),las=1, cex.axis=cex.box, tck=tck,labels=NA)
 }
 
 plot.exceed	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 	plot(c(NA,1),c(0,1), type="l", col=col[1], 
-		axes=F, xlab=NA,
+		axes=F, xlab="Day of year",
 		ylim=c(0,100), xlim=plt.rng.x,
-		ylab="Lakes warmer than 8.9°C (%)",
+		ylab="Lakes beyond 8.9°C (%)",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
-	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
-	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
-	axis(2,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck)
-	axis(4,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+
 	
 	exceed	<-	get.hist.exceed(year)
 	polygon(x=c(exceed$x,rev(exceed$x)), y=c(exceed$line.1,rev(exceed$line.5)),
@@ -99,26 +101,49 @@ plot.exceed	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 		col=col[1])
 	label.loc	<-	get.text.location(par())
 	text(label.loc[1],label.loc[2],label)
+	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck)
+	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	axis(2,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck)
+	axis(4,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck,labels=NA)
 }
 
 plot.strat	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 	plot(c(NA,1),c(0,1), type="l", col=col[1], 
-		axes=F, xlab="Day of year",
+		axes=F, xlab=NA,
 		ylim=c(0,100), xlim=plt.rng.x,
 		ylab="Lakes stratified (%)",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)		
-	par(mgp=c(.9,.04,0))
-	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck)
-	par(mgp=c(.9,.14,0))
-	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
-	axis(2,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck)
-	axis(4,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	
 	
 	strat	<-	get.strat.count(year)
+  
+	polygon(x=c(strat$x,rev(strat$x)), y=c(strat$line.2,rev(strat$line.3)),
+	        col = col[3],border=NA)
+  
 	lines(strat$x,strat$line.1,type="l", lwd=2,
 		col=col[1])
 	label.loc	<-	get.text.location(par())
 	text(label.loc[1],label.loc[2],label)
+	min.dur = 7 # min duration of strat
+	
+	med.up = vector(length=(length(strat$line.1)-min.dur))
+	for (i in 1:(length(strat$line.1)-min.dur)){
+
+		if (all(strat$line.1[i:(i+min.dur)]>50)){
+			med.up[i] = TRUE
+		}
+	}
+	
+	par(mgp=c(.9,.04,0))
+	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	
+	par(mgp=par.mgp)
+	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	axis(2,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck)
+	axis(4,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck,labels=NA)
+	
+	print(strat$x[med.up])
+
 }
 
 get.air.temp	<-	function(year){
@@ -183,8 +208,29 @@ get.strat.count	<-	function(year){
 	num.lakes	<-	as.numeric(tail(strsplit(count.head,'.',fixed=T)[[1]],1))
 	# warm median --
 	x = DoY$DoY
-	line.1	<-	DoY[,2]/num.lakes*100
-	return(data.frame(x=x,line.1=line.1))
+  strat.count = DoY[,2]
+  strat.low = vector(length=length(strat.count))
+  strat.high = vector(length=length(strat.count))
+  for (i in 1:length(strat.count)){
+    FP_rate=0.129 # rate of false positives
+    FN_rate=0.20 # rate of false negatives
+    #strat.low is false positive rate, w/ no false negatives (all negatives are true negatives) *remove FPs
+    #strat.high is false negative rate, w/ no false positives (all positives are true positives) *add FNs
+    #FP=FP_rate*FN/(1-FP_rate)
+    TN.low = num.lakes-strat.count[i]
+    FP.low = (FP_rate*TN.low)/(1-FP_rate)
+    strat.low[i] = max(c(strat.count[i]-FP.low,0))
+    
+    TP.high = strat.count[i]
+    FN.high = (FN_rate*TP.high)/(1-FN_rate)
+    strat.high[i] = strat.count[i]+FN.high
+    #FP_rate= FP / (FP + TN).
+    #FN / (FN + TP).
+  }
+	line.1	<-	strat.count/num.lakes*100
+  line.2  <- strat.low/num.lakes*100
+	line.3  <- strat.high/num.lakes*100
+	return(data.frame(x=x,line.1=line.1,line.2=line.2,line.3=line.3))
 }
 
 get.text.location	<-	function(par,perc=10){
