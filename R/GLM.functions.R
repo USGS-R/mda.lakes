@@ -156,18 +156,6 @@ getElevation <- local({ lookup=NULL; function(WBIC) {
   }
 }})
 
-
-getElevation	<-	function(WBIC){
-	data	<-	read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
-	indx	<-	paste(c('X',WBIC),collapse='')
-	if (indx %in% names(data)){
-		elevation	<-	as.numeric(levels(data[1,indx])[1])
-	} else {
-		elevation	<-	NA
-	}
-	return(elevation)
-}
-
 #This uses a little fanciness to prevent loading file on every call.
 getLatLon <- local({ lookup=NULL; function(WBIC) {
 	if (is.null(lookup)) { 
