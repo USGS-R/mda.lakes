@@ -142,7 +142,7 @@ getElevation	<-	function(WBIC){
 	if (indx %in% names(data)){
 		elevation	<-	as.numeric(levels(data[1,indx])[1])
 	} else {
-		elevation	<-	NULL
+		elevation	<-	NA
 	}
 	return(elevation)
 }
