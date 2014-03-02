@@ -93,8 +93,12 @@ getCanopy	<-	local(
 			wbic.val = lookup[[as.character(WBIC)]]
 
 			if (is.null(wbic.val) & default.if.null==TRUE){
-				return(default.hc)
-				} else {return(wbic.val)}
+			  return(default.hc)
+			} else if (is.null(wbic.val) & default.if.null==FALSE){
+			  return(NA)
+			} else {
+			  return(wbic.val)
+			}
 		}
 	}
 )
