@@ -123,7 +123,11 @@ getClarity	<-	local(
 
 			if (is.null(wbic.val) & default.if.null==TRUE){
 				return(default.kd)
-			} else {return(wbic.val)}
+			} else if (is.null(wbic.val) & default.if.null==FALSE){
+			  return(NA)
+			} else {
+        return(wbic.val)
+			}
 		}
 	}
 )
@@ -229,17 +233,18 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 getZmax <- local({ lookup=NULL; function(WBIC) {
   if (is.null(lookup)) { 
     cat('Caching depth info.\n')
-    ft2m  <-	0.3048
+    
     d	<-	read.table('../supporting files/managed_lake_info.txt',header=TRUE,sep='\t',quote="\"")
     
     lookup <<- new.env()
+    ft2m  <-  0.3048
     for(i in 1:nrow(d)){
-      lookup[[toString(d$WBIC[i])]] = ft2m*mean(d$max.depth.ft[i],na.rm=TRUE)
+      mean.m <- d$max.depth.ft[i]
+      lookup[[toString(d$WBIC[i])]] = mean(ft2m*mean.m)
     }
   }
   lookup[[WBIC]]
 }})
-
 
 
 getZmean	<-	function(WBIC){
