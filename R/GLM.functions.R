@@ -135,6 +135,27 @@ getClarity	<-	local(
 		}
 	}
 )
+#Return perimeter in meters
+getElevation <- local({ lookup=NULL; function(WBIC) {
+  if (is.null(lookup)) { 
+    cat('Caching elevation info\n')
+    d <-  read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
+    WBIC.names= names(d[-1]) # remove first col, it is junk
+    lookup <<- new.env()
+    for(i in 1:length(WBIC.names)){
+      names.W = WBIC.names[i] # need to remove the "X"
+      lookup[[toString(substr(x=names.W,2,stop=nchar(names.W)))]] = as.numeric(levels(d[1,names.W])[1])
+    }
+  }
+  wbic.val = lookup[[as.character(WBIC)]]
+  
+  if (is.null(wbic.val)){
+    return(NA)
+  } else {
+    return(wbic.val)
+  }
+}})
+
 
 getElevation	<-	function(WBIC){
 	data	<-	read.table('../supporting files/WI_ManagedLakes_elevation.tsv',header=TRUE,sep='\t')
