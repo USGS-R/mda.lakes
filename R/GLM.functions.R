@@ -48,8 +48,12 @@ getResidenceTime	<-	local(
 			wbic.val = lookup[[as.character(WBIC)]]
 
 			if (is.null(wbic.val) & default.if.null==TRUE){
-				return(default.RT)
-				} else {return(wbic.val)}
+			  return(default.RT)
+			} else if (is.null(wbic.val) & default.if.null==FALSE){
+			  return(NA)
+			} else {
+			  return(wbic.val)
+			}
 		}
 	}
 )
@@ -189,7 +193,12 @@ getSDF	<-	function(WBIC){
 	area	<-	getArea(WBIC)
 	circle.perim	<-	2*pi*sqrt(area/pi)
 	SDF	<-	perim/circle.perim
-	return(SDF)
+  if (length(SDF)==0){
+    return(NA)
+  } else {
+    return(SDF)
+  }
+
 }
 getCD	<-	function(WBIC=NULL,Wstr=NULL){
 	if (is.null(WBIC) & is.null(Wstr)){
