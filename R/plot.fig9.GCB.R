@@ -2,7 +2,7 @@
 
 WBIC <- '1835300'
 
-plot.fig9.GCB  <-	function(years){
+plot.fig9.GCB  <-	function(years,corrs){
   
   cex.box = 0.8
   cex.ttl = 0.8
@@ -13,7 +13,7 @@ plot.fig9.GCB  <-	function(years){
   tick.y	<-	data.frame("onset"=c(NA, 80,100,120,140,160,NA),"july"=c(18,20,22,24,26,28,30))
   plot_colors <<- c("grey40", "grey80","black","firebrick")
   lab.perc	<<-	12 # label (e.g., (a) spacing percent from corner)
-  par.mgp	<<-	data.frame(x=c(1.2,.1,0),y=c(1.2,.1,0))
+  par.mgp	<<-	data.frame(x=c(1.2,.1,0),y=c(1.3,.1,0),b=c(.9,.1,0))
   plot.order	<<-	c("medium","small","large")
   line.wd	<<-	2	# plot line width
   
@@ -25,58 +25,73 @@ plot.fig9.GCB  <-	function(years){
   r.mar	<-	0.0
   t.mar	<-	0.00
   b.mar	<-	0.15
-  left.spc	<-	0.27 #0.1
+  left.spc	<-	0.3 #0.1
+  pan.w <<- (fig.w-left.spc*2-h.spc*2)/3
   pan.w <<- fig.w-left.spc-h.spc
   fig.h	<-	pan.h*2+v.spc*2+b.mar+t.mar
   png(filename = "../Figure_09.png",
       width = fig.w, height = fig.h, units = "in", res=300)
   
-  divs  <-	5
+  divs  <-	9
   panels = NULL
   for (j in 1:2){	
     for (i in 1:divs){
-      panels	<-	rbind(panels,c(j,j))
+      panels	<-	rbind(panels,c(j,j,j,j+2))
     }
   }
-  panels	<-	rbind(panels,c(j,j))# last one!
+  panels[divs+1,4]=3
+  panels	<-	rbind(panels,c(j,j,j,j+2))# last one!
+  panels  <-	rbind(panels,c(j,j,j,j+2))# last one!
   panels
-  num.pan = 7
   
 
   layout(panels)
   
-  par(mai=c(0,left.spc, v.spc, h.spc),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar))
-  plot.july(years=seq(1979,2011,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab)
-  par(mai=c(fig.h/((divs*2)+1),left.spc, v.spc, h.spc))
-  plot.onset(years=years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab)
-  #plot.onset(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab)
-  #
+  par(mai=c(0,left.spc, v.spc, 0),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar))
+  if (missing(corrs)){
+    corr.july <- plot.july(years=seq(1979,2011,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=T)
+  } else {
+    corr.july= corrs$corr.july
+    corr.onset = corrs$corr.onset
+    plot.july(years=seq(1979,2011,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=F)
+  }
   
+  par(mai=c(fig.h/(dim(panels)[1])*2,left.spc, v.spc, 0))
+  
+  if (missing(corrs)){
+    corr.onset <- plot.onset(years=years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=T)
+  } else {
+    plot.onset(years=years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=F)
+  }
+  par(mgp=par.mgp$b,mai=c(fig.h/(dim(panels)[1])*2-v.spc,left.spc*.9, v.spc, h.spc))
+  plot.box(data.frame(data=corr.july),tck,cex.box,cex.ttl,xlab='July temp.',lab='(b)')
+  par(mgp=par.mgp$b,mai=c(fig.h/(dim(panels)[1])*2,left.spc*.9, 0, h.spc))
+  plot.box(data.frame(data=corr.onset),tck,cex.box,cex.ttl,xlab='Strat. onset',lab='(d)')
   
   dev.off()
+  return(list(corr.july=corr.july,corr.onset=corr.onset))
 }
 
 
-getStratRnk <- function(WBIC='1835300',year=1982){
-  file.in <- paste('../supporting files/strat.onset',year,'.tsv',sep='')
-  dat <- read.table(file.in,sep='\t',header=T)
-  
-  rmv.i = is.na(dat$strat.onset.DoY)
-  dat <- dat[!rmv.i, ]
-  srt <- sort.int(dat$strat.onset.DoY,na.last=NA,index.return = T)
-  
-  WBIC.rnk <- dat$WBIC[srt$ix]
-  WBIC.val <- dat$strat.onset.DoY[srt$ix]
-  peak.val = tail(WBIC.val,1)
-  target.rnk <- which(WBIC.rnk==WBIC)
-  WBIC.val <- WBIC.val[target.rnk]
-  tot.strat = length(srt$ix)
-  stratPerc <- target.rnk/tot.strat
-  return(list(stratP=stratPerc,tot.num=WBIC.val,peak=peak.val))
+plot.box <- function(box.data,tck,cex.box,cex.ttl,xlab,lab){
+  ylabel = expression(paste("Coherence (R"^"2",")"))
+  boxplot(box.data,ylab=ylabel, axes=F,
+          ylim=c(0,1),xlim=c(0,2),
+          outline=F,width=.45,
+          range=1,
+          cex.lab=cex.ttl)#xlab=names(box.data))
+  tck = tck*2
+  par(mgp=c(0,.1,0))
+  title(xlab=xlab,cex.lab=cex.ttl)
+  axis(1,las=1, at=c(-100,100),cex.axis=cex.box, tck=1e-9,labels=NA)
+  axis(3,las=1, at=c(-100,100),cex.axis=cex.box, tck=1e-9,labels=NA)
+  axis(2,las=1, at=seq(-1,2,.2),cex.axis=cex.box, tck=tck)
+  axis(4,las=1, at=seq(-1,2,.2),cex.axis=cex.box, tck=tck,labels=NA)  
+  label.loc  <-  get.text.location(par(),h=1,w=.45)
+  text(label.loc[1],label.loc[2],lab)
 }
 
-
-plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
+plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=F){
   #source('GLM.functions.R')
  target = '1835300'
   #par(mgp=c(.9,.06,0))
@@ -96,7 +111,7 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
   y.vals.1 = y.vals
   y.vals.2 = y.vals
   target.lake = y.vals
-    quantile
+  #other.lakes
   for (i in 1:length(x.vals)){
     use.i = sens.table$year==years[i]
     use.lk = sens.table$year==years[i] & sens.table$lakeid==target
@@ -105,13 +120,35 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
     y.vals.2[i] <- quantile(x=sens.table$mean_surf_jul[use.i],probs=c(.25,.75),na.rm=T)[[2]]
     target.lake[i] <- sens.table$mean_surf_jul[use.lk]
   }
-
+ if (corr){
+   other.lakes = unique(sens.table$lakeid[sens.table$lakeid!=target])
+   corr = vector(length=length(other.lakes))
+   for (i in 1:length(other.lakes)){
+     lke = other.lakes[i]
+     vals.comp = vector(length=length(years))
+     for (j in 1:length(x.vals)){
+       use.lk = sens.table$year==years[j] & sens.table$lakeid==lke
+       if (any(use.lk)){
+         vals.comp[j] = sens.table$mean_surf_jul[use.lk]
+       } else {
+         vals.comp[j] = NA
+       }
+       
+     }
+     print(i)
+     corr[i] = summary(lm(vals.comp~target.lake))$r.squared
+   }
+ } else {
+   corr= NA
+ }
+ 
+  
   polygon(x=c(x.vals,rev(x.vals)), y=c(y.vals.1,rev(y.vals.2)),
          col = plot_colors[2],border=NA)
   
  lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="dotted")
   lines(x.vals,target.lake,col=plot_colors[3],type='l',lwd=line.wd)
-  label.loc  <-  get.text.location(par())
+  label.loc  <-  get.text.location(par(),h=1,w=2)
   text(label.loc[1],label.loc[2],'(a)')
   par(mgp=par.mgp$y)
   axis(1,las=1, at=tick.x,cex.axis=cex.box, tck=tck,labels=NA)
@@ -119,9 +156,12 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
   par(mgp=par.mgp$x)
   axis(2,las=1, at=tick.y$july,cex.axis=cex.box, tck=tck)
   axis(4,at=tick.y$july,las=1, cex.axis=cex.box, tck=tck,labels=NA)  
+ return(corr)
 }
 
-plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
+
+
+plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=F){
   #source('GLM.functions.R')
   target = '1835300'
   #par(mgp=c(.9,.06,0))
@@ -138,6 +178,12 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
   y.vals.2 = y.vals
   target.lake = y.vals
   
+  # build first year
+  file.name = '../supporting files/strat.onset1979.tsv'
+  sens.table  <-  read.delim(file.name,sep='\t',header=T)
+  other.lakes <- sens.table$WBIC[sens.table$WBIC!=target & !is.na(sens.table$strat.onset.DoY)]
+  other.vals <- matrix(nrow=length(x.vals),ncol=length(other.lakes))
+  
   for (i in 1:length(x.vals)){
     file.name = paste('../supporting files/strat.onset',years[i],'.tsv',sep='')
     sens.table  <-	read.delim(file.name,sep='\t',header=T)
@@ -146,15 +192,37 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
     y.vals.1[i] <- quantile(x=sens.table$strat.onset.DoY,probs=c(.25,.75),na.rm=T)[[1]]
     y.vals.2[i] <- quantile(x=sens.table$strat.onset.DoY,probs=c(.25,.75),na.rm=T)[[2]]
     target.lake[i] <- sens.table$strat.onset.DoY[use.lk]
+    if (corr){
+      for (j in 1:length(other.lakes)){
+        use.i = sens.table$WBIC==other.lakes[j]
+        if (any(use.i)){
+          other.vals[i,j] <- sens.table$strat.onset.DoY[use.i]
+        } else {
+          other.vals[i,j] = NA
+        }
+        
+      }
+    }
+    
   }
+  if (corr){
+    corr = vector(length=length(other.lakes))
+    for (i in 1:length(other.lakes)){
+      print(i)
+      corr[i] = summary(lm(other.vals[,i]~target.lake))$r.squared
+    }
+  } else {
+    corr= NA
+  }
+  
 
   polygon(x=c(x.vals,rev(x.vals)), y=c(y.vals.1,rev(y.vals.2)),
           col = plot_colors[2],border=NA)
   
   lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="dotted")
   lines(x.vals,target.lake,col=plot_colors[3],type='l',lwd=line.wd)
-  label.loc  <-	get.text.location(par())
-  text(label.loc[1],label.loc[2],'(b)')
+  label.loc  <-	get.text.location(par(),h=1,w=2)
+  text(label.loc[1],label.loc[2],'(c)')
   
   par(mgp=par.mgp$y)
   axis(1,las=1, at=tick.x,cex.axis=cex.box, tck=tck)
@@ -162,10 +230,10 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
   par(mgp=par.mgp$x)
   axis(2,las=1, at=tick.y$onset,cex.axis=cex.box, tck=tck)
   axis(4,at=tick.y$onset,las=1, cex.axis=cex.box, tck=tck,labels=NA)  
-  
+  return(corr)
 }
 
-get.text.location  <-	function(par,perc=10){
+get.text.location  <-	function(par,perc=10,h=1,w=1){
   x.lim	<-	par$usr[1:2] # limits
   y.lim	<-	par$usr[3:4]
   # upper right hand
@@ -173,9 +241,10 @@ get.text.location  <-	function(par,perc=10){
   x.range <-	x.lim[2]-x.lim[1]
   
   y	<-	y.lim[2]-y.range*perc/100
-  x	<-	x.lim[1]+x.range*perc/100*(pan.h/pan.w)
+  x	<-	x.lim[1]+x.range*perc/100*(h/w)
   return(c(x,y))
   
 }
 
-plot.fig9.GCB(years=seq(1979,2011,1))
+#corrs <- data.frame(corr.july=seq(0,1,.1),corr.onset=seq(0,1,.1))
+corrs <- plot.fig9.GCB(years=seq(1979,2011,1))#,corrs=corrs)
