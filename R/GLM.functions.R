@@ -102,7 +102,7 @@ getCanopy	<-	local(
 getClarity	<-	local(
 	{ lookup=NULL
 		
-		default.kd	<-	0.6613525
+		default.kd	<-	0.6983965
 		
 		function(WBIC,default.if.null=FALSE){
 			if (is.null(lookup)){
