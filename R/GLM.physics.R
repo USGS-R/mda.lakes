@@ -179,9 +179,14 @@ getIceOffDate <- function(GLMice,GLMwtr){
   if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
     stop("GLM ice time series must be equal or shorter than one year")
   }
+  
   maxTempIdx <-  as.numeric(getMaxTempIdx(GLMwtr))
-    # now, look backwards
-  iceOffIdx <-  max(which(GLMice[iceID][1:maxTempIdx,]!=0))+1
+  
+  # now, look backwards
+  nonzero.ice.idx = which(GLMice[iceID][1:maxTempIdx,]!=0)
+  
+  # if we never had ice cover from start of sim, just set to zero
+  iceOffIdx <- max(ifelse(length(nonzero.ice.idx) < 1, 0, nonzero.ice.idx)) + 1
   iceOffDOY <-  GLMice[timeID][iceOffIdx,]
   return(iceOffDOY)
 }
@@ -299,6 +304,7 @@ getUnmixedStartEnd <-  function(GLMwtr, GLMice, minStrat, arr.ind=FALSE){
   if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
     stop("GLM ice time series must be equal or shorter than one year")
   }
+  browser()
   # advised that the input is shortened to the ice-free period,
   startDate <- getIceOffDate(GLMice,GLMwtr)
   stopDate <- getIceOnDate(GLMice,GLMwtr)
@@ -313,13 +319,13 @@ getUnmixedStartEnd <-  function(GLMwtr, GLMice, minStrat, arr.ind=FALSE){
   strat.start = floor(nrow(tempMxMn)/2)
   for(i in strat.end:nrow(tempMxMn)){
     if(is.na(tempMxMn[i,1]) | tempMxMn[i,1]-tempMxMn[i,2]<=minStrat){
-      strat.end = i - 1
+      strat.end = max(strat.end, i - 1)
       break
     }
   }
   for(i in seq(strat.start, 1, by=-1)){
     if(is.na(tempMxMn[i,1]) | tempMxMn[i,1]-tempMxMn[i,2]<=minStrat){
-      strat.start = i + 1
+      strat.start = min(strat.start, i + 1)
       break
     }
   }
@@ -443,6 +449,74 @@ heightInRange.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
   
   return(thicks)
 }
+
+
+################################################################################
+# volInTemp.GLM
+#
+# Pulls volumes above a certain height.
+#
+################################################################################
+volsAboveHeight.GLM <- function(GLMnc, heights){
+  
+  layZ = ncvar_get(GLMnc,"z")
+  layZ[layZ > 1e10] = NA
+  layVol = ncvar_get(GLMnc,"V")
+  
+  volumes = rep(NaN, length(heights))
+  
+  for(i in 1:length(volumes)){
+    if(is.na(heights[i])){
+      volumes[i] = NA
+    }
+    volumes[i] = sum(layVol[layZ[,i] >= heights[i], ], na.rm=TRUE)
+  }
+  
+  return(volumes)
+}
+
+
+#Returns water level from the NC file
+#Should go in GLM.nc.R in rGLM at some point
+water.level.glm = function(glm.nc){
+  
+  if(!is(glm.nc, "ncdf4")){
+    stop("Must supply glm.nc object. (from nc_open)")
+  }
+  
+  sim.z = ncvar_get(glm.nc,'z')
+  sim.z[sim.z > 1e10] = NA
+  
+  z.out = apply(sim.z,2,max, na.rm=TRUE)
+  
+  return(z.out)
+}
+
+
+################################################################################
+# volInTemp.GLM
+#
+# Pulls volumes below a certain height.
+#
+################################################################################
+volsBelowHeight.GLM <- function(GLMnc, heights){
+  
+  layZ = ncvar_get(GLMnc,"z")
+  layZ[layZ > 1e10] = NA
+  layVol = ncvar_get(GLMnc,"V")
+  
+  volumes = rep(NaN, length(heights))
+  
+  for(i in 1:length(volumes)){
+    if(is.na(heights[i])){
+      volumes[i] = NA
+    }
+    volumes[i] = sum(layVol[layZ[,i] <= heights[i], ], na.rm=TRUE)
+  }
+  
+  return(volumes)
+}
+
 
 
 
