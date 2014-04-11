@@ -32,7 +32,7 @@ key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1
                                                            'habitat.calc.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip', 'chained.habitat.out.R')))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R', c('GLM.physics.R' )))
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/Libraries', c('GLM.physics.R' )))
 
 bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelHabCalc.bat'
 
