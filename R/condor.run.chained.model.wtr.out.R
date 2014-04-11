@@ -26,7 +26,7 @@ key.code = file.path(home.dir, c('chained.GLM.lib.R'))
 key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.2.tar.gz',
                                                            'ncdf4_1.4.zip', '.Renviron'))))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_1.0.zip', 
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_1.2.zip', 
                                                            'wtr.out.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip')))
 

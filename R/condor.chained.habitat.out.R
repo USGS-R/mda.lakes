@@ -26,7 +26,7 @@ wbics = str_extract(basename(folders),"[0-9]+")
 
 bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/habitatcalc.bat'
 
-key.code = file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_0.5.tar.gz', 
+key.code = file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_1.2.zip', 
                                                            'habitat.calc.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip'))
 
@@ -78,6 +78,13 @@ for(i in 1:length(folders)){
 
 #Temporary fix. Get rid of proceeding "1" on WBICS
 fOutput$lakeid = str_trim(str_extract(fOutput$lakeid, " ([0-9]+)"))
+
+#Now convert dateOver's to DOY
+fOutput$dateOver18 = (as.numeric(fOutput$dateOver18) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver16.7 = (as.numeric(fOutput$dateOver16.7) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver21 = (as.numeric(fOutput$dateOver21) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver8.9 = (as.numeric(fOutput$dateOver8.9) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+
 
 write.table(fOutput,'omg.huge.output.tsv', row.names=FALSE, sep='\t')
 

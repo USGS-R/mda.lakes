@@ -6,7 +6,7 @@ library(stringr)
 source('htcondor-R.R')
 
 home.dir = getwd()
-run.dir = 'D:/WilmaRuns/08-09Final'
+run.dir = 'D:/WilmaRuns/2014-03-13-2'
 driver.dir = 'D:/WilmaDrivers/07-30'
 
 #run.dir = 'D:/WilmaLTER'
@@ -16,21 +16,21 @@ runs = Sys.glob(file.path(run.dir, 'WBIC_*'))
 model.ids = basename(runs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
-model.files = file.path('D:/WILMA/GLM/1.2.2', 
+model.files = file.path('D:/WILMA/GLM/1.2', 
                         c('glm.exe', 'hdf5_hldll.dll', 'hdf5dll.dll',
                           'libmmd.dll', 'netcdf.dll', 'svml_dispmd.dll', 'szip.dll',
                           'zlib1.dll'))
-#nc.files = file.path('D:/WILMA/WILMA-R/bin', 
-#                     c('netcdfBins.zip', 'bzip2.dll', 
-#                       'unzip.exe', 'zip.exe', 'zip32z64.dll'))
+nc.files = file.path('D:/WILMA/WILMA-m/R/CompressCode', 
+                     c('netcdfBins.zip', 'bzip2.dll', 
+                       'unzip.exe', 'zip.exe', 'zip32z64.dll'))
 
 
-R.code = file.path(home.dir, c('chained.GLM.lib.R'))
-R.code.2 = file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.2.tar.gz',
+R.code = file.path(home.dir, c('chained.GLM.lib.R', '3dayPrefix.csv'))
+R.code.2 = file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.5.tar.gz',
                                                            'ncdf4_1.4.zip', '.Renviron')))
 
 
-bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedmodel.bat'
+bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelNcCompress.bat'
 
 
 driver.files = paste(file.path(driver.dir,model.ids), '.csv', sep='')
@@ -41,6 +41,7 @@ driver.files = paste(file.path(driver.dir,model.ids), '.csv', sep='')
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 
 for(i in 1:length(runs)){
+#for(i in 1:10){
   
   # Write out ice on/off data for chained runs
   lake.ice.info = empir.ice[empir.ice$WBIC == as.numeric(WBICs[i]), ]
@@ -54,7 +55,7 @@ for(i in 1:length(runs)){
   condor.write.submit(file.path(runs[i],'condor.cmd'),
                       executable=bat.file, 
                       c(model.files, driver.files[i], R.code,
-                        R.code.2, 'glm.nml', 'icecal.in.tsv'))
+                        R.code.2, nc.files, 'glm.nml', 'icecal.in.tsv'))
   
   #Submit the run!
   setwd(runs[i])
