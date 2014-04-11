@@ -1,8 +1,9 @@
 plot.fig8.GCB	<-	function(years){
 	lW = 3
-	cex.box = 0.8
-	cex.ttl = 0.8
+	cex.box = 1
+	cex.ttl = 1
 	tck	<-	0.02
+	font.size = 10
 	plt.rng.x	= c(75,143)
 	seq.range = seq(70,365,1)
 	plot_colors <- c("black", "black", "grey80","grey40")
@@ -42,7 +43,7 @@ plot.fig8.GCB	<-	function(years){
 	
 	layout(panels)
 	
-	par(mai=c(.0,left.spc, v.spc, h.spc),mgp=par.mgp,omi=c(0,l.mar,t.mar,r.mar))
+	par(mai=c(.0,left.spc, v.spc, h.spc),mgp=par.mgp,omi=c(0,l.mar,t.mar,r.mar),ps=font.size)
 	
 	# plot 1 & 4 are air temperatures
 	plot.air(years[1],col=plot_colors[2],plt.rng.x,cex.ttl,cex.box,tck,label='(a)')
@@ -97,6 +98,9 @@ plot.exceed	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 		col = col[3],border=NA)
 	polygon(x=c(exceed$x,rev(exceed$x)), y=c(exceed$line.2,rev(exceed$line.4)),
 		col = col[4],border=NA)
+  cat("starting print")
+  print(exceed$x[head(which(exceed$line.3>=95),1)])
+  cat('done wit print\n')
 	lines(exceed$x,exceed$line.3,type="l", lwd=2,
 		col=col[1])
 	label.loc	<-	get.text.location(par())
@@ -206,6 +210,8 @@ get.strat.count	<-	function(year){
 	headers	<-	names(DoY)
 	count.head 	<- tail(headers,1)
 	num.lakes	<-	as.numeric(tail(strsplit(count.head,'.',fixed=T)[[1]],1))
+  
+  num.lakes <- 2368 # replace with real year num!!!!
 	# warm median --
 	x = DoY$DoY
   strat.count = DoY[,2]

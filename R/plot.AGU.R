@@ -3,29 +3,36 @@ dat<-read.table('../supporting files/omg.huge.output.tsv',header = TRUE, sep = "
 names(dat)
 
 
-all.box = boxplot(dat$mean_surf_jul~dat$year,plot=FALSE)
+all.box = boxplot(dat$mean_surf_JAS~dat$year,plot=FALSE) # was jul
 
-dat.2009<- dat$mean_surf_jul
+dat.2009<- dat$mean_surf_JAS
 dat.2009[dat$year!=2009] = NA
 
-dat.2002<- dat$mean_surf_jul
-dat.2002[dat$year!=2002] = NA
+dat.2002<- dat$mean_surf_JAS
+dat.2002[dat$year!=2002] = NA# was 2002
 
-box.dat<- data.frame("All"=dat$mean_surf_jul,'2009'=dat.2009,"2002"=dat.2002)
+dat.1996<- dat$mean_surf_JAS
+dat.1996[dat$year!=1996] = NA
 
-names(box.dat)= c('All','2009','2002')
+dat.1998<- dat$mean_surf_JAS
+dat.1998[dat$year!=1998] = NA
+
+box.dat<- data.frame("All"=dat$mean_surf_JAS,'2009'=dat.2009,'1996'=dat.1996,'2002'=dat.2002,'1998'=dat.1998)
+
+names(box.dat)= c('All','2009','1996','2002','1998')
 # ---- for july temp histograms -----
-lW = 3
-cex.box = 1.8
-cex.ttl = 1.8
+lW = 1.25
+cex.box = 1.4
+cex.ttl = 1.4
 png(filename = "../JulyHist.png",
-    width = 6, height = 5.75, units = "in", pointsize = 12, res=200)
+    width = 7.5, height = 4.5, units = "in", pointsize = 12, res=200)
+box.loc <- c(1.25,2.3,2.9,3.5,4.1)
 
-par(mar=c(4, 7, 0.5, 0.5))
+par(mar=c(2.5, 5, 0.75, 0.75))
 boxplot(box.dat, range=1.5, ylim = c(17.7, 31.7),outline=FALSE, 
-        lwd=lW+2, xlim = c(.75, 3.25), width=c(3,1.8,1.8), at=c(1.25,2.4,3),
+        lwd=lW+2, xlim = c(.75, 4.25), width=c(1.0,.5,.5,.5,.5), at=box.loc,
         ylab="Mean July surface temperature (°C)", cex.lab=cex.ttl,cex.axis=cex.box)
-axis(1,lwd=lW,lab=F, at=c(1.25,2.4,3))
+axis(1,lwd=lW,lab=F, at=box.loc)
 axis(2,lwd=lW,lab=F)
 
 box(lwd=lW)
@@ -102,18 +109,46 @@ dev.off()
 
 # ---- for temp range histograms -----
 
-dat.clear <- read.table('../supporting files/clear.range.tsv',header = TRUE, sep = "\t")
-dat.dark  <- read.table('../supporting files/dark.range.tsv',header = TRUE, sep = "\t")
-plot.frame<- data.frame('Clear'=c(as.numeric(dat.clear$temp.range),NA,NA),
-                        'Dark'=as.numeric(dat.dark$temp.range)) # pad w/ NAs
+get.clear.dark	<-	function(years='All'){
+	
+	dat.clear <- read.table('../supporting files/clear.range.tsv',header = TRUE, sep = "\t")
+	dat.dark  <- read.table('../supporting files/dark.range.tsv',header = TRUE, sep = "\t")
+	num.clear	<-	dim(dat.clear)[1]
+	num.dark	<-	dim(dat.dark)[1]
+	num.range	<-	max(c(num.clear,num.dark))
+	clear.range	<-	vector(length=num.range)	# will include padding if lengths are different
+	dark.range	<-	vector(length=num.range)
+	if (years=="All"){
+		for (j in 1:num.clear){
+			clear.range[j]	<-	max(dat.clear[j,-1],na.rm=TRUE)-min(dat.clear[j,-1],na.rm=TRUE)
+		}
+		for (j in 1:num.dark){
+			dark.range[j]	<-	max(dat.dark[j,-1],na.rm=TRUE)-min(dat.dark[j,-1],na.rm=TRUE)
+		}
+	} else {
+		headers = paste("X",as.character(years),sep='')
+		for (j in 1:num.clear){
+			clear.range[j]	<-	max(dat.clear[j,headers],na.rm=TRUE)-min(dat.clear[j,headers],na.rm=TRUE)
+		}
+		for (j in 1:num.dark){
+			dark.range[j]	<-	max(dat.dark[j,headers],na.rm=TRUE)-min(dat.dark[j,headers],na.rm=TRUE)
+		}
+	}
+	
+	plot.frame<- data.frame('Clear'=clear.range,
+	                        'Dark'=dark.range) # pad w/ NAs
+	
+}
+
 lW = 3
 cex.box = 1.8
 cex.ttl = 1.8
 png(filename = "../RangePlot.png",
     width = 6, height = 5.75, units = "in", pointsize = 12, res=200)
 
+plot.frame	<-	get.clear.dark(c(1996,1998))
 par(mar=c(4, 7, 0.5, 0.5))
-boxplot(plot.frame, range=1.5, ylim = c(-1, 2.5),outline=FALSE, 
+boxplot(plot.frame, range=1.5, ylim = c(-1.2, 1.2),outline=FALSE, 
         lwd=lW+2, width=c(3,3),
         ylab="Mean July surface temperature (°C)", 
         cex.lab=cex.ttl,cex.axis=cex.box,yaxp=c(-1,2,3))

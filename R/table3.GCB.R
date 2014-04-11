@@ -160,6 +160,20 @@ compareZA <- function(lakes){
   return(stt)
 }
 
+compareEL <- function(lakes){
+  val.x = vector(length=length(lakes$WBICs))
+  for (k in 1:length(val.x)){
+    val.x[k] <- getElevation(as.character(lakes$WBICs[k]))*1.0e-6
+  }
+  val.y = vector(length=length(lakes$WBICs))
+  for (k in 1:length(val.y)){
+    val.y[k] <- getLatLon(as.character(lakes$WBICs[k]))[1]
+  }
+  stt <- cor.test(y=val.y,x=val.x, method = "pearson")
+  return(stt)
+}
+
+
 
 lakes <- getNumLakes() #gets all validation lakes with a RMSE value
 
@@ -174,6 +188,7 @@ corrs$latitude =getLatdata(lakes)
 corrs$longitude =getLondata(lakes)
 corrs$residenceTime = getRTdata(lakes)
 corrs$depth_vs_area =compareZA(lakes)
+corrs$elev_vs_late =compareEL(lakes)
 cor.nm = names(corrs)
 for (i in 1:length(cor.nm)){
   cat(cor.nm[i])

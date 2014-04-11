@@ -4,18 +4,19 @@ WBIC <- '1835300'
 
 plot.fig9.GCB  <-	function(years,corrs){
   
-  cex.box = 0.8
-  cex.ttl = 0.8
+  cex.box = 1
+  cex.ttl = 1
   tck	<-	0.02
   plt.rng.x	<-	c(1978.8,2011.2)
   plt.rng.y	<-	data.frame("onset"=c(83,154),"july"=c(18.5,28.5))
   tick.x	<-	seq(1960,2020,5)
   tick.y	<-	data.frame("onset"=c(NA, 80,100,120,140,160,NA),"july"=c(18,20,22,24,26,28,30))
-  plot_colors <<- c("grey40", "grey80","black","firebrick")
+  plot_colors <<- c("grey30", "grey80","black","firebrick")
   lab.perc	<<-	12 # label (e.g., (a) spacing percent from corner)
   par.mgp	<<-	data.frame(x=c(1.2,.1,0),y=c(1.3,.1,0),b=c(.9,.1,0))
   plot.order	<<-	c("medium","small","large")
   line.wd	<<-	2	# plot line width
+  font.size = 10
   
   fig.w	<-	3.14961
   pan.h <<- 1
@@ -47,7 +48,7 @@ plot.fig9.GCB  <-	function(years,corrs){
 
   layout(panels)
   
-  par(mai=c(0,left.spc, v.spc, 0),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar))
+  par(mai=c(0,left.spc, v.spc, 0),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar),ps=font.size)
   if (missing(corrs)){
     corr.july <- plot.july(years=seq(1979,2011,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=T)
   } else {
@@ -74,7 +75,9 @@ plot.fig9.GCB  <-	function(years,corrs){
 
 
 plot.box <- function(box.data,tck,cex.box,cex.ttl,xlab,lab){
-  ylabel = expression(paste("Coherence (R"^"2",")"))
+  
+  t.crit <- 0.42 # ONE-tailed critical at 0.01 (testing positive correlation)
+  ylabel = expression(paste("Coherence (",italic(rho),")"))
   boxplot(box.data,ylab=ylabel, axes=F,
           ylim=c(0,1),xlim=c(0,2),
           outline=F,width=.45,
@@ -87,6 +90,11 @@ plot.box <- function(box.data,tck,cex.box,cex.ttl,xlab,lab){
   axis(3,las=1, at=c(-100,100),cex.axis=cex.box, tck=1e-9,labels=NA)
   axis(2,las=1, at=seq(-1,2,.2),cex.axis=cex.box, tck=tck)
   axis(4,las=1, at=seq(-1,2,.2),cex.axis=cex.box, tck=tck,labels=NA)  
+  
+  abline(h=t.crit,lty="1342",lwd=0.65)# ONE-tailed critical at 0.01 (testing positive correlation)
+  
+  cat(sum(box.data<0.42)); cat(' of '); cat(length(box.data[[1]])); cat(' below t.crit\n')
+  
   label.loc  <-  get.text.location(par(),h=1,w=.45)
   text(label.loc[1],label.loc[2],lab)
 }
@@ -136,7 +144,7 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
        
      }
      print(i)
-     corr[i] = summary(lm(vals.comp~target.lake))$r.squared
+     corr[i] = cor.test(y=vals.comp,x=target.lake, method = "pearson")$estimate[[1]]#summary(lm(vals.comp~target.lake))$r.squared
    }
  } else {
    corr= NA
@@ -145,7 +153,9 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
   
   polygon(x=c(x.vals,rev(x.vals)), y=c(y.vals.1,rev(y.vals.2)),
          col = plot_colors[2],border=NA)
-  
+ #lines(x.vals,y.vals.1,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
+ #lines(x.vals,y.vals.2,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
+ 
  lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="dotted")
   lines(x.vals,target.lake,col=plot_colors[3],type='l',lwd=line.wd)
   label.loc  <-  get.text.location(par(),h=1,w=2)
@@ -209,7 +219,7 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
     corr = vector(length=length(other.lakes))
     for (i in 1:length(other.lakes)){
       print(i)
-      corr[i] = summary(lm(other.vals[,i]~target.lake))$r.squared
+      corr[i] = cor.test(y=other.vals[,i],x=target.lake, method = "pearson")$estimate[[1]]#summary(lm(other.vals[,i]~target.lake))$r.squared
     }
   } else {
     corr= NA
@@ -218,6 +228,9 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
 
   polygon(x=c(x.vals,rev(x.vals)), y=c(y.vals.1,rev(y.vals.2)),
           col = plot_colors[2],border=NA)
+  
+  #lines(x.vals,y.vals.1,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
+  #lines(x.vals,y.vals.2,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
   
   lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="dotted")
   lines(x.vals,target.lake,col=plot_colors[3],type='l',lwd=line.wd)
@@ -247,4 +260,4 @@ get.text.location  <-	function(par,perc=10,h=1,w=1){
 }
 
 #corrs <- data.frame(corr.july=seq(0,1,.1),corr.onset=seq(0,1,.1))
-corrs <- plot.fig9.GCB(years=seq(1979,2011,1))#,corrs=corrs)
+corrs <- plot.fig9.GCB(years=seq(1979,2011,1),corrs=corrs)
