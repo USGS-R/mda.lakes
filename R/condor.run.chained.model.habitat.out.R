@@ -34,9 +34,6 @@ key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1
 
 key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R', c('GLM.physics.R' )))
 
-key.code = c(key.code, file.path('D:/WiLMA/WILMA-m/R', '3dayPrefix.csv'))
-
-
 bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelHabCalc.bat'
 
 

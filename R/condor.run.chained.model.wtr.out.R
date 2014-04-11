@@ -30,8 +30,6 @@ key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1
                                                            'wtr.out.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip')))
 
-key.code = c(key.code, file.path('D:/WiLMA/WILMA-m/R', '3dayPrefix.csv'))
-
 
 bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelWtrOut.bat'
 
