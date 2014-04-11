@@ -26,9 +26,9 @@ condor.write.submit = function(fPath, executable, input.files="", arguments="" )
   writeLines("output = phase1.out", fid)
   writeLines("error = phase1.err", fid)
   writeLines("log = phase1.log", fid)
-  writeLines("requirements = (TARGET.Arch == \"X86_64\") && ((TARGET.OpSys == \"WINNT61\")) && (Machine =!= \"hanson-i5.ad.wisc.edu\")", fid)
+  writeLines("requirements = (TARGET.Arch == \"X86_64\") && ((TARGET.OpSys == \"WINDOWS\")) && (Machine =!= \"hanson-i5.ad.wisc.edu\") && (Machine =!= \"Simulator.ad.wisc.edu\")&& (Machine =!= \"i7top\")", fid)
 
-
+  writeLines("environment=\"PATH='C:\\Program Files\\R\\R-2.15.2\\bin\\i386;C:\\Program Files\\R\\R-2.15.3\\bin\\i386;C:\\Windows\\system32'\"", fid)
   writeLines("should_transfer_files = YES", fid)
   writeLines("+WantFlocking = false", fid)
   writeLines("when_to_transfer_output = ON_EXIT", fid)
