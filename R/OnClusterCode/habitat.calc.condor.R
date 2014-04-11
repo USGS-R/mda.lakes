@@ -1,7 +1,7 @@
 ## This runs on the condor node to do all habitat calcs
 
 install.packages("ncdf4_1.4.zip", lib='./rLibs', repos=NULL)
-install.packages("rGLM_0.1.2.tar.gz", lib='./rLibs', repos=NULL, type='source')
+install.packages("rGLM_0.1.5.tar.gz", lib='./rLibs', repos=NULL, type='source')
 install.packages('rLakeAnalyzer_1.2.zip', lib='./rLibs', repos=NULL)
 install.packages('stringr_0.6.2.zip', lib='./rLibs', repos=NULL)
 
