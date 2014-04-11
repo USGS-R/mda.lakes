@@ -24,7 +24,7 @@ model.files = file.path('D:/WILMA/GLM/1.2',
 #                       'unzip.exe', 'zip.exe', 'zip32z64.dll'))
 
 
-key.code = file.path(home.dir, c('chained.GLM.lib.R'))
+key.code = file.path(home.dir, c('Libraries/chained.GLM.lib.R'))
 key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R',
                                                            'ncdf4_1.4.zip', '.Renviron'))))
 
