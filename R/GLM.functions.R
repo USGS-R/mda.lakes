@@ -107,6 +107,55 @@ getCanopy	<-	local(
 	}
 )
 
+getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.null=FALSE){
+  #WBIC is a string
+  #years is a single numeric or vector of numerics
+  #year.1 and year.2 are the bounds of the averaging (i.e., values outside of this range will not be used)
+  #trend is a percentage of SECCHI increase (positive number) or decrease (negative number). E.g., 0.94 is a 0.94%/yr increase in SECCHI (decrease in Kd) . 
+  #default.if.null is boolean. If default.if.null==T, a default kd will be used (centered) and the trend applied
+  
+  if (is.na(WBIC)){stop('WBIC cannot be NA')}
+  if (is.null(WBIC)){stop('WBIC cannot be NULL')}
+  
+  default.kd  <-	0.6983965
+  
+  secchiConv  <-	1.7
+  
+  d	<-	read.table('../supporting files/annual_mean_secchi.txt',
+                  header=TRUE,sep='\t')
+  
+  useI  <-	d$WBIC==WBIC
+  Kd <- vector(length=length(years))
+  
+  if (!any(useI) & default.if.null==T){
+    year.cent = mean(c(year.1,year.2))
+    secchi.mn = secchiConv/default.kd
+
+  } else if (!any(useI) & default.if.null==F){
+    
+    return(NULL)    
+  } else {
+    dat.WBIC <- d[useI,]
+    
+    yr.i = dat.WBIC$year >= year.1 & year.2 >= dat.WBIC$year
+    
+    year.cent <- mean(dat.WBIC$year[yr.i]) # the pivot point!
+    secchi.mn <- mean(dat.WBIC$secchi.m.mean[yr.i]) # mean at pivot point!
+  }
+  
+    #sech = m*x+b
+    m = trend*secchi.mn*0.01
+    #solve for b:
+    b= secchi.mn-m*year.cent
+    #convert to Kd:
+    
+  for (i in 1:length(years)){
+    Kd[i] <- secchiConv/(m*years[i]+b)
+  }
+    
+  return(Kd)
+}
+
 getClarity	<-	local(
 	{ lookup=NULL
 		
