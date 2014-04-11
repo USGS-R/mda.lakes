@@ -181,8 +181,13 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
   s.starts = s.starts[!rmI]
   s.ends = s.ends[!rmI]
   
+  three.day.file = "ShortWave,LongWave,AirTemp,RelHum,WindSpeed,Rain,Snow
+218.1,276.7,-1.80,84.7,7.80,0.000,0.002
+296.5,206.8,-3.12,79.1,3.89,0.000,0.019
+222.3,245.9,-1.25,84.0,5.50,0.001,0.009"
+  
   # Prep prefix met data
-  prefix = read.csv('3dayPrefix.csv', header=TRUE)
+  prefix = read.csv(textConnection(three.day.file), header=TRUE)
   
   full.met = read.csv(get.nml(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
   #stash original
