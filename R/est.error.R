@@ -1,6 +1,6 @@
 # load lake summary document, which holds WBIC and SE
 
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 fileName	<-	'../supporting files/summary.txt'
 dat <-	read.table(file=fileName,header=TRUE,sep='\t')
 n.cut 	<- 20	# data points required for analysis

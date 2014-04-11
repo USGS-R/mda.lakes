@@ -4,7 +4,7 @@
 
 library(stringr)
 source('Libraries/htcondor-R.R')
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()
@@ -27,7 +27,7 @@ nc.files = file.path('D:/WILMA/WILMA-m/R/CompressCode',
                        'unzip.exe', 'zip.exe', 'zip32z64.dll'))
 
 
-R.code = file.path(home.dir, c('cLibraries/hained.GLM.lib.R', '3dayPrefix.csv', 'GLM.functions.R'))
+R.code = file.path(home.dir, c('cLibraries/hained.GLM.lib.R', '3dayPrefix.csv', 'Libraries/GLM.functions.R'))
 R.code.2 = file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.5.tar.gz',
                                                            'ncdf4_1.4.zip', '.Renviron',
                                                            'run.calc.strat.condor.R')))

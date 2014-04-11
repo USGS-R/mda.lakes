@@ -1,6 +1,6 @@
 data <- read.table('../supporting files/Validation/iceModel_onoff_all.tsv',header=TRUE)
 
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 # find all unique WBICs:
 unWBIC 	<-	unique(data$WBIC)
 

@@ -100,7 +100,7 @@ plot.box <- function(box.data,tck,cex.box,cex.ttl,xlab,lab){
 }
 
 plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=F){
-  #source('GLM.functions.R')
+  #source('Libraries/GLM.functions.R')
  target = '1835300'
   #par(mgp=c(.9,.06,0))
   plot(c(0,1),c(0,1), type="l", col=NA, 
@@ -172,7 +172,7 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
 
 
 plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab,corr=F){
-  #source('GLM.functions.R')
+  #source('Libraries/GLM.functions.R')
   target = '1835300'
   #par(mgp=c(.9,.06,0))
   plot(c(0,1),c(0,1), type="l", col=NA, 

@@ -1,7 +1,7 @@
 
 # build table 2
 # fields: N  A	zmax	Kd	h_s	elev  SDF	lat range	lon range
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 getNumLakes <- function(){
   
   sens.table  <-	read.delim("../supporting files/omg.huge.output.tsv",sep='\t',header=T)

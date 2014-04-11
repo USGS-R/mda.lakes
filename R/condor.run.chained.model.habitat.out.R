@@ -4,7 +4,7 @@
 
 library(stringr)
 source('Libraries/htcondor-R.R')
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()

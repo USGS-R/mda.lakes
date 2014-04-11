@@ -1,11 +1,11 @@
-source("GLM.functions.R")
+source("Libraries/GLM.functions.R")
 require("rGLM")
 lyrDz	<<-	0.25
 #year	<-	'2009'
 
 
 calc.strat.onset	<-	function(WBIC,year,min.duration=30,mix.diff=1.0){
-	source("GLM.functions.R")
+	source("Libraries/GLM.functions.R")
 	require("rGLM")
 	# min.duration is in TIME UNITS
 	# mix diff is °C
