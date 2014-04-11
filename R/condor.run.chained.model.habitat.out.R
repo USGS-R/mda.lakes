@@ -3,7 +3,7 @@
 ## does a few things. 
 
 library(stringr)
-source('htcondor-R.R')
+source('Libraries/htcondor-R.R')
 source('GLM.functions.R')
 library(rGLM)
 
@@ -30,9 +30,9 @@ key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.sing
 
 key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.2.zip', 
                                                            'habitat.calc.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
-                                                           'stringr_0.6.2.zip')))
+                                                           'stringr_0.6.2.zip', 'chained.habitat.out.R')))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R', c('GLM.physics.R', 'chained.habitat.out.R')))
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R', c('GLM.physics.R' )))
 
 key.code = c(key.code, file.path('D:/WiLMA/WILMA-m/R', '3dayPrefix.csv'))
 

@@ -3,7 +3,7 @@
 ## does a few things. 
 
 library(stringr)
-source('htcondor-R.R')
+source('Libraries/htcondor-R.R')
 
 home.dir = getwd()
 run.dir = 'D:/WilmaRuns/2014-03-13-2'
@@ -25,7 +25,7 @@ nc.files = file.path('D:/WILMA/WILMA-m/R/CompressCode',
                        'unzip.exe', 'zip.exe', 'zip32z64.dll'))
 
 
-R.code = file.path(home.dir, c('chained.GLM.lib.R', '3dayPrefix.csv'))
+R.code = file.path(home.dir, c('Libraries/chained.GLM.lib.R', '3dayPrefix.csv'))
 R.code.2 = file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.5.tar.gz',
                                                            'ncdf4_1.4.zip', '.Renviron')))
 

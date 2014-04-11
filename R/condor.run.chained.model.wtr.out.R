@@ -3,7 +3,7 @@
 ## does a few things. 
 
 library(stringr)
-source('htcondor-R.R')
+source('Libraries/htcondor-R.R')
 
 home.dir = getwd()
 run.dir = 'D:/WilmaRuns/09-18Final'
