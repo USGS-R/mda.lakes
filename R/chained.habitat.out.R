@@ -13,29 +13,30 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     lakeid = basename(run.path)
   }
   
-  vol.tmp.ranges = c(28,29,     10.6,11.2,
-                     12,28,     18.2,28.2, 
-                     19.3,23.3, 19, 23, 
-                     20.6,23.2, 22, 23,
-                     25, 29,    26.6, 32,
-                     26, 28,    26, 32,
-                     28,32,     29, 100,
-                     30, 31,    18, 22)
-  
-  vol.tmp.ranges = matrix(vol.tmp.ranges, ncol=2, byrow=TRUE)
-  
-  #These are basically the same ranges
+  vol.tmp.ranges = c(26.6, 32,
+                     26,   28,
+                     27,   30, 
+                     27,   32,
+                     18,   31.1,
+                     28,   29,
+                     30,   31,
+                     10.6, 11.2,
+                     18.2, 28.2,
+                     18,   22, 
+                     19,   23, 
+                     20.6, 23.2,
+                     22,   23,
+                     29,   100)
+   
   height.tmp.ranges = vol.tmp.ranges
   
-  day.tmp.ranges = c(19, 23,       26, 30,
-                     10.6, 11.2,   12, 28,
-                     18.2, 28.2,   18, 22,
-                     20.6, 23.2,   20, 30,
-                     22, 23,       23, 31,
-                     26.6, 32,     26, 28,
-                     28, 29,       30, 31,
-                     19.3, 23.3,   29, 100,
-                     21, 100)
+  day.tmp.ranges = vol.tmp.ranges
+  
+  #Convert to matricies
+  vol.tmp.ranges = matrix(vol.tmp.ranges, ncol=2, byrow=TRUE)
+  
+  height.tmp.ranges = matrix(height.tmp.ranges, ncol=2, byrow=TRUE)
+      
   day.tmp.ranges = matrix(day.tmp.ranges, ncol=2, byrow=TRUE)
   
   
@@ -49,6 +50,9 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   
   empir.ice = read.table(file.path(run.path, 'icecal.in.tsv'), sep='\t', header=TRUE)
   empir.ice$DATE = as.POSIXct(empir.ice$DATE)
+  
+  #used for calcs which need the previous year's data available
+  previous.wtr = NA 
   
   for(i in 1:length(nc.files)){
     
@@ -71,11 +75,10 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     
     #Drop the first 3 days
-    
     wtr = wtr[4:nrow(wtr), , drop=FALSE]
     ice = ice[4:nrow(wtr),]
     surfT = surfT[4:nrow(wtr)]
-    raw.wtr = raw.wtr[,4:ncol(wtr), drop=FALSE] #this is a matrix with a different orientation
+    raw.wtr = raw.wtr[,4:ncol(raw.wtr), drop=FALSE] #this is a matrix with a different orientation
     run.time = run.time[4:length(run.time)]
     
     censor.days = 3  #used for later functions to censor burn-in days
@@ -140,10 +143,13 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     misc.out[['durStrat']] = c(misc.out[['durStrat']], getStratifiedDuration(wtr, ice, minStrat=0.5))
     
     
+    misc.out[['dateOver5']] = c(misc.out[['dateOver5']], getFirstDayAboveT(wtr, 5))
+    misc.out[['dateOver5']] = c(misc.out[['dateOver6']], getFirstDayAboveT(wtr, 6))
     misc.out[['dateOver8.9']] = c(misc.out[['dateOver8.9']], getFirstDayAboveT(wtr, 8.9))
     misc.out[['dateOver21']] = c(misc.out[['dateOver21']], getFirstDayAboveT(wtr, 21))
+    misc.out[['dateOver20']] = c(misc.out[['dateOver20']], getFirstDayAboveT(wtr, 20))
     misc.out[['dateOver18']] = c(misc.out[['dateOver18']], getFirstDayAboveT(wtr, 18))
-    misc.out[['dateOver16.7']] = c(misc.out[['dateOver16.7']], getFirstDayAboveT(wtr, 16.7))
+    
     
     misc.out[['coef_var_0_30']] = c(misc.out[['coef_var_0_30']], sd(surfT[1:30])/mean(surfT[1:30]))
     misc.out[['coef_var_30_60']] = c(misc.out[['coef_var_30_60']], sd(surfT[31:60])/mean(surfT[31:60]))
@@ -173,15 +179,60 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]], na.rm=TRUE))
     misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(tmp$metaTopD[start.end[1]:start.end[2]], na.rm=TRUE))
     
+    ## Get epi and hypo volumes
+    water.level = water.level.glm(GLMnc)
+    water.level = water.level[4:length(water.level)] #Truncate damn 3 days at start
+    
+    meta.top.heights = water.level - tmp$metaTopD
+    meta.bot.heights = water.level - tmp$metaBotD
+    
+    epi.vols = volsAboveHeight.GLM(GLMnc, c(rep(NA,3), meta.top.heights))
+    hyp.vols = volsBelowHeight.GLM(GLMnc, c(rep(NA,3), meta.bot.heights))
+    
+    mean.epi.vol = mean(epi.vols[start.end[1]:start.end[2]], na.rm=TRUE)
+    mean.hyp.vol = mean(hyp.vols[start.end[1]:start.end[2]], na.rm=TRUE)
+    
+    
+    misc.out[['mean.epi.vol']] = c(misc.out[['mean.epi.vol']], mean.epi.vol)
+    misc.out[['mean.hyp.vol']] = c(misc.out[['mean.hyp.vol']], mean.hyp.vol)
+    misc.out[['mean.epi.hypo.ratio']] = c(misc.out[['mean.epi.hypo.ratio']], mean.epi.vol/mean.hyp.vol)
+    
+    
+    ## GDD calcs
     dd10 = surfT - 10
     dd5  = surfT - 5
-    misc.out[['degree_days_5c']] = c(misc.out[['degree_days_5c']], sum(dd5[dd5 > 0], na.rm=TRUE))
-    misc.out[['degree_days_10c']] = c(misc.out[['degree_days_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
+    misc.out[['GDD_wtr_5c']] = c(misc.out[['GDD_wtr_5c']], sum(dd5[dd5 > 0], na.rm=TRUE))
+    misc.out[['GDD_wtr_10c']] = c(misc.out[['GDD_wtr_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
     
     vols = ncvar_get(GLMnc,'Tot_V')
+    vols = vols[c(-1,-2,-3)]
+    
     
     #Units are in ML, so 1ML = 1000 m^3
     misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE)*1000)
+    misc.out[['volume_sum_m_3_day']] = c(misc.out[['volume_sum_m_3']], sum(vols, na.rm=TRUE)*1000)
+    misc.out[['simulation_length_days']] = c(misc.out[['simulation_length_days']], length(vols))
+    
+    if(!is.na(previous.wtr)){
+      
+      dur0to4 = difftime(wtr$DateTime[1], previous.wtr$DateTime[nrow(previous.wtr)], units='days')
+      dur0to4 = trunc(dur0to4)
+      
+      #previous year
+      lastOct30 = as.POSIXct(paste((as.numeric(years[i])-1), '-10-30', sep=''))
+      #this year stop
+      thisJul1 = as.POSIXct(paste(years[i], '-07-01', sep=''))
+      
+      dur0to4 = dur0to4 + getDaysBetweenT(previous.wtr[previous.wtr$DateTime > lastOct30, ], 0, 4)
+      dur0to4 = dur0to4 + getDaysBetweenT(wtr[wtr$DateTime < thisJul1, ], 0, 4)
+      
+      misc.out[['winter_dur_0-4']] = c(misc.out[['winter_dur_0-4']], dur0to4)
+      
+    }else{
+      misc.out[['winter_dur_0-4']] = c(misc.out[['winter_dur_0-4']], NA)
+    }
+    
+    previous.wtr = wtr
     
     #Cleanup this memory hog
     nc_close(GLMnc)
