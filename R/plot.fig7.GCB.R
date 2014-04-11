@@ -51,13 +51,13 @@ plot.fig7.GCB	<-	function(years){
 plot.kw	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
 	source('GLM.functions.R')
 	param	<-	'Kw'
-	write.param <- "Kd"
+	write.param <- expression(paste("Change in K"["d"]," (%)"))
 	#par(mgp=c(.9,.06,0))
 	plot(c(0,1),c(0,1), type="l", col=NA, 
 		axes=F,
 		ylim=plt.rng.y$Kw, xlim=plt.rng.x,
 		ylab="Temp. difference (°C)",
-		xlab=paste("Change in ",write.param," (%)",sep=''),
+		xlab=write.param,
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
 	
 	par(mgp=par.mgp$y)
@@ -198,10 +198,10 @@ plot.RT	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,l
 plot.hc	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
 	source('GLM.functions.R')
 	param	<-	'hc'
-	
+	write.param <- expression(paste("Change in h"["s"]," (%)"))
 	plot(c(0,1),c(0,1), type="l", col=NA, 
 		axes=F,
-		xlab=paste("Change in ",param," (%)",sep=''),
+		xlab=write.param,
 		ylim=plt.rng.y$hc, xlim=plt.rng.x,
 		ylab="Temp. difference (°C)",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
