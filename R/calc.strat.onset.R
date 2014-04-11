@@ -1,10 +1,12 @@
 source("GLM.functions.R")
-require(rGLM)
-lyrDz	<-	0.25
+require("rGLM")
+lyrDz	<<-	0.25
 #year	<-	'2009'
 
 
 calc.strat.onset	<-	function(WBIC,year,min.duration=30,mix.diff=1.0){
+	source("GLM.functions.R")
+	require("rGLM")
 	# min.duration is in TIME UNITS
 	# mix diff is °C
 	folder	<-	paste("../supporting files/10-06Final/WBIC_",WBIC,'/',sep='')
@@ -20,8 +22,8 @@ calc.strat.onset	<-	function(WBIC,year,min.duration=30,mix.diff=1.0){
 		temp.bot	<-	getTempGLMnc(GLMnc,lyrDz,ref='bottom',z.out=0)
 	  	nc_close(GLMnc)
 		strat.count	<-	0
-		for (j in 1:length(temp.surf$DateTime)){
-			if (temp.surf[j,2]-temp.bot[j,2]>mix.diff){
+		for (j in seq_len(length(temp.surf[, 2]))){
+			if (!is.na(temp.surf[j,2]) & !is.na(temp.bot[j,2]) & temp.surf[j,2]-temp.bot[j,2]>mix.diff){
 				strat.count = strat.count+1
 				if (strat.count>=min.duration){
 					strat.onset	<-	as.numeric(strftime(temp.surf[j,1], format = "%j"))-min.duration
@@ -35,6 +37,7 @@ calc.strat.onset	<-	function(WBIC,year,min.duration=30,mix.diff=1.0){
 	return(strat.onset)
 }
 
+#calc.strat.onset('9700',year=1985)
 get.lakes <- function(year){
   # if doing more than a few years, this should be stripped for just one column and kept in memory (future)
   dat<-read.delim('../supporting files/omg.huge.output.tsv',header = TRUE, sep = "\t")
@@ -66,4 +69,10 @@ call.lakes	<-	function(year){
 	names(write.out) <- col.names
 	write.table(x=write.out,file=file.out,sep='\t',col.names=TRUE,quote=FALSE,row.names = FALSE)
 }
-call.lakes(1998)
+
+
+years = seq(1979,2011,1)
+print(years)
+for (i in 1:length(years)){
+	call.lakes(years[i])
+}

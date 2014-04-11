@@ -1,6 +1,6 @@
 source("GLM.functions.R")
 require(rGLM)
-lyrDz	<-	0.25
+lyrDz	<<-	0.25
 #year	<-	'2009'
 
 
