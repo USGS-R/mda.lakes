@@ -8,11 +8,11 @@ source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()
-run.dir = 'D:/WilmaRuns/2014-04-11-0.92perc_decrease'
+run.dir = 'D:/WilmaRuns/2014-04-11-0.92perc_increase'
 driver.dir = 'D:/WilmaDrivers/07-30'
 
 with.kd = read.table('../supporting files/annual_mean_secchi.txt', header=TRUE, sep='\t')
-with.kd = with.kd[!is.na(with.kd$year),]
+with.kd = with.kd[is.na(with.kd$year),]
 
 #runs = paste(run.dir, '/WBIC_', unique(with.kd$WBIC), sep='')
 runs = Sys.glob(file.path(run.dir, 'WBIC_*'))
@@ -35,7 +35,7 @@ key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.sing
                                                            'ncdf4_1.4.zip', '.Renviron'))))
 
 key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.2.zip', 
-                                                           'habitat.calc.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
+                                                           'habitat.calc.condor.Kevin.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip')))
 
 key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/Libraries', c('GLM.physics.R', 'chained.habitat.out.R')))

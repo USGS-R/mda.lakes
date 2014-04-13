@@ -6,7 +6,7 @@
 :: We need a temporary library folder
 mkdir rLibs
 R CMD BATCH run.single.scenario.condor.R
-R CMD BATCH habitat.calc.condor.R
+R CMD BATCH habitat.calc.condor.Kevin.R
 
 :: Cleanup!
 ::del output.nc
