@@ -134,6 +134,13 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
   } else if (!any(useI) & default.if.null==F){
     
     return(NULL)    
+  } else if (any(useI) & all(is.na(d[useI,'year']))){
+	  warning('No date info, using center of simulation year range as pivot point.')
+	  dat.WBIC <- d[useI,]
+    
+    year.cent <- mean(c(year.1, year.2))
+    secchi.mn <- mean(dat.WBIC$secchi.m.mean) # mean at pivot point!
+	
   } else {
     dat.WBIC <- d[useI,]
     
