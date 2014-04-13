@@ -7,7 +7,7 @@ if(iscondor){
 
 Sys.setenv(TZ='GMT')
 
-run.chained.GLM = function(run.dir, glm.path,nml.args=NULL, verbose=TRUE, only.cal=FALSE){
+run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.cal=FALSE){
   	# run.dir is the home for all model inputs
   	# glm.path is the path to the glm.exe (including the exe)
 	# only.cal is boolean to only run cal/val years
@@ -346,5 +346,128 @@ get.wtr.chained.prefix = function(run.dir){
   
   return(wtr)
   
+}
+
+run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
+  require(rGLM)
+  #run.dir is the home for all model inputs
+  #glm.path is the path to the glm.exe (including the exe)
+  # I don't like doing this in a function, but you must 
+  # to properly run GLM
+  origin = getwd()
+  setwd(run.dir)
+  
+  ## Key Paths and parameters
+  
+  ## Open template NML file
+  source.nml = read.nml('glm.nml','./')
+  # stash original
+  file.copy('glm.nml', 'glm.nml.orig')
+  
+  # Ice on/off Dates
+  #Get the ice on/off dates
+  ice.in = read.table('icecal.in.tsv', as.is=TRUE, header=TRUE, sep='\t')
+  
+  ice.in$DATE = as.POSIXct(ice.in$DATE)
+  ice.in = ice.in[order(ice.in$DATE), ]
+  
+  #temporary hack
+  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
+    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
+  }
+  
+  kd.in = read.table('kd.scenario.tsv', as.is=TRUE, header=TRUE, sep='\t')
+  
+  
+  # Find complete seasons (pairs of off/on dates)
+  s.starts = NA
+  s.ends = NA
+  class(s.starts) = c("POSIXct", "POSIXt")
+  class(s.ends) = c("POSIXct", "POSIXt")
+  season.i = 1
+  
+  for(i in 1:nrow(ice.in)){
+    abs(as.double(ice.in$DATE[i] - s.starts[season.i], units="days")) < 365
+    #browser()
+    if(ice.in$ON.OFF[i] == 'off'){# Must start at an "off" 
+      s.starts[season.i] = ice.in$DATE[i]
+      
+    }else if(!is.na(s.starts[season.i]) && 
+               abs(as.double(ice.in$DATE[i] - s.starts[season.i], units="days")) < 365){
+      s.ends[season.i] = ice.in$DATE[i]
+      
+      season.i = season.i + 1
+    }
+  }
+  s.starts = s.starts[1:length(s.ends)]
+  
+  # Figure out the years to model with start/end dates
+  # Find start/stop dates in existing NML
+  nml.start = as.POSIXct(source.nml$time$start)
+  nml.end = as.POSIXct(source.nml$time$stop)
+  
+  
+  # Intersect the two (Max of starts, min of ends)
+  # If we have ice-off before nml.start or ice-on after nml.end, truncate
+  rmI = s.starts <= nml.start | s.ends >= nml.end
+  s.starts = s.starts[!rmI]
+  s.ends = s.ends[!rmI]
+  
+  three.day.file = "ShortWave,LongWave,AirTemp,RelHum,WindSpeed,Rain,Snow
+  218.1,276.7,-1.80,84.7,7.80,0.000,0.002
+  296.5,206.8,-3.12,79.1,3.89,0.000,0.019
+  222.3,245.9,-1.25,84.0,5.50,0.001,0.009"
+  
+  # Prep prefix met data
+  prefix = read.csv(textConnection(three.day.file), header=TRUE)
+  
+  full.met = read.csv(get.nml(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
+  #stash original
+  file.copy(get.nml(source.nml, 'meteo_fl'), 'met.csv.orig')
+  
+  
+  #Let's change that prefix data!
+  
+  for(i in 1:length(s.starts)){
+    startI = which(strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S") == full.met$time)
+    full.met[(startI-3):(startI-1),-1] = prefix
+    
+    
+  }
+  #Write the met data with the new prefixes before iceoffs
+  write.csv(full.met, get.nml(source.nml, 'meteo_fl'), row.names=FALSE, quote=FALSE)
+  
+  
+  #Iterate runs, appending output name with year.
+  for(i in 1:length(s.starts)){  
+    
+    #Edit and output NML, start this thing 3 days early
+    source.nml <- set.nml(source.nml,'start',strftime(s.starts[i]-as.difftime(3, unit="days"), format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
+    if (!is.null(nml.args)){
+      for (a in 1:length(nml.args)){
+        source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
+      }
+    }
+    
+    #Write new Kd value
+    this.kd = kd.in$kd[kd.in$year == as.numeric(strftime(s.starts[i],'%Y'))]
+    source.nml <- set.nml(source.nml, 'Kw', this.kd)
+    
+    write.nml(source.nml, 'glm.nml', './')
+    
+    #Runs this iteration of the model.
+    if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
+    
+    out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
+    cat(out,'\n')
+    
+  }
+  #bring the original back
+  file.rename('glm.nml.orig', 'glm.nml')
+  file.rename('met.csv.orig', get.nml(source.nml, 'meteo_fl'))
+  
+  setwd(origin)
 }
 
