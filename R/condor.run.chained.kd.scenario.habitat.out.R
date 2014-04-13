@@ -9,6 +9,7 @@ library(rGLM)
 
 home.dir = getwd()
 run.dir = 'D:/WilmaRuns/2014-04-11-0.92perc_increase'
+secchi.trend = 0.92
 driver.dir = 'D:/WilmaDrivers/07-30'
 
 with.kd = read.table('../supporting files/annual_mean_secchi.txt', header=TRUE, sep='\t')
@@ -34,7 +35,7 @@ key.code = file.path(home.dir, c('Libraries/chained.GLM.lib.R'))
 key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.single.scenario.condor.R',
                                                            'ncdf4_1.4.zip', '.Renviron'))))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.3.2.tar.gz', 
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.3.3.tar.gz', 
                                                            'habitat.calc.condor.Kevin.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip')))
 
@@ -61,7 +62,7 @@ for(i in 1:length(runs)){
   write.table(info, file.path(runs[i], 'run.info.tsv'), row.names=FALSE)
   
   
-  kds = data.frame(year =1979:2011, kd=getScenarioKd(WBICs[i], 1979:2011, trend=-0.92))
+  kds = data.frame(year=1979:2011, kd=getScenarioKd(WBICs[i], 1979:2011, trend=secchi.trend))
   write.table(kds, file.path(runs[i], 'kd.scenario.tsv'), row.names=FALSE, sep='\t')
   
   
@@ -79,7 +80,7 @@ for(i in 1:length(runs)){
   
   # fix clarity values, default has been updated
   source.nml = read.nml('glm.nml','./')
-  set.nml(source.nml, 'Kw', kw)
+  source.nml = set.nml(source.nml, 'Kw', kw)
   write.nml(source.nml, 'glm.nml', './')
   
   #Submit
@@ -118,7 +119,7 @@ fOutput = data.frame()
 
 for(i in 1:length(runs)){
   
-  hab.out.path = file.path(runs[i], 'habitat.out.tsv')
+  hab.out.path = file.path(runs[i], 'kevin.metrics.out.tsv')
   
   
   if(!file.exists(hab.out.path)){
@@ -147,7 +148,7 @@ if(!file.exists(file.path(run.dir,'output'))){
   dir.create(file.path(run.dir,'output'))  
 }
 
-write.table(fOutput, file.path(run.dir, 'output', 'omg.huge.output.tsv'), 
+write.table(fOutput, file.path(run.dir, 'output', 'all.kevin.metrics.out.tsv'), 
                                row.names=FALSE, sep='\t')
 system("rundll32 user32.dll,MessageBeep -1")
 

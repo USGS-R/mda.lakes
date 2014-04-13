@@ -298,7 +298,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   bthy.areas = nml.data$morphometry$A*1000  #GLM file has areas in 1000's of m^2
   bthy.depths = abs(nml.data$morphometry$H - max(nml.data$morphometry$H))
   
-  bathy = data.frame(depths=bthy.depths, area=bthy.areas)
+  bathy = data.frame(depths=bthy.depths, areas=bthy.areas)
   bathy = bathy[order(bathy$depths),]  #sort by depth, I think we want ascending
   
   for(i in 1:length(nc.files)){
@@ -359,29 +359,32 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     jul31 = as.POSIXct(paste(years[i], '-07-31', sep=''))
     sep30 = as.POSIXct(paste(years[i], '-09-30', sep=''))
     
+    la.wtr = getTempGLMnc(GLMnc, ref='surface')
+    la.wtr = la.wtr[4:nrow(la.wtr),] # drop those pesky intro days
+    names(la.wtr) = tolower(names(la.wtr)) ## fix the header to make it 'rLA' compatible
     
-    s.s = ts.schmidt.stability(wtr, bathy)
+    s.s = ts.schmidt.stability(la.wtr, bathy, na.rm=TRUE)
     
     misc.out[['max_schmidt_stability']] = c(misc.out[['max_schmidt_stability']], max(s.s[,2], na.rm=TRUE))
     
     misc.out[['mean_schmidt_stability_JAS']] = c(misc.out[['mean_schmidt_stability_JAS']], 
-                                    mean(s.s[ss$datetime >= jul1 & ss$datetime <=sep30,2], na.rm=TRUE))
+                                    mean(s.s[s.s$datetime >= jul1 & s.s$datetime <=sep30,2], na.rm=TRUE))
     
     elevations = getElevGLM(wtr)
     depths = max(elevations) - elevations
     tmp = getEpiMetaHypo.GLM(wtr, depths)
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
 	
-  	depths = get.offsets(wtr)
+  	depths = get.offsets(la.wtr)
   	
-  	whole.lake.temps = ts.layer.temperature(wtr, 0, max(depths), bathy)
+  	whole.lake.temps = ts.layer.temperature(la.wtr, 0, max(depths), bathy, na.rm=TRUE)
   	
   	misc.out[['lake_average_temp']] = c(misc.out[['lake_average_temp']], mean(whole.lake.temps[,2], na.rm=TRUE))
   	
-  	tmp = ts.meta.depths(wtr, seasonal=TRUE)
+  	tmp = ts.meta.depths(la.wtr, seasonal=TRUE, na.rm=TRUE)
   	
-  	epi.temps = ts.layer.temperature(wtr, 0, tmp$top, bathy)
-  	hypo.temps = ts.layer.temperature(wtr, tmp$bottom, max(depths), bathy)
+  	epi.temps = ts.layer.temperature(la.wtr, 0, tmp$top, bathy, na.rm=TRUE)
+  	hypo.temps = ts.layer.temperature(la.wtr, tmp$bottom, max(depths), bathy, na.rm=TRUE)
   	
   	misc.out[['mean_epi_temp']] = c(misc.out[['mean_epi_temp']], mean(epi.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
   	misc.out[['mean_hypo_temp']] = c(misc.out[['mean_hypo_temp']], mean(hypo.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
