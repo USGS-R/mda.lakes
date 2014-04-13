@@ -7,4 +7,4 @@ install.packages("rGLM_0.1.5.tar.gz", lib='./rLibs', repos=NULL, type='source')
 source('chained.GLM.lib.R')
 library(rGLM)
 
-run.prefixed.chained.GLM('.', glm.path = 'glm.exe', NULL, verbose=TRUE)
+run.prefixed.chained.kd.scenario.GLM('.', glm.path = 'glm.exe', NULL, verbose=TRUE)
