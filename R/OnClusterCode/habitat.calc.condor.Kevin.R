@@ -15,4 +15,4 @@ library('stringr')
 
 info = read.table('run.info.tsv', header=TRUE, sep='\t')
 
-chained.habitat.calc('.', 'habitat.out.tsv', info$WBIC)
+chained.habitat.calc.kevin('.', 'kevin.metrics.out.tsv', info$WBIC)

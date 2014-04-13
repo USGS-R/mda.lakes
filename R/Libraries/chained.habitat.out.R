@@ -271,5 +271,156 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
 }
 
 
+chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
+  
+  require(stringr)
+  require(rGLM)
+  require(ncdf4)
+  require(rLakeAnalyzer)
+  
+  nc.files = Sys.glob(file.path(run.path, '*.nc'))
+  years = wbics = str_extract(basename(nc.files),"[0-9]+")
+  
+  if(missing(lakeid)){
+    lakeid = basename(run.path)
+  }
+  
+  misc.out = list()
+  
+  bad = rep(FALSE, length(years))
+  
+  empir.ice = read.table(file.path(run.path, 'icecal.in.tsv'), sep='\t', header=TRUE)
+  empir.ice$DATE = as.POSIXct(empir.ice$DATE)
+  
+  #We need Hypsometry for some of Kevin's damn numbers
+  nml.data = read.nml('glm.nml', folder='./')
+  
+  bthy.areas = nml.data$morphometry$A*1000  #GLM file has areas in 1000's of m^2
+  bthy.depths = abs(nml.data$morphometry$H - max(nml.data$morphometry$H))
+  
+  bathy = data.frame(depths=bthy.depths, area=bthy.areas)
+  bathy = bathy[order(bathy$depths),]  #sort by depth, I think we want ascending
+  
+  for(i in 1:length(nc.files)){
+    
+    #Open the NC file and get data frame of wtr temp
+    GLMnc = nc_open(nc.files[i], readunlim=FALSE)
+    test.get = ncvar_get(GLMnc,'temp')
+    
+    wtr = getGLMwtr(GLMnc)
+    ice = getGLMice(GLMnc)
+    surfT = getSurfaceT(wtr)
+    
+    raw.wtr = ncvar_get(GLMnc, 'temp')
+    run.time = getTimeGLMnc(GLMnc)
+    
+    
+    #Drop the first 3 days
+    wtr = wtr[4:nrow(wtr), , drop=FALSE]
+    ice = ice[4:nrow(wtr),]
+    surfT = surfT[4:nrow(wtr)]
+    raw.wtr = raw.wtr[,4:ncol(raw.wtr), drop=FALSE] #this is a matrix with a different orientation
+    run.time = run.time[4:length(run.time)]
+    
+    censor.days = 3  #used for later functions to censor burn-in days
+    
+    #Make sure temps are in a sane range
+    if(any(raw.wtr > 50, na.rm=TRUE) | any(raw.wtr < -20, na.rm=TRUE)){
+      
+      cat('Unreasonable temp values found:', lakeid, '\n')
+      nc_close(GLMnc)
+      bad[i] = TRUE
+      next
+    }
+    
+    #Ok, sometimes the first modeled day gives a really bad temp value
+    # at the surface. Drop those!
+    if(any(raw.wtr[,1] > 13, na.rm=TRUE)){
+      cat('Unreasonable first day temps found:', lakeid, '\n')
+      nc_close(GLMnc)
+      bad[i] = TRUE
+      next
+    }
+    
+    
+    #Make sure the last date is within 2 days of one of the ice-ons
+    # If it isn't, then the model probably failed early
+    if( !any(abs(difftime(run.time[length(run.time)],empir.ice$DATE, units='days')) < 2.1) ){
+      cat('Wrong ice-off date:', lakeid, '\n')
+      nc_close(GLMnc)
+      bad[i] = TRUE
+      next
+    }
+    
+    misc.out[['durStrat']] = c(misc.out[['durStrat']], getStratifiedDuration(wtr, ice, minStrat=0.5))
+    
+    jun1 = as.POSIXct(paste(years[i], '-06-01', sep=''))
+    jul1 = as.POSIXct(paste(years[i], '-07-01', sep=''))
+    jul31 = as.POSIXct(paste(years[i], '-07-31', sep=''))
+    sep30 = as.POSIXct(paste(years[i], '-09-30', sep=''))
+    
+    
+    s.s = ts.schmidt.stability(wtr, bathy)
+    
+    misc.out[['max_schmidt_stability']] = c(misc.out[['max_schmidt_stability']], max(s.s[,2], na.rm=TRUE))
+    
+    misc.out[['mean_schmidt_stability_JAS']] = c(misc.out[['mean_schmidt_stability_JAS']], 
+                                    mean(s.s[ss$datetime >= jul1 & ss$datetime <=sep30,2], na.rm=TRUE))
+    
+    elevations = getElevGLM(wtr)
+    depths = max(elevations) - elevations
+    tmp = getEpiMetaHypo.GLM(wtr, depths)
+    start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
+	
+  	depths = get.offsets(wtr)
+  	
+  	whole.lake.temps = ts.layer.temperature(wtr, 0, max(depths), bathy)
+  	
+  	misc.out[['lake_average_temp']] = c(misc.out[['lake_average_temp']], mean(whole.lake.temps[,2], na.rm=TRUE))
+  	
+  	tmp = ts.meta.depths(wtr, seasonal=TRUE)
+  	
+  	epi.temps = ts.layer.temperature(wtr, 0, tmp$top, bathy)
+  	hypo.temps = ts.layer.temperature(wtr, tmp$bottom, max(depths), bathy)
+  	
+  	misc.out[['mean_epi_temp']] = c(misc.out[['mean_epi_temp']], mean(epi.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
+  	misc.out[['mean_hypo_temp']] = c(misc.out[['mean_hypo_temp']], mean(hypo.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
+      
+	
+    ## GDD calcs
+    dd10 = surfT - 10
+    dd5  = surfT - 5
+    misc.out[['GDD_wtr_5c']] = c(misc.out[['GDD_wtr_5c']], sum(dd5[dd5 > 0], na.rm=TRUE))
+    misc.out[['GDD_wtr_10c']] = c(misc.out[['GDD_wtr_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
+    
+    vols = ncvar_get(GLMnc,'Tot_V')
+    vols = vols[c(-1,-2,-3)]
+    
+    #Units are in ML, so 1ML = 1000 m^3
+    misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE)*1000)
+    misc.out[['simulation_length_days']] = c(misc.out[['simulation_length_days']], length(vols))
+        
+    #Cleanup this memory hog
+    nc_close(GLMnc)
+    cat("Vols calculated", years[i], '\n')
+  }
+  
+  #Build output data frame
+  fOutput = data.frame(year=years[!bad])
+  fOutput$lakeid = lakeid
+  
+  misc.names = names(misc.out)
+  for(i in 1:length(misc.names)){
+    fOutput[[misc.names[i]]] = misc.out[[misc.names[i]]]
+  }
+  
+  #Output!!
+  if(!is.null(output.path)){
+    write.table(fOutput, output.path, row.names=FALSE, sep='\t')
+  }else{
+    return(fOutput)
+  }
+}
+
 
 

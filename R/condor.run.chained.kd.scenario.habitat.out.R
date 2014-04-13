@@ -12,7 +12,7 @@ run.dir = 'D:/WilmaRuns/2014-04-11-0.92perc_increase'
 driver.dir = 'D:/WilmaDrivers/07-30'
 
 with.kd = read.table('../supporting files/annual_mean_secchi.txt', header=TRUE, sep='\t')
-with.kd = with.kd[is.na(with.kd$year),]
+#with.kd = with.kd[is.na(with.kd$year),]
 
 #runs = paste(run.dir, '/WBIC_', unique(with.kd$WBIC), sep='')
 runs = Sys.glob(file.path(run.dir, 'WBIC_*'))
@@ -34,7 +34,7 @@ key.code = file.path(home.dir, c('Libraries/chained.GLM.lib.R'))
 key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.single.scenario.condor.R',
                                                            'ncdf4_1.4.zip', '.Renviron'))))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.2.zip', 
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.3.2.tar.gz', 
                                                            'habitat.calc.condor.Kevin.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip')))
 
@@ -72,15 +72,15 @@ for(i in 1:length(runs)){
                         'glm.nml', 'icecal.in.tsv', 'run.info.tsv', 'kd.scenario.tsv'))
   
   #We need to fix kw values
-  #kw = getClarity(WBICs[i], default.if.null=TRUE)
+  kw = getClarity(WBICs[i], default.if.null=TRUE)
   
   #Submit the run!
   setwd(runs[i])
   
   # fix clarity values, default has been updated
-  #source.nml = read.nml('glm.nml','./')
-  #set.nml(source.nml, 'Kw', kw)
-  #write.nml(source.nml, 'glm.nml', './')
+  source.nml = read.nml('glm.nml','./')
+  set.nml(source.nml, 'Kw', kw)
+  write.nml(source.nml, 'glm.nml', './')
   
   #Submit
   system('condor_submit condor.cmd')
