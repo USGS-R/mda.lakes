@@ -16,6 +16,8 @@ n	<-	n[!rmvI]
 SE	<-	SE[!rmvI]
 n.lakes	<-	length(SE)
 
+hist(SE,breaks=seq(0,8,.25))
+print(median(SE))
 area	<-	vector(length=n.lakes)
 SDF	<-	vector(length=n.lakes)
 depth	<-	vector(length=n.lakes)
