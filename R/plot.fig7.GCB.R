@@ -49,7 +49,7 @@ plot.fig7.GCB	<-	function(years){
 }
 
 plot.kw	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
-	source('GLM.functions.R')
+	source('Libraries/GLM.functions.R')
 	param	<-	'Kw'
 	write.param <- expression(paste("Change in K"["d"]," (%)"))
 	#par(mgp=c(.9,.06,0))
@@ -116,7 +116,7 @@ plot.kw	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,l
 }
 
 plot.RT	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
-	source('GLM.functions.R')
+	source('Libraries/GLM.functions.R')
 	param	<-	'RT'
 	#par(mgp=c(.9,.06,0))
 	plot(c(0,1),c(0,1), type="l", col=NA, 
@@ -196,7 +196,7 @@ plot.RT	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,l
 	text(label.loc[1],label.loc[2],label='(b)')
 }
 plot.hc	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab){
-	source('GLM.functions.R')
+	source('Libraries/GLM.functions.R')
 	param	<-	'hc'
 	write.param <- expression(paste("Change in h"["s"]," (%)"))
 	plot(c(0,1),c(0,1), type="l", col=NA, 

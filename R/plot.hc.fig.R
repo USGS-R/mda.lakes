@@ -1,5 +1,5 @@
 # plot figure 8 for Jamon's canopy manuscript
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 get.wSt <- function(lkeArea,hs=NULL,method='Markfort'){
   minWstr  <-  0.0001
   minhs <- 0.1

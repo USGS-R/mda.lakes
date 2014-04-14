@@ -1,6 +1,6 @@
 library(rGLM)
 library(stringr)
-source("GLM.functions.R")
+source("Libraries/GLM.functions.R")
 
 model.dirs	<-	Sys.glob('D:/WiLMA/GLM/Run/WBIC_*')	# where the .nml files are
 stop.mmdd <- '09-30'

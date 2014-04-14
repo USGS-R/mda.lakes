@@ -1,6 +1,6 @@
 # this takes a single lake WBIC, a simulation year, an array of temperature errors (to be randomly sampled from), and the number of realizations
 
-source("GLM.functions.R")
+source("Libraries/GLM.functions.R")
 require(rGLM)
 nc.dir	<-	"../supporting files/10-06Final"
 val.file	<-	"../supporting files/Epilimnion.tsv"

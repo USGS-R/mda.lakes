@@ -3,7 +3,7 @@
 ## does a few things. 
 
 library(stringr)
-source('htcondor-R.R')
+source('Libraries/htcondor-R.R')
 
 home.dir = getwd()
 run.dir = 'D:/WilmaRuns/09-18Final'
@@ -22,15 +22,13 @@ model.files = file.path('D:/WILMA/GLM/1.2.2',
 #                       'unzip.exe', 'zip.exe', 'zip32z64.dll'))
 
 
-key.code = file.path(home.dir, c('chained.GLM.lib.R'))
+key.code = file.path(home.dir, c('Libraries/chained.GLM.lib.R'))
 key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.single.condor.R','rGLM_0.1.2.tar.gz',
                                                            'ncdf4_1.4.zip', '.Renviron'))))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_1.0.zip', 
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.2.tar.gz', 'rLakeAnalyzer_1.2.zip', 
                                                            'wtr.out.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
                                                            'stringr_0.6.2.zip')))
-
-key.code = c(key.code, file.path('D:/WiLMA/WILMA-m/R', '3dayPrefix.csv'))
 
 
 bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelWtrOut.bat'

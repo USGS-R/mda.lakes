@@ -4,7 +4,7 @@ library(ncdf4)
 library(rGLM)
 
 source('chained.GLM.lib.R')
-source('GLM.functions.R')
+source('Libraries/GLM.functions.R')
 library(stringr)
 
 

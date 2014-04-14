@@ -1,5 +1,5 @@
 plot.sensitivity	<-	function(){
-	source('GLM.functions.R')
+	source('Libraries/GLM.functions.R')
 	param	<-	'hc'
 	
 	small.thresh	<-	1000000 # 100 ha

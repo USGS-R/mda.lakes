@@ -1,6 +1,6 @@
 # find the darkest and clearest quartiles of lakes
 
-source("GLM.functions.R")
+source("Libraries/GLM.functions.R")
 require(rGLM)
 years	<-	seq(1979,2011,1)
 lyrDz = 0.25
