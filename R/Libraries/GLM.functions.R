@@ -128,17 +128,17 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
   Kd <- vector(length=length(years))
   
   if (!any(useI) & default.if.null==T){
-    year.cent = mean(c(year.1,year.2))
+    year.cent = year.1  #mean(c(year.1,year.2))
     secchi.mn = secchiConv/default.kd
 
   } else if (!any(useI) & default.if.null==F){
     
     return(NULL)    
   } else if (any(useI) & all(is.na(d[useI,'year']))){
-	  warning('No date info, using center of simulation year range as pivot point.')
+	  warning('No date info, using beginning of simulation as pivot point.')
 	  dat.WBIC <- d[useI,]
     
-    year.cent <- mean(c(year.1, year.2))
+    year.cent <- year.1
     secchi.mn <- mean(dat.WBIC$secchi.m.mean) # mean at pivot point!
 	
   } else {
@@ -146,7 +146,7 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
     
     yr.i = dat.WBIC$year >= year.1 & year.2 >= dat.WBIC$year
     
-    year.cent <- mean(dat.WBIC$year[yr.i]) # the pivot point!
+    year.cent <- year.1  #mean(dat.WBIC$year[yr.i]) # the pivot point!
     secchi.mn <- mean(dat.WBIC$secchi.m.mean[yr.i]) # mean at pivot point!
   }
   
