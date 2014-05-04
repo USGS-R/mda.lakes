@@ -8,7 +8,7 @@ source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()
-run.dir = 'D:/WilmaRuns/2014-04-11-0.92perc_increase'
+run.dir = 'D:/WilmaRuns/2014-05-04-0.92perc_increase'
 secchi.trend = 0.92
 driver.dir = 'D:/WilmaDrivers/07-30'
 
