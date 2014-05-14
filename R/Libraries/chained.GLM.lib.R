@@ -17,7 +17,7 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
 	setwd(run.dir)
 
 	if(!file.exists(glm.path)){
-		error('glm.path does not point correctly to a GLM executable')
+		stop('glm.path does not point correctly to a GLM executable')
 	}
 	
 	## Key Paths and parameters
@@ -110,6 +110,9 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
       #Runs this iteration of the model.
       if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
       out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
+      if(out != 0){
+      	warning('GLM is sick')
+      }
       
       
     }
