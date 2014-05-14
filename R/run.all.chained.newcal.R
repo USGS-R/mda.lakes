@@ -7,19 +7,14 @@ source('Libraries/GLM.functions.R')
 library(stringr)
 
 
-
 ## Run all GLM models
 origin = getwd()
 
 driver.dir = 'D:/WilmaDrivers/07-30'
-model.dirs = Sys.glob('D:/WilmaRuns/2014-04-30/WBIC_*')
-glm.path = "D:/WILMA/GLM/1.2/glm.exe"
+model.dirs = Sys.glob('D:/WilmaRuns/2014-05-05glm1.4ce0.0013/WBIC_*')
+glm.path = "D:/WILMA/GLM/1.4.0/x64/glm.exe"
 model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
-
-wndRef = 0.00145
-wndMethod = 'Markfort'
-
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TRUE, header=TRUE)
@@ -57,7 +52,7 @@ for(i in 1:length(model.ids)){
   #Wstr = getWstr(WBICs[i],method=wndMethod,canopy=h_s*h_s.mult[m])
   Kw   = getClarity(WBICs[i], default.if.null=TRUE)
   
-  nml.args = list('Kw' = Kw)# reverting...
+  nml.args = list('Kw' = Kw, 'ce'=0.0013, 'ch'=0.0013)
   
   run.chained.GLM(model.dirs[i], glm.path = glm.path, nml.args, verbose=FALSE, only.cal=TRUE)
   
@@ -67,7 +62,7 @@ for(i in 1:length(model.ids)){
   
   ## Delete the output *.nc files if you want
   unlink(Sys.glob(file.path(model.dirs[i], '*.nc')))
-  cat(WBICs[i], '\n')
+  cat(i/length(model.ids)*100, '%\t', WBICs[i], '\n')
 }
 
 
@@ -83,6 +78,6 @@ for(i in 1:length(model.ids)){
 	all.cal = rbind(all.cal, tmp)
 }
 
-write.table(all.cal,'../Output/all.cal.tsv', sep='\t', row.names=FALSE)
+write.table(all.cal,'../Output/all.cal.glm1.4.tsv', sep='\t', row.names=FALSE)
 
 
