@@ -130,10 +130,13 @@ system("rundll32 user32.dll,MessageBeep -1")
 #fOutput$lakeid = str_trim(str_extract(fOutput$lakeid, " ([0-9]+)"))
 
 #Now convert dateOver's to DOY
-fOutput$dateOver18 = (as.numeric(fOutput$dateOver18) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
-#fOutput$dateOver16.7 = (as.numeric(fOutput$dateOver16.7) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
-fOutput$dateOver21 = (as.numeric(fOutput$dateOver21) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver5   = (as.numeric(fOutput$dateOver5) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver6   = (as.numeric(fOutput$dateOver6) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
 fOutput$dateOver8.9 = (as.numeric(fOutput$dateOver8.9) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver18  = (as.numeric(fOutput$dateOver18) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver20  = (as.numeric(fOutput$dateOver20) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+fOutput$dateOver21  = (as.numeric(fOutput$dateOver21) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+
 
 
 write.table(fOutput,'omg.huge.output.tsv', row.names=FALSE, sep='\t')
