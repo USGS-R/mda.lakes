@@ -144,7 +144,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     
     misc.out[['dateOver5']] = c(misc.out[['dateOver5']], getFirstDayAboveT(wtr, 5))
-    misc.out[['dateOver5']] = c(misc.out[['dateOver6']], getFirstDayAboveT(wtr, 6))
+    misc.out[['dateOver6']] = c(misc.out[['dateOver6']], getFirstDayAboveT(wtr, 6))
     misc.out[['dateOver8.9']] = c(misc.out[['dateOver8.9']], getFirstDayAboveT(wtr, 8.9))
     misc.out[['dateOver21']] = c(misc.out[['dateOver21']], getFirstDayAboveT(wtr, 21))
     misc.out[['dateOver20']] = c(misc.out[['dateOver20']], getFirstDayAboveT(wtr, 20))
