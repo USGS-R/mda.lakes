@@ -144,7 +144,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     
     misc.out[['dateOver5']] = c(misc.out[['dateOver5']], getFirstDayAboveT(wtr, 5))
-    misc.out[['dateOver5']] = c(misc.out[['dateOver6']], getFirstDayAboveT(wtr, 6))
+    misc.out[['dateOver6']] = c(misc.out[['dateOver6']], getFirstDayAboveT(wtr, 6))
     misc.out[['dateOver8.9']] = c(misc.out[['dateOver8.9']], getFirstDayAboveT(wtr, 8.9))
     misc.out[['dateOver21']] = c(misc.out[['dateOver21']], getFirstDayAboveT(wtr, 21))
     misc.out[['dateOver20']] = c(misc.out[['dateOver20']], getFirstDayAboveT(wtr, 20))
@@ -310,6 +310,8 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     wtr = getGLMwtr(GLMnc)
     ice = getGLMice(GLMnc)
     surfT = getSurfaceT(wtr)
+    floorT = getTempGLMnc(GLMnc, ref='bottom', z.out=0)
+    floorT = floorT[4:nrow(floorT),]
     
     raw.wtr = ncvar_get(GLMnc, 'temp')
     run.time = getTimeGLMnc(GLMnc)
@@ -389,6 +391,23 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   	misc.out[['mean_epi_temp']] = c(misc.out[['mean_epi_temp']], mean(epi.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
   	misc.out[['mean_hypo_temp']] = c(misc.out[['mean_hypo_temp']], mean(hypo.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
       
+    misc.out[['mean_surf_temp']] = c(misc.out[['mean_surf_temp']], mean(surfT))
+    misc.out[['mean_bottom_temp']] = c(misc.out[['mean_bottom_temp']], mean(floorT[,2]))
+    
+    misc.out[['mean_bottom_temp_365']] = c(misc.out[['mean_bottom_temp_365']],
+    																			 mean(c(floorT[,2], rep(4, 365 - nrow(floorT)))))
+    																			 		 
+		misc.out[['mean_surf_temp_365']] = c(misc.out[['mean_surf_temp_365']],
+    																	 mean(c(surfT, rep(4, 365 - length(surfT)))))
+		
+		jun1 = as.POSIXct(paste(years[i], '-06-01', sep=''))
+		jul1 = as.POSIXct(paste(years[i], '-07-01', sep=''))
+		jul31 = as.POSIXct(paste(years[i], '-07-31', sep=''))
+		sep30 = as.POSIXct(paste(years[i], '-09-30', sep=''))
+		aug31 = as.POSIXct(paste(years[i], '-08-31', sep=''))
+		
+		misc.out[['mean_surf_JA']] = c(misc.out[['mean_surf_JA']],
+						mean(getSurfaceT(wtr[wtr$DateTime >= jul1 & wtr$DateTime <= aug31, ])))
 	
     ## GDD calcs
     dd10 = surfT - 10

@@ -8,8 +8,8 @@ source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()
-run.dir = 'D:/WilmaRuns/2014-04-11-0.92perc_increase'
-secchi.trend = 0.92
+run.dir = 'D:/WilmaRuns/2014-05-04-0.92perc_increase'
+secchi.trend = 0
 driver.dir = 'D:/WilmaDrivers/07-30'
 
 with.kd = read.table('../supporting files/annual_mean_secchi.txt', header=TRUE, sep='\t')
@@ -120,13 +120,17 @@ fOutput = data.frame()
 for(i in 1:length(runs)){
   
   hab.out.path = file.path(runs[i], 'kevin.metrics.out.tsv')
-  
+  kd.scenario.path = file.path(runs[i], 'kd.scenario.tsv')
   
   if(!file.exists(hab.out.path)){
     next
   }
   
+  kds = read.table(kd.scenario.path, sep='\t', header=T)
+  
   tmp = read.table(hab.out.path, sep='\t', header=T, as.is=TRUE)
+  
+  tmp = merge(kds, tmp, by='year')
   
   fOutput = rbind(fOutput, tmp)
   
@@ -139,10 +143,10 @@ system("rundll32 user32.dll,MessageBeep -1")
 #fOutput$lakeid = str_trim(str_extract(fOutput$lakeid, " ([0-9]+)"))
 
 #Now convert dateOver's to DOY
-fOutput$dateOver18 = (as.numeric(fOutput$dateOver18) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+#fOutput$dateOver18 = (as.numeric(fOutput$dateOver18) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
 #fOutput$dateOver16.7 = (as.numeric(fOutput$dateOver16.7) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
-fOutput$dateOver21 = (as.numeric(fOutput$dateOver21) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
-fOutput$dateOver8.9 = (as.numeric(fOutput$dateOver8.9) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+#fOutput$dateOver21 = (as.numeric(fOutput$dateOver21) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
+#fOutput$dateOver8.9 = (as.numeric(fOutput$dateOver8.9) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
 
 if(!file.exists(file.path(run.dir,'output'))){
   dir.create(file.path(run.dir,'output'))  

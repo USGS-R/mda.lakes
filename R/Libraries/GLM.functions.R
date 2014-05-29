@@ -168,12 +168,12 @@ getClarity	<-	local(
 		
 		default.kd	<-	0.6983965
 		
-		function(WBIC,default.if.null=FALSE){
+		function(WBIC,default.if.null=FALSE,source.file='../supporting files/annual_mean_secchi.txt'){
 			if (is.null(lookup)){
 				cat('Caching clarity info.\n')
 				secchiConv	<-	1.7
-				d	<-	read.table('../supporting files/annual_mean_secchi.txt',
-				header=TRUE,sep='\t')
+				d	<-	read.table(source.file, header=TRUE, sep='\t')
+				
 				lookup <<- new.env()
 				unWBIC	<-	unique(as.character(d$WBIC))
 				for (i in 1:length(unWBIC)){

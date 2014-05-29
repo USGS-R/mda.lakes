@@ -3,7 +3,7 @@ setwd("~/WiLMA/R")
 library(ncdf4)
 library(rGLM)
 
-source('chained.GLM.lib.R')
+source('Libraries/chained.GLM.lib.R')
 source('Libraries/GLM.functions.R')
 library(stringr)
 

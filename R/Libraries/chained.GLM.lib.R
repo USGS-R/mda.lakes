@@ -16,8 +16,12 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
 	origin = getwd()
 	setwd(run.dir)
 
+	if(!file.exists(glm.path)){
+		stop('glm.path does not point correctly to a GLM executable')
+	}
+	
 	## Key Paths and parameters
-
+	
 
 	## Open template NML file
 	source.nml = read.nml('glm.nml','./')
@@ -106,6 +110,9 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
       #Runs this iteration of the model.
       if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
       out = system2(glm.path, wait=TRUE, stdout=stdout,stderr=stderr)
+      if(out != 0){
+      	warning('GLM is sick')
+      }
       
       
     }
@@ -231,7 +238,7 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
   file.rename('glm.nml.orig', 'glm.nml')
   file.rename('met.csv.orig', get.nml(source.nml, 'meteo_fl'))
   
-  setwd(origin)
+	setwd(origin)
 }
 
 
