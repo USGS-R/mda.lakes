@@ -79,7 +79,12 @@ getCanopy	<-	local(
           for (i in 1:nrow(d)){
             lookup[[toString(d$WBDY_WBIC[i])]]	<-	d$ASTER_pos_h_s[i]
           }
-        } else if (method=='Simard'){
+        } else if (method=='GLiHT'){
+          lookup <<- new.env()
+          for (i in 1:nrow(d)){
+            lookup[[toString(d$WBDY_WBIC[i])]]  <-	d$GLIHT_h_s[i]
+          }
+        }else if (method=='Simard'){
           lookup <<- new.env()
           for (i in 1:nrow(d)){
             lookup[[toString(d$WBDY_WBIC[i])]]	<-	d$SIMARD_h_c[i]
