@@ -43,7 +43,7 @@ getErrors <- function(wbics,max.all.e=3){
   # creates data.frame for box plots
   # open all the files, find the unique WBICs across all
   val.dir <- '../GLM/Run/'
-  
+  total.mx = 100
   
   
   d.f <- data.frame(c())
@@ -64,14 +64,12 @@ getErrors <- function(wbics,max.all.e=3){
     
     for (j in 1:length(wbics)){
       match.i <- wbics[j] == wbics.err
-      print(sum(match.i))
       if (!is.na(sum(match.i)) & sum(match.i)> 0){
         ded.vec[j] <- mean(dat[match.i, 2])
       } else {
         ded.vec[j] <- NA
       }
     }
-    cat('fail?')
     d.f.add <- data.frame(ded.vec)
     
     names(d.f.add) <- f.names[i]
@@ -80,8 +78,6 @@ getErrors <- function(wbics,max.all.e=3){
     } else {
       d.f <- cbind(d.f, d.f.add)
     }
-    cat(i)
-    cat('..no\n')
   }
   # will be NA padded
   
@@ -89,7 +85,7 @@ getErrors <- function(wbics,max.all.e=3){
   rmv.i = vector(length=length(wbics))
   for (j in 1:length(wbics)){
     bunk.i = d.f[j, ] > max.all.e | is.na(d.f[j, ])
-    if (all(bunk.i)){
+    if (all(bunk.i) | any(d.f[j, ] > total.mx,na.rm=T)){
       rmv.i[j] = T
     }
   }
