@@ -108,19 +108,16 @@ plotBox <- function(land.key='agricultural',area.cuts=c(1,10)){
   land.type <- num.keys[[land.key]]
   ar.lim <- area.cuts*1000000 # now m2
   
-  
-  
-  plot(c(0,NA),c(NA,NA),ylim=c(0,4.5),
-       xlim=c(0.5,(length(pl$names)+.5)),
-       xlab=NA,ylab="RMSE (°C)",
-       axes=F,xaxs="i", yaxs="i",main=land.key)
-  
-  
   errors.1 <- getErrors(un.wbic[land.cover==land.type & !is.na(land.cover) & areas<ar.lim[1]])
   errors.2 <- getErrors(un.wbic[land.cover==land.type & !is.na(land.cover) & areas>=ar.lim[1] & areas < ar.lim[2]])
   errors.3 <- getErrors(un.wbic[land.cover==land.type & !is.na(land.cover) & areas>=ar.lim[2]])
 
   pl <- boxplot(errors.1,ylim=c(0,6),plot=F)
+  plot(c(0,NA),c(NA,NA),ylim=c(0,4.5),
+       xlim=c(0.5,(length(pl$names)+.5)),
+       xlab=NA,ylab="RMSE (°C)",
+       axes=F,xaxs="i", yaxs="i",main=land.key)
+  
   axis(side=1,at=seq(0,(length(pl$names)+1)),labels=c(NA,pl$names,NA))
   axis(side=2,at=seq(0,10))
   polyplot(pl,color='grey80',cent.off=-tot.w/3,bin=tot.w/6)
