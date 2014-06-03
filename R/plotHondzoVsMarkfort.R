@@ -38,8 +38,8 @@ getAreas <- function(wbic){
 }
 
 
-getErrors <- function(wbics){
-  max.all.e <- 3.#3.5 # if all are above this RMSE, skip the lake
+getErrors <- function(wbics,max.all.e=3){
+  # max.all.e if all are above this RMSE, skip the lake
   # creates data.frame for box plots
   # open all the files, find the unique WBICs across all
   val.dir <- '../GLM/Run/'
