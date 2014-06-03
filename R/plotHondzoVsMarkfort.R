@@ -98,14 +98,17 @@ getErrors <- function(wbics){
   
 }
 
+getLCkey <- function(lc.name){
+  num.keys <- list('urban'=100,'agricultural'=110,'grassland'=150,'forest'=160,'water'=200,'wetland'=210)
+  return(num.keys[[lc.name]])
+}
 
 plotBox <- function(land.key='agricultural',area.cuts=c(1,10)){
   #errors is a data.frame
   #areas in km2
   tot.w = 0.8
-  num.keys <- list('urban'=100,'agricultural'=110,'grassland'=150,'forest'=160,'water'=200,'wetland'=210)
-  
-  land.type <- num.keys[[land.key]]
+
+  land.type <- getLCkey(land.key)
   ar.lim <- area.cuts*1000000 # now m2
   
   errors.1 <- getErrors(un.wbic[land.cover==land.type & !is.na(land.cover) & areas<ar.lim[1]])
