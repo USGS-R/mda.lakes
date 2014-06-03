@@ -142,22 +142,25 @@ polyplot <- function(pl,color,cent.off,bin){
     
 }
 
-un.wbic <<- allUniqueVal()
-land.cover <<- getLC(un.wbic)
-areas <<- getAreas(un.wbic)
-
-run.types = c('urban','agricultural','grassland','forest','water','wetland')
-area.cuts=c(0.5,1)
-
-panels = NULL
-for (j in 1:3){	
-  for (i in 1:3){
-    panels	<-	rbind(panels,c(j,j+3))
+plot.all <- function(){
+  un.wbic <<- allUniqueVal()
+  land.cover <<- getLC(un.wbic)
+  areas <<- getAreas(un.wbic)
+  
+  run.types = c('urban','agricultural','grassland','forest','water','wetland')
+  area.cuts=c(0.5,1)
+  
+  panels = NULL
+  for (j in 1:3){  
+    for (i in 1:3){
+      panels	<-	rbind(panels,c(j,j+3))
+    }
+  }
+  
+  layout(panels)
+  
+  for (i in 1:length(run.types)){
+    plotBox(run.types[i],area.cuts)
   }
 }
 
-layout(panels)
-
-for (i in 1:length(run.types)){
-  plotBox(run.types[i],area.cuts)
-}
