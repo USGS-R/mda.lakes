@@ -23,8 +23,8 @@ plot.fig6.GCB  <-	function(hist.all){
   fig.h	<-	pan.size+b.mar+t.mar
 
   
-  png(filename = "../Figure_06.png",
-      width = fig.w, height = fig.h, units = "in", res=300)
+  pdf(file = "../Figure_06.pdf",title='Read et al. figure',
+      width=fig.w, height=fig.h)
   
   #hist.all <- get.hist()
   par(mai=c(b.mar,left.spc, t.mar, r.mar+pan.size+pan.gap),mgp=par.mgp,omi=c(0,0,0,0),ps = 10, cex = 1, cex.main = 1)#
@@ -230,6 +230,14 @@ get.hist <- function(){
     use.i <- dat$lakeid==lakes[i]
     year.var.jul[i] <- cv(dat$mean_surf_jul[use.i])#mean_surf_jul
     strats = strat.mat[, i]
+    if (lakes[i]==1835300){
+      
+      print('big muskie strat:')
+      print(cv(strat.mat[, i],na.rm=T))
+      print('big muskie jul:')
+      print(year.var.jul[i])
+    }
+      
     if (sum(is.na(strats))<10){
       year.var.so[i] <- cv(strat.mat[, i],na.rm=T)
     }
