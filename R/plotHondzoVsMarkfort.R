@@ -20,7 +20,10 @@ getLC <- function(wbic){
   LC <- vector(length=length(wbic))
   for (i in 1:length(wbic)){
     u.i <- wbic[i]==dat$WBDY_WBIC
-    LC[i] <- dat$MAJORITY_landcover[u.i]
+    if (sum(u.i) > 1){
+      if (length(unique(dat$MAJORITY_landcover[u.i])) > 1){stop("WBIC duplicates with different LC vals")}
+    }
+    LC[i] <- dat$MAJORITY_landcover[u.i][1]
   }
   return(LC)
 }
