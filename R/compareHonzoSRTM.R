@@ -9,7 +9,7 @@ areas <<- getAreas(un.wbic)
 plot.types <- list('forest'=c('forest'),
                    'other'=c('urban','agricultural','grassland','wetland'))#'water','urban',
 
-group.def <- data.frame('error.cut'=3,'class.min'=0.1,'class.max'=10)
+group.def <- data.frame('error.cut'=3,'class.min'=NA,'class.max'=NA)
 
 getLCmatches <- function(landcover,match.class){
   
@@ -23,17 +23,17 @@ getLCmatches <- function(landcover,match.class){
   return(match.i)
 }
 
-getSizeMatches <- function(areas,upper=NULL,lower=NULL){
+getSizeMatches <- function(areas,upper=NA,lower=NA){
   upperKM2 <- upper*1000000
   lowerKM2 <- lower*1000000
   
-  if (!is.null(upper)){
+  if (!is.na(upper)){
     up.match <- areas <= upperKM2
   } else {
     up.match <- rep(T,length(areas))
   }
   
-  if (!is.null(lower)){
+  if (!is.na(lower)){
     lw.match <- areas >= lowerKM2
   } else {
     lw.match <- rep(T,length(areas))
@@ -43,7 +43,7 @@ getSizeMatches <- function(areas,upper=NULL,lower=NULL){
   return(match.i)
 }
 
-match.lc <- getLCmatches(land.cover,plot.types$forest)
+match.lc <- getLCmatches(land.cover,plot.types$other)
 match.ar <- getSizeMatches(areas,upper=group.def$class.max, lower=group.def$class.min)
 sum(match.ar)
 print(group.def)
@@ -51,4 +51,12 @@ pl <- getErrors(un.wbic[match.lc & match.ar],max.all.e=group.def$error.cut)
 boxplot(pl,ylim=c(0,6))
 
 
-print(t.test(pl$Hondzo,pl$SRTM,paired=T))
+print(t.test(pl$Hondzo,pl$SRTM,paired=T,alternative='greater'))
+
+match.lc <- getLCmatches(land.cover,plot.types$forest)
+match.ar <- getSizeMatches(areas,upper=group.def$class.max, lower=group.def$class.min)
+pl <- getErrors(un.wbic[match.lc & match.ar],max.all.e=group.def$error.cut)
+boxplot(pl,ylim=c(0,6))
+
+
+print(t.test(pl$Hondzo,pl$SRTM,paired=T,alternative='two.side'))
