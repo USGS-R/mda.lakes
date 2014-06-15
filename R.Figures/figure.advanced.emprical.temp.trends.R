@@ -62,7 +62,6 @@ for(i in 1:nrow(u.events)){
 
 all.slopes = all.slopes[!is.infinite(slopes) & !is.na(slopes),]
 
+write.table(all.slopes,'all.slopes.csv', row.names=FALSE, sep=',')
 
-boxplot(slopes~week, all.slopes[depth<2,], ylim=c(-1,1))
-abline(0,0,lwd=2)
-by.month = all.slopes[,median(slopes), by=month]
+
