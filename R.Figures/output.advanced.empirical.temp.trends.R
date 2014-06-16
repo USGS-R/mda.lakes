@@ -6,15 +6,19 @@ library(data.table)
 all.slopes.perms = function(times, data){
 	
 	if(length(data)==2){
-		return((data[1]-data[2])/(times[1]-times[2]))
+		perm.i = matrix(c(1,2))
+		#return((data[1]-data[2])/(times[1]-times[2]))
+	}else{
+		perm.i = combn(1:length(data),2)
 	}
 	
-	perm.i = combn(1:length(data),2)
+	
 	#perm1 = data[perm.i[1,],]
 	#perm2 = data[perm.i[2,],]
-	#browser()
 	
-	return((data[perm.i[1,]]-data[perm.i[2,]])/(times[perm.i[1,]] - times[perm.i[2,]]))
+	slopes = (data[perm.i[1,]]-data[perm.i[2,]])/(times[perm.i[1,]] - times[perm.i[2,]])
+	output = data.frame(slopes, start=min(times), end=max(times), dt=diff(range(times)))
+	return(output)
 }
 
 wtr = fread('../supporting files/wtemp.obs.tsv')
@@ -54,9 +58,9 @@ for(i in 1:nrow(u.events)){
 	}
 	
 	slopes = all.slopes.perms(moment[,year], moment[,wtemp])
+	slopes$wbic = u.event$wbic
 	
-	all.slopes = rbind(all.slopes, 
-										 merge(u.event,data.table(slopes=slopes, wbic=u.event$wbic), by='wbic'))
+	all.slopes = rbind(all.slopes, merge(u.event, slopes, by='wbic'))
 	n = n + nrow(moment)
 }
 
