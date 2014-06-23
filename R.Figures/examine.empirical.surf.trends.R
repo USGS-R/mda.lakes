@@ -108,5 +108,21 @@ for(i in 2:nrow(lter.wbic)){
   lines(tmp.mod$year, tmp.mod$mean_surf_JAS)
 }
 
+source('../R/Libraries/GLM.functions.R')
+
+u.wbic = unique(all.slopes$wbic)
+areas = rep(NA,length(all.slopes))
+kds   = rep(NA,length(all.slopes))
+
+for(i in 1:length(u.wbic)){
+	area = getArea(as.character(u.wbic[i]))
+	if(is.null(area)){
+		next;
+	}
+	areas[i] = area
+	kds[i] = getClarity(as.character(u.wbic[i]))
+}
+
+all.slopes = merge(all.slopes,data.frame(wbic=u.wbic, area=areas, kd=kds), by='wbic')
 
 
