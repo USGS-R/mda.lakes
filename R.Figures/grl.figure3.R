@@ -3,6 +3,8 @@
 library(plotrix)
 source('sens.confint.mod.R')
 all.slopes = fread('all.slopes.csv')
+prefix = 'grl'
+
 #n.vals = fread('all.slopes.n.csv')
 #all.slopes = merge(all.slopes, n.vals, by=c('wbic','week','depth'))
 
@@ -20,7 +22,7 @@ all.slopes[,bin.lab:=datLabels]
 #layout(matrix(c(1,1,2,2,2,2), 2, 3, byrow = FALSE))
 
 
-tiff('grl.figure.3.tiff', width=3200, height=1500, res=300, compression='lzw')
+tiff(paste(prefix,'.figure.3.tiff', sep=''), width=3200, height=1500, res=300, compression='lzw')
 
 par(oma=c(0,0.5,0,0))
 slopes = ddply(all.slopes, 'bin.lab', function(df){c(median(df$slopes), min(df$area), max(df$area), mean(range(df$area)))})

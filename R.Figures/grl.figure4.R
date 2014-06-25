@@ -2,10 +2,11 @@
 source('sens.confint.mod.R')
 
 all.slopes = fread('all.slopes.csv')
+prefix = 'grl'
 
 ## drop LTER lakes
-lter = rbind(fread('../supporting files/lter.north.lakes.tsv'), fread('../supporting files/lter.south.lakes.tsv'))
-all.slopes = all.slopes[(wbic %in% lter$WBIC), ]
+#lter = rbind(fread('../supporting files/lter.north.lakes.tsv'), fread('../supporting files/lter.south.lakes.tsv'))
+#all.slopes = all.slopes[(wbic %in% lter$WBIC), ]
 
 #n.vals = fread('all.slopes.n.csv')
 #all.slopes = merge(all.slopes, n.vals, by=c('wbic','week','depth'))
@@ -21,7 +22,7 @@ all.slopes[,bin.lab:=datLabels]
 all.slopes = all.slopes[,rel.depth:=floor(10*depth/zmax)/10]
 all.slopes = all.slopes[rel.depth <= 1,]
 
-tiff('grl.figure.4.tiff', width=2400, height=2100, res=300, compression='lzw')
+tiff(paste(prefix,'.figure.4.tiff',sep=''), width=2400, height=2100, res=300, compression='lzw')
 par(oma=c(0, 0.5, 0, 0), mar=c(5.1,4.1,4.1,3.1))
 #par(mgp=c(1.5, 0.35, 0), tcl=-0.25, ps=10, family="Times") 
 vals = ddply(all.slopes[bin.lab==1,], 'rel.depth', function(df)median(df$slopes))

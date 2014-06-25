@@ -4,6 +4,8 @@ library(plyr)
 library(zyp)
 source('sens.confint.mod.R')
 all.slopes = fread('all.slopes.csv')
+prefix = 'grl'
+
 all.slopes = all.slopes[!is.na(area),]
 all.slopes[,week:=week+1]
 
@@ -12,7 +14,7 @@ all.slopes[,week4:=(floor(week/4)*4)]
 all.slopes = all.slopes[,rel.depth:=floor(10*depth/zmax)/10]
 all.slopes = all.slopes[rel.depth <= 1,]
 
-tiff('grl.figure.2.tiff', width=2000, height=2000, res=300, compression='lzw')
+tiff(paste(prefix, '.figure.2.tiff',sep=''), width=2000, height=2000, res=300, compression='lzw')
 par(mfrow=c(2,1), mar=c(1,5,0,0), oma=c(5,0,1,0))
 
 slopes = ddply(all.slopes,'week', function(df)median(df$slopes))
