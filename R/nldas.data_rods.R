@@ -31,3 +31,42 @@ nldas.rods <- function(var.name,lat,lon){
   nldas.rods <- data.frame("DateTime"=time,"value"=obs)
   return(nldas.rods)
 }
+
+downsample.rods <- function(nldas.rods,var.name){
+  
+  flat.dates <- strptime(nldas.rods$DateTime,'%Y-%m-%d')
+  flat.vars <- nldas.rods$value
+  dwn.dates <- unique(flat.dates)
+  dwn.vars <- vector(mode='numeric',length = length(dwn.dates))
+  
+  for (j in 1:length(dwn.dates)){
+    u.i <- flat.dates == dwn.dates[j]
+    if (var.name=='precipitation'){
+      dwn.vars[j] <- sum(flat.vars[u.i])
+    } else {
+      dwn.vars[j] <- sum(flat.vars[u.i])
+    }
+  }
+  nldas.rods <- data.frame("DateTime"=as.POSIXct(dwn.dates),"value"=dwn.vars)
+  return(nldas.rods)
+}
+
+write.rods <- function(nldas.rods,var.name,f.name){
+  write.out <- nldas.rods
+  names(write.out) <- c("DateTime",var.name)
+  output = paste0('/Documents/R/Robertson/data/',f.name,'_',var.name,'.tsv')
+  write.table(write.out,file=output,col.names=TRUE, quote=FALSE, row.names=FALSE, sep="\t")
+}
+
+var.name = "precipitation"
+lakes <- list("Delevan"=c(42+36/60+0/3600,-88-36/60-30/3600),
+              'Mendota'=c(42+6/60+0/3600,-89-25/60-0/3600),
+              'Green'=c(42+36/60+0/3600,-88-36/60-30/3600),
+              'Winnebago'=c(),
+              'Anvil'=c(),
+              'St_Germaine'=c())
+lat = 42+36/60+0/3600
+lon = -88-36/60-30/3600
+nldas.rods <- nldas.rods(var.name,lat,lon)
+nldas.rods <- downsample.rods(nldas.rods,var.name)
+write.rods(nldas.rods,var.name,f.name='Delavan')
