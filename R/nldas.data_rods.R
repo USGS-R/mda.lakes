@@ -38,19 +38,30 @@ downsample.rods <- function(nldas.rods,var.name){
   flat.vars <- nldas.rods$value
   dwn.dates <- unique(flat.dates)
   dwn.vars <- vector(mode='numeric',length = length(dwn.dates))
+  n.l <- length(dwn.dates)
   
-  for (j in 1:length(dwn.dates)){
-    u.i <- flat.dates == dwn.dates[j]
-    if (var.name=='precipitation'){
-      dwn.vars[j] <- sum(flat.vars[u.i])
-    } else {
-      dwn.vars[j] <- sum(flat.vars[u.i])
-    }
+  # crazy treatment because 'large logical' vectors are really slow
+  j = 1
+  u.i <- which(flat.dates == dwn.dates[j]) # first one is likely different or incomplete
+  dwn.vars[j] <- ds.vals(values=flat.vars[u.i],var.name)
+  for (j in 2:(n.l-1)){
+    u.i = tail(u.i,1)+seq(1,24)
+    dwn.vars[j] <- ds.vals(values=flat.vars[u.i],var.name)
   }
+  j= n.l
+  u.i <- which(flat.dates == dwn.dates[j]) # last one is likely different or incomplete
+  dwn.vars[j] <- ds.vals(values=flat.vars[u.i],var.name)
   nldas.rods <- data.frame("DateTime"=as.POSIXct(dwn.dates),"value"=dwn.vars)
   return(nldas.rods)
 }
 
+ds.vals <- function(values,var.name){
+  if (var.name=='precipitation'){
+    return(sum(values))
+  } else {
+    return(mean(values))
+  }
+}
 write.rods <- function(nldas.rods,var.name,f.name){
   write.out <- nldas.rods
   names(write.out) <- c("DateTime",var.name)
@@ -61,12 +72,17 @@ write.rods <- function(nldas.rods,var.name,f.name){
 var.name = "precipitation"
 lakes <- list("Delevan"=c(42+36/60+0/3600,-88-36/60-30/3600),
               'Mendota'=c(42+6/60+0/3600,-89-25/60-0/3600),
-              'Green'=c(42+36/60+0/3600,-88-36/60-30/3600),
-              'Winnebago'=c(),
-              'Anvil'=c(),
-              'St_Germaine'=c())
-lat = 42+36/60+0/3600
-lon = -88-36/60-30/3600
-nldas.rods <- nldas.rods(var.name,lat,lon)
-nldas.rods <- downsample.rods(nldas.rods,var.name)
-write.rods(nldas.rods,var.name,f.name='Delavan')
+              'Green'=c(43+49/60+0/3600,-88-59/60-0/3600),
+              'Winnebago'=c(44+0/60+0/3600,-88-25/60-0/3600),
+              'Anvil'=c(45+56/60+34/3600,-89-3/60-50/3600),
+              'St_Germaine'=c(45+54/60+50/3600,-89-29/60-0/3600))
+
+for (i in 1:length(lakes)){
+  lake = lakes[[i]]
+  lat = lakes[[i]][1]
+  lon = lakes[[i]][2]
+  nldas.rods <- nldas.rods(var.name,lat,lon)
+  nldas.rods <- downsample.rods(nldas.rods,var.name)
+  write.rods(nldas.rods,var.name,f.name=lake)
+}
+
