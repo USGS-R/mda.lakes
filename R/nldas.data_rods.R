@@ -65,12 +65,12 @@ ds.vals <- function(values,var.name){
 write.rods <- function(nldas.rods,var.name,f.name){
   write.out <- nldas.rods
   names(write.out) <- c("DateTime",var.name)
-  output = paste0('/Documents/R/Robertson/data/',f.name,'_',var.name,'.tsv')
+  output = paste0('../../R/Robertson/data/',f.name,'_',var.name,'.tsv')
   write.table(write.out,file=output,col.names=TRUE, quote=FALSE, row.names=FALSE, sep="\t")
 }
 
 var.name = "precipitation"
-lakes <- list("Delevan"=c(42+36/60+0/3600,-88-36/60-30/3600),
+lakes <- list("Delavan"=c(42+36/60+0/3600,-88-36/60-30/3600),
               'Mendota'=c(42+6/60+0/3600,-89-25/60-0/3600),
               'Green'=c(43+49/60+0/3600,-88-59/60-0/3600),
               'Winnebago'=c(44+0/60+0/3600,-88-25/60-0/3600),
@@ -78,7 +78,7 @@ lakes <- list("Delevan"=c(42+36/60+0/3600,-88-36/60-30/3600),
               'St_Germaine'=c(45+54/60+50/3600,-89-29/60-0/3600))
 
 for (i in 1:length(lakes)){
-  lake = lakes[[i]]
+  lake = names(lakes)[i]
   lat = lakes[[i]][1]
   lon = lakes[[i]][2]
   nldas.rods <- nldas.rods(var.name,lat,lon)
