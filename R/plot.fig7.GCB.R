@@ -9,8 +9,8 @@ plot.fig7.GCB	<-	function(years){
 	tick.y	<-	data.frame("Kw"=c(-10,-5,NA,0,NA,5,10),"RT"=c(-10,-1,NA,0,NA,1,10),"hc"=c(-10,NA,-1,0,NA,1,10))
 	tick.x.lab	<-	c(NA,"-50%","0","+50%",NA)
 	plot_colors <<- c("black", 'grey65', "grey80","grey40")
-	lab.perc	<<-	12 # label (e.g., (a) spacing percent from corner)
-	par.mgp	<<-	data.frame(x=c(.65,.1,0),y=c(-.3,-.06,0))
+	lab.perc	<<-	14 # label (e.g., (a) spacing percent from corner)
+	par.mgp	<<-	data.frame(x=c(.9,.1,0),y=c(.66,-.06,0),y.s=c(.83,-.06,0))
 	small.thresh	<<-	1000000 # 100 ha
 	large.thresh	<<-	1e20	# effectively no upper limit
 	plot.order	<<-	c("medium","small","large")
@@ -22,21 +22,25 @@ plot.fig7.GCB	<-	function(years){
 	l.mar	<-	0.0
 	r.mar	<-	0#v.spc
 	t.mar	<-	0.01
-	b.mar	<-	0.25
+	b.mar	<-	0.22
 	left.spc	<-	0.25 #0.1
 	pan.size	<-	(fig.w-3*(h.spc+left.spc)-r.mar-l.mar)/3
 	fig.h	<-	pan.size+v.spc+b.mar+t.mar
 	print(fig.h)
 	print(fig.w)
-	png(filename = "../Figure_07.png",
-	    width = fig.w, height = fig.h, units = "in", res=450)
+  
+	pdf(file = "../Figure_08.pdf",title='Read et al. figure',
+	    width=fig.w, height=fig.h)
+  
+	#png(filename = "../Figure_07.png",
+	#    width = fig.w, height = fig.h, units = "in", res=450)
 
 	panels = matrix(c(1,2,3),1,3)
 	
 	
 	layout(panels)
 	
-	par(mai=c(b.mar,left.spc, v.spc, h.spc),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar))
+	par(mai=c(b.mar,left.spc, v.spc, h.spc),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar),ps=13)
 
 	plot.kw(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab)
 	plot.RT(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,label,tck,tick.x.lab)
@@ -56,11 +60,12 @@ plot.kw	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,l
 	plot(c(0,1),c(0,1), type="l", col=NA, 
 		axes=F,
 		ylim=plt.rng.y$Kw, xlim=plt.rng.x,
-		ylab="Temp. difference (°C)",
-		xlab=write.param,
+		ylab="Temp. difference (°C)   ",
+		xlab=" ",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
 	
-	par(mgp=par.mgp$y)
+	par(mgp=par.mgp$y.s)
+	title(xlab=write.param,cex.lab=cex.ttl)
 	axis(1,las=1, at=tick.x,cex.axis=cex.box, tck=tck,labels=tick.x.lab)
 	axis(3,at=tick.x,las=1, cex.axis=cex.box, tck=tck,labels=NA)
 	par(mgp=par.mgp$x)
@@ -119,14 +124,16 @@ plot.RT	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,l
 	source('Libraries/GLM.functions.R')
 	param	<-	'RT'
 	#par(mgp=c(.9,.06,0))
+	write.param = paste("Change in ",param," (%)",sep='')
 	plot(c(0,1),c(0,1), type="l", col=NA, 
 		axes=F,
 		ylim=plt.rng.y$RT, xlim=plt.rng.x,
-		ylab="Temp. difference (°C)",
-		xlab=paste("Change in ",param," (%)",sep=''),
+		ylab="Temp. difference (°C)   ",
+		xlab=" ",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
 	
 	par(mgp=par.mgp$y)
+	title(xlab=write.param,cex.lab=cex.ttl)
 	axis(1,las=1, at=tick.x,cex.axis=cex.box, tck=tck,labels=tick.x.lab)
 	axis(3,at=tick.x,las=1, cex.axis=cex.box, tck=tck,labels=NA)
 	par(mgp=par.mgp$x)
@@ -201,12 +208,13 @@ plot.hc	<-	function(year,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick.y,l
 	write.param <- expression(paste("Change in h"["s"]," (%)"))
 	plot(c(0,1),c(0,1), type="l", col=NA, 
 		axes=F,
-		xlab=write.param,
+		xlab=" ",
 		ylim=plt.rng.y$hc, xlim=plt.rng.x,
-		ylab="Temp. difference (°C)",
+		ylab="Temp. difference (°C)   ",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
 
-	par(mgp=par.mgp$y)
+	par(mgp=par.mgp$y.s)
+	title(xlab=write.param,cex.lab=cex.ttl)
 	axis(1,las=1, at=tick.x,cex.axis=cex.box, tck=tck,labels=tick.x.lab)
 	axis(3,at=tick.x,las=1, cex.axis=cex.box, tck=tck,labels=NA)
 	par(mgp=par.mgp$x)

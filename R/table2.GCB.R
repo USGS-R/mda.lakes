@@ -58,7 +58,12 @@ getKdata <- function(WBICs){
   for (k in 1:length(val)){
     val[k] <- getClarity(as.character(WBICs[k]),default.if.null=FALSE)
   }
-
+  
+  cat(length(val)-sum(is.na(val)))
+  cat(' of ')
+  cat(length(val))
+  cat("lakes have Kd\n")
+  
   return(getRange(val,len.out=3))
   
 }

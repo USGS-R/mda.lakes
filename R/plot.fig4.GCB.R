@@ -1,7 +1,7 @@
-plot.fig4.GCB <- function(){
+plot.fig4.GCB <- function(format='tif'){
   lW = 3
-  cex.box = 1
-  cex.ttl = 1
+  cex.box <<- 1
+  cex.ttl <<- 1
   tck  <<-	0.01
   rng.seq <<- seq(-5,40,5)
   plt.rng	<<- list(x=c(0,32),y=c(0,32))
@@ -15,18 +15,28 @@ plot.fig4.GCB <- function(){
   r.mar	<-	0.05
   t.mar	<-	0.05
   b.mar <- 0.4
-  left.spc	<-	0.4 # far left margin spacing
+  left.spc	<-	0.5 # far left margin spacing
   pan.size	<-	(fig.w - left.spc - r.mar - pan.gap*2)/3
-  par.mgp <<- c(1.05,.14,0)
+  par.mgp <<- data.frame(x=c(1.4,.18,0),y=c(.8,-.05,0),y.s=c(1.05,.14,0))
 
   fig.h	<-	pan.size+b.mar+t.mar
   print(fig.h)
   
-  png(filename = "../Figure_04.png",
-      width = fig.w, height = fig.h, units = "in", res=300)
+  if (format=='pdf'){
+    pdf(file = "../Figure_04.pdf",title='Read et al. figure',
+        width=fig.w, height=fig.h)
+  } else if (format=='tif'){
+    tiff(filename = "../Figure_04.tif",
+         width = fig.w, height = fig.h, units = "in", pointsize = 12,
+         compression = "zip",
+         bg = "white", res = 300)
+  }
+
+  #png(filename = "../Figure_04.png",
+  #    width = fig.w, height = fig.h, units = "in", res=300)
   
   
-  par(mai=c(b.mar,left.spc, t.mar, r.mar+(pan.size+pan.gap)*2),mgp=par.mgp,omi=c(0,0,0,0),ps = 10, cex = 1, cex.main = 1)#
+  par(mai=c(b.mar,left.spc, t.mar, r.mar+(pan.size+pan.gap)*2),mgp=par.mgp$x,omi=c(0,0,0,0),ps = 10, cex = 1, cex.main = 1)#
   plot.all()
   
   par(mai=c(b.mar,pan.gap+left.spc+pan.size, t.mar, r.mar+pan.size+pan.gap),new = TRUE)
@@ -47,7 +57,7 @@ plot.all <- function(){
   file.nm <- 'All_temp'
   
   dat   <-	read.delim(paste('../supporting files/',file.nm,'.tsv',sep=''))
-  
+  par(mgp=par.mgp$x)
   x.lab <- "Observed temperature (°C)"
   plot(c(NA,1),c(0,1), type="l", col=NA, 
        axes=F, xlab=NA,
@@ -59,11 +69,10 @@ plot.all <- function(){
                                                               alpha$all,maxColorValue=1))
   abline(0,1,lwd=1,col='black')
   
-  old.par <- par()
-  suppressWarnings(par(mgp = c(.55,-.15,0)))
+  suppressWarnings(par(mgp = par.mgp$y))
   axis(1,at=rng.seq,las=1, cex.axis=cex.box, tck=tck)
   title(xlab=x.lab,cex.lab=cex.ttl)
-  suppressWarnings(par(mgp=old.par$mgp))
+  suppressWarnings(par(mgp=par.mgp$x))
   axis(3,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
   axis(2,at=rng.seq,las=1, cex.axis=cex.box, tck=tck)
   axis(4,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
@@ -91,10 +100,10 @@ plot.epi <- function(){
   abline(0,1,lwd=1,col='black')
   
   old.par <- par()
-  suppressWarnings(par(mgp = c(.55,-.15,0)))
+  suppressWarnings(par(mgp = par.mgp$y))
   axis(1,at=rng.seq,las=1, cex.axis=cex.box, tck=tck)
   title(xlab=x.lab,cex.lab=cex.ttl)
-  suppressWarnings(par(mgp=old.par$mgp))
+  suppressWarnings(par(mgp = par.mgp$x))
   axis(3,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
   axis(2,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
   axis(4,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
@@ -121,10 +130,10 @@ plot.hypo <- function(){
   abline(0,1,lwd=1,col='black')
   
   old.par <- par()
-  suppressWarnings(par(mgp = c(.55,-.15,0)))
+  suppressWarnings(par(mgp = par.mgp$y))
   axis(1,at=rng.seq,las=1, cex.axis=cex.box, tck=tck)
   title(xlab=x.lab,cex.lab=cex.ttl)
-  suppressWarnings(par(mgp=old.par$mgp))
+  suppressWarnings(par(mgp = par.mgp$x))
   axis(3,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
   axis(2,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
   axis(4,at=rng.seq,las=1, cex.axis=cex.box, tck=tck,labels=NA)
@@ -134,17 +143,17 @@ plot.hypo <- function(){
   
 }
 
-get.text.location  <-  function(par,perc=6.5){
+get.text.location  <-  function(par,perc=6.8){
   x.lim	<-	par$usr[1:2] # limits
   y.lim	<-	par$usr[3:4]
   # upper right hand
   y.range	<-	y.lim[2]-y.lim[1]
   x.range <-	x.lim[2]-x.lim[1]
   
-  y	<-	y.lim[2]-y.range*perc/100
+  y	<-	y.lim[2]-y.range*perc/105
   x	<-	x.lim[1]+x.range*perc/100
   return(c(x,y))
   
 }
 
-plot.fig4.GCB()
+plot.fig4.GCB('tif')

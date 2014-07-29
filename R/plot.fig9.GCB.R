@@ -19,19 +19,19 @@ plot.fig9.GCB  <-	function(years,corrs){
   font.size = 10
   
   fig.w	<-	3.14961
-  pan.h <<- 1
+  pan.h <<- 1.1
   v.spc	<-	0.05 # inches of vertical space to separate panels (top only)
   h.spc	<-	0.05 # inches of horizontal space to separate panels (right only)
   l.mar	<-	0.0
   r.mar	<-	0.0
   t.mar	<-	0.00
-  b.mar	<-	0.15
+  b.mar	<-	0.1
   left.spc	<-	0.3 #0.1
   pan.w <<- (fig.w-left.spc*2-h.spc*2)/3
   pan.w <<- fig.w-left.spc-h.spc
   fig.h	<-	pan.h*2+v.spc*2+b.mar+t.mar
-  png(filename = "../Figure_09.png",
-      width = fig.w, height = fig.h, units = "in", res=300)
+  pdf(file = "../Figure_07.pdf",title='Read et al. figure 07',
+      width=fig.w, height=fig.h)
   
   divs  <-	9
   panels = NULL
@@ -156,7 +156,7 @@ plot.july  <-	function(years,col,plt.rng.x,plt.rng.y,cex.ttl,cex.box,tick.x,tick
  #lines(x.vals,y.vals.1,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
  #lines(x.vals,y.vals.2,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
  
- lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="dotted")
+ lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="longdash")
   lines(x.vals,target.lake,col=plot_colors[3],type='l',lwd=line.wd)
   label.loc  <-  get.text.location(par(),h=1,w=2)
   text(label.loc[1],label.loc[2],'(a)')
@@ -232,7 +232,7 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
   #lines(x.vals,y.vals.1,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
   #lines(x.vals,y.vals.2,col=plot_colors[2],type='l',lwd=1.2,lty="dotted")
   
-  lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="dotted")
+  lines(x.vals,y.vals,col=plot_colors[1],type='l',lwd=1.2,lty="longdash")
   lines(x.vals,target.lake,col=plot_colors[3],type='l',lwd=line.wd)
   label.loc  <-	get.text.location(par(),h=1,w=2)
   text(label.loc[1],label.loc[2],'(c)')
@@ -246,7 +246,7 @@ plot.onset  <-  function(years=seq(1979,1988,1),col,plt.rng.x,plt.rng.y,cex.ttl,
   return(corr)
 }
 
-get.text.location  <-	function(par,perc=10,h=1,w=1){
+get.text.location  <-	function(par,perc=9,h=1,w=1){
   x.lim	<-	par$usr[1:2] # limits
   y.lim	<-	par$usr[3:4]
   # upper right hand
@@ -259,5 +259,5 @@ get.text.location  <-	function(par,perc=10,h=1,w=1){
   
 }
 
-#corrs <- data.frame(corr.july=seq(0,1,.1),corr.onset=seq(0,1,.1))
+
 corrs <- plot.fig9.GCB(years=seq(1979,2011,1),corrs=corrs)
