@@ -1,11 +1,12 @@
 setwd("~/WiLMA/R")
 
 library(ncdf4)
-library(rGLM)
+library(glmtools)
+library(stringr)
 
 source('Libraries/chained.GLM.lib.R')
 
-library(stringr)
+
 
 
 
@@ -18,15 +19,15 @@ glm.path = "C:/Users/jread/Desktop/GLM_v1.2.0/bin/glm.exe"
 model.ids = basename(model.dirs)
 WBICs = str_extract(model.ids,'\\d+')  # WBICS as strings
 
-wndMethod = 'Markfort'
+wndMethod = 'Hondzo'
 wndRef = 0.0014
 
 empir.ice = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE, as.is=TRUE)
 wtemp.obs = read.table('../supporting files/wtemp.obs.tsv', sep='\t', as.is = TRUE, header=TRUE)
-h_s.source = c("GLiHT","Simard","ASTER_pos")#"SRTM",
+h_s.source = c("ASTER")#"SRTM","GLiHT","Simard",
 for (m in 1:length(h_s.source)){
   source('Libraries/GLM.functions.R')
-  summaryTxt = paste('../GLM/Run/summary_hs.',h_s.source[m],'.txt',sep='')
+  summaryTxt = paste('../GLM/Run/summary_hs.',wndMethod,'.txt',sep='')#h_s.source[m]
   print(summaryTxt)
   
   for(i in 1:length(model.ids)){
@@ -53,9 +54,10 @@ for (m in 1:length(h_s.source)){
     h_s  <-	getCanopy(WBICs[i],method=h_s.source[m], default.if.null=FALSE)
     
     
-    print(h_s)
+    
     if (!is.na(h_s)){
       Wstr = getWstr(WBICs[i],method=wndMethod,canopy=h_s)
+      print(Wstr)
       nml.args = list('coef_wind_drag'=wndRef*Wstr^0.33)# reverting...
       
       run.chained.GLM(model.dirs[i], glm.path = glm.path,nml.args, verbose=FALSE, only.cal=TRUE)
