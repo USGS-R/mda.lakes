@@ -122,6 +122,10 @@ for(i in 1:length(lakeids)){
 	
 	fout = file.path(out.dir,paste0('WBIC_', lakeids[i], '.csv'))
 	write.table(out.data, fout, sep=',', row.names=FALSE, col.names=TRUE, quote=FALSE)
+	
+	#append new year to data
+	#write.table(format(out.data, digits=4), fout, sep=',', row.names=FALSE, 
+	# col.names=FALSE, quote=FALSE,	append=TRUE)
 }
 	
 
