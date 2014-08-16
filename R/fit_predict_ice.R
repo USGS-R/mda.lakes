@@ -4,6 +4,7 @@ library(oce)
 library(stringr)
 library(lubridate)
 library(zoo)
+library(plyr)
 source("Libraries/GLM.functions.R")
 
 ################################################################################
@@ -132,6 +133,12 @@ for(i in 1:length(all_inputs)){
 }
 
 
+###Cleanup output
+#drop lakes with missing sa or long, or el or mn_dp
+all_ice_inputs = all_ice_inputs[complete.cases(all_ice_inputs[,c('mn_dp','sa','long','el')]), ]
+
+
+
 ################################################################################
 ## Build ice models
 ################################################################################
@@ -150,6 +157,12 @@ lm_on  = lm(yday_on~zero_fl+sqrt_mn_dp+at_fl, ice_on_mod)
 all_ice_inputs$yday_off_predict = floor(predict(lm_off, all_ice_inputs))
 all_ice_inputs$sqrt_mn_dp = all_ice_inputs$mn_dp^0.5
 all_ice_inputs$yday_on_predict  = floor(predict(lm_on, all_ice_inputs))
+
+all_ice_inputs$yday_off_predict[is.na(all_ice_inputs$yday_off_predict)] = 
+	median(all_ice_inputs$yday_off_predict, na.rm=TRUE)
+
+all_ice_inputs$yday_on_predict[is.na(all_ice_inputs$yday_on_predict)] = 
+	median(all_ice_inputs$yday_on_predict, na.rm=TRUE)
 
 
 on.output = all_ice_inputs[, c('WBIC','yday_on_predict', 'year')]
