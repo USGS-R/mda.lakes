@@ -1,2 +1,9 @@
-.DS_Store
+**.DS_Store
 .Rhistory
+supporting\ files/strat*
+supporting\ files/exceed*
+supporting\ files/all_driver*
+supporting\ files/summary_hs*
+supporting\ files/is.strat*
+**omg.huge.output.tsv
+

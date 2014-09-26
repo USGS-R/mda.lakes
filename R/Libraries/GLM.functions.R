@@ -1,3 +1,4 @@
+
 getBathy	<-	function(WBIC){
 	numZ	<-	15
 	fileN	<-	paste(c('../supporting files/Bathy/',WBIC,'.bth'),collapse='')

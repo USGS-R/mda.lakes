@@ -24,7 +24,7 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
 	
 
 	## Open template NML file
-	source.nml = read.nml('glm.nml','./')
+	source.nml = read_nml('glm.nml')
 	# stash original
 	file.copy('glm.nml', 'glm.nml.orig')
 
@@ -85,8 +85,8 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
 	}
 	# Figure out the years to model with start/end dates
 	# Find start/stop dates in existing NML
-	nml.start = as.POSIXct(get.nml(source.nml,'start'))
-	nml.end = as.POSIXct(get.nml(source.nml,'stop'))
+	nml.start = as.POSIXct(get_nml_value(source.nml,'start'))
+	nml.end = as.POSIXct(get_nml_value(source.nml,'stop'))
 
 
 	# Intersect the two (Max of starts, min of ends)
@@ -139,7 +139,7 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
   ## Key Paths and parameters
   
   ## Open template NML file
-  source.nml = read.nml('glm.nml','./')
+  source.nml = read_nml('glm.nml','./')
   # stash original
   file.copy('glm.nml', 'glm.nml.orig')
   
@@ -193,9 +193,9 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
   # Prep prefix met data
   prefix = read.csv(textConnection(three.day.file), header=TRUE)
   
-  full.met = read.csv(get.nml(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
+  full.met = read.csv(get_nml_value(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
   #stash original
-  file.copy(get.nml(source.nml, 'meteo_fl'), 'met.csv.orig')
+  file.copy(get_nml_value(source.nml, 'meteo_fl'), 'met.csv.orig')
   
   
   #Let's change that prefix data!
@@ -207,22 +207,22 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
     
   }
   #Write the met data with the new prefixes before iceoffs
-  write.csv(full.met, get.nml(source.nml, 'meteo_fl'), row.names=FALSE, quote=FALSE)
+  write.csv(full.met, get_nml_value(source.nml, 'meteo_fl'), row.names=FALSE, quote=FALSE)
   
   
   #Iterate runs, appending output name with year.
   for(i in 1:length(s.starts)){  
     
     #Edit and output NML, start this thing 3 days early
-    source.nml <- set.nml(source.nml,'start',strftime(s.starts[i]-as.difftime(3, unit="days"), format="%Y-%m-%d %H:%M:%S"))
-    source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
-    source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
+    source.nml <- set_nml(source.nml,'start',strftime(s.starts[i]-as.difftime(3, unit="days"), format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set_nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set_nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
     if (!is.null(nml.args)){
       for (a in 1:length(nml.args)){
-        source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
+        source.nml <- set_nml(source.nml,names(nml.args[a]),nml.args[[a]])
       }
     }
-    write.nml(source.nml, 'glm.nml', './')
+    write_nml(source.nml, file_out = 'glm.nml')
     
     #Rusn this iteration of the model.
     if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
@@ -233,7 +233,7 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
   }
   #bring the original back
   file.rename('glm.nml.orig', 'glm.nml')
-  file.rename('met.csv.orig', get.nml(source.nml, 'meteo_fl'))
+  file.rename('met.csv.orig', get_nml_value(source.nml, 'meteo_fl'))
   
 	setwd(origin)
 }
@@ -257,11 +257,6 @@ output.cal.chained = function(run.dir){
   	if (length(nc.files>0)){
 	
 		lake.cal.data = read.table('cal.in.tsv', sep='\t', header=TRUE)
-    	glm.ncs = list()
-    
-    	for(i in 1:length(nc.files)){
-      		glm.ncs[[i]] = nc_open(nc.files[i])
-    	}
     
     	## Subsample run to get water temp data at 4D obs points
 
@@ -269,20 +264,17 @@ output.cal.chained = function(run.dir){
     	lake.cal.depths = sort(unique(lake.cal.data$DEPTH))
     
     	# create single wtr data.frame for all years (all nc files)
-		wtr.tmp = getTempGLMnc(glm.ncs[[1]],ref='surface',z.out=lake.cal.depths)
-		nc_close(glm.ncs[[1]])
+		wtr.tmp = get_temp(file = nc.files[1], reference = 'surface', z_out = lake.cal.depths)
 		# trim it down to matching dates
 		wtr = wtr.tmp[as.Date(wtr.tmp[,1]) %in% as.Date(lake.cal.dates),]
     
     	if (length(nc.files)>1){
-      		for(i in 2:length(glm.ncs)){
-				# rbind is slow...
-				wtr.tmp = getTempGLMnc(glm.ncs[[i]],ref='surface',z.out=lake.cal.depths)
-				# trim it down to matching dates
-				wtr.tmp = wtr.tmp[as.Date(wtr.tmp[,1]) %in% as.Date(lake.cal.dates),]
+      		for(i in 2:length(nc.files)){
+            # rbind is slow...
+				    wtr.tmp = get_temp(file = nc.files[i], reference = 'surface', z_out = lake.cal.depths)
+				    # trim it down to matching dates
+				    wtr.tmp = wtr.tmp[as.Date(wtr.tmp[,1]) %in% as.Date(lake.cal.dates),]
         		wtr = rbind(wtr,wtr.tmp)
-				#Close these pesky memory hogs
-				nc_close(glm.ncs[[i]])
       		}
     	}
     
@@ -310,7 +302,7 @@ output.cal.chained = function(run.dir){
 get.wtr.chained.prefix = function(run.dir){
   
   require(ncdf4)
-  require(rGLM)
+  require(glmtools)
   origin = getwd()
   setwd(run.dir)
   #output.cal.chained
@@ -319,7 +311,7 @@ get.wtr.chained.prefix = function(run.dir){
   
   
   nc.files = Sys.glob('output*.nc')
-  glm.ncs = list()
+  
   
   for(i in 1:length(nc.files)){
     glm.ncs[[i]] = nc_open(nc.files[i])
@@ -327,7 +319,7 @@ get.wtr.chained.prefix = function(run.dir){
   
   ## Subsample run to get water temp data at 4D obs points
   
-  wtr = getTempGLMnc(glm.ncs[[1]], 0.25)
+  wtr = get_temp(file = nc.files[i], 0.25)
   wtr = wtr[4:nrow(wtr), ] #Drop the first three burn-in days
   
   for(i in 2:length(glm.ncs)){
@@ -353,7 +345,7 @@ get.wtr.chained.prefix = function(run.dir){
 }
 
 run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
-  require(rGLM)
+  require(glmtools)
   #run.dir is the home for all model inputs
   #glm.path is the path to the glm.exe (including the exe)
   # I don't like doing this in a function, but you must 
@@ -364,7 +356,7 @@ run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL
   ## Key Paths and parameters
   
   ## Open template NML file
-  source.nml = read.nml('glm.nml','./')
+  source.nml = read_nml('glm.nml')
   # stash original
   file.copy('glm.nml', 'glm.nml.orig')
   
@@ -421,9 +413,9 @@ run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL
   # Prep prefix met data
   prefix = read.csv(textConnection(three.day.file), header=TRUE)
   
-  full.met = read.csv(get.nml(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
+  full.met = read.csv(get_nml_value(source.nml, 'meteo_fl'), header=TRUE)#, colClasses=c(time="POSIXct"))
   #stash original
-  file.copy(get.nml(source.nml, 'meteo_fl'), 'met.csv.orig')
+  file.copy(get_nml_value(source.nml, 'meteo_fl'), 'met.csv.orig')
   
   
   #Let's change that prefix data!
@@ -435,27 +427,27 @@ run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL
     
   }
   #Write the met data with the new prefixes before iceoffs
-  write.csv(full.met, get.nml(source.nml, 'meteo_fl'), row.names=FALSE, quote=FALSE)
+  write.csv(full.met, get_nml_value(source.nml, 'meteo_fl'), row.names=FALSE, quote=FALSE)
   
   
   #Iterate runs, appending output name with year.
   for(i in 1:length(s.starts)){  
     
     #Edit and output NML, start this thing 3 days early
-    source.nml <- set.nml(source.nml,'start',strftime(s.starts[i]-as.difftime(3, unit="days"), format="%Y-%m-%d %H:%M:%S"))
-    source.nml <- set.nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
-    source.nml <- set.nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
+    source.nml <- set_nml(source.nml,'start',strftime(s.starts[i]-as.difftime(3, unit="days"), format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set_nml(source.nml,'stop',strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"))
+    source.nml <- set_nml(source.nml,'out_fn',paste('output', strftime(s.starts[i],'%Y'), sep=''))
     if (!is.null(nml.args)){
       for (a in 1:length(nml.args)){
-        source.nml <- set.nml(source.nml,names(nml.args[a]),nml.args[[a]])
+        source.nml <- set_nml(source.nml,names(nml.args[a]),nml.args[[a]])
       }
     }
     
     #Write new Kd value
     this.kd = kd.in$kd[kd.in$year == as.numeric(strftime(s.starts[i],'%Y'))]
-    source.nml <- set.nml(source.nml, 'Kw', this.kd)
+    source.nml <- set_nml(source.nml, 'Kw', this.kd)
     
-    write.nml(source.nml, 'glm.nml', './')
+    write_nml(source.nml, file_out = 'glm.nml')
     
     #Runs this iteration of the model.
     if (!verbose){stdout=FALSE; stderr=FALSE} else {stdout=""; stderr=""}
@@ -466,7 +458,7 @@ run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL
   }
   #bring the original back
   file.rename('glm.nml.orig', 'glm.nml')
-  file.rename('met.csv.orig', get.nml(source.nml, 'meteo_fl'))
+  file.rename('met.csv.orig', get_nml_value(source.nml, 'meteo_fl'))
   
   setwd(origin)
 }

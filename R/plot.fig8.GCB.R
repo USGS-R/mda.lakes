@@ -3,29 +3,33 @@ plot.fig8.GCB	<-	function(years){
 	cex.box = 1
 	cex.ttl = 1
 	tck	<-	0.02
-	font.size = 10
+	font.size = 13
 	plt.rng.x	= c(75,143)
 	seq.range = seq(70,365,1)
 	plot_colors <- c("black", "black", "grey80","grey40")
 	
-	h_w.ratio	<-	1.0 # height to width ratio
+	h_w.ratio	<-	1.1 # height to width ratio
 	fig.w	<-	3.14961
-	v.spc	<-	0.1 # inches of vertical space to separate panels (top only)
-	h.spc	<-	0.01 # inches of vertical space to separate panels (right only)
-	l.mar	<-	0.05
-	r.mar	<-	v.spc
+	v.spc	<-	0.05 # inches of vertical space to separate panels (top only)
+	h.spc	<-	0.05 # inches of vertical space to separate panels (right only)
+	l.mar	<-	0.02
+	r.mar	<-	0.01#v.spc
 	t.mar	<-	0.00
-	left.spc	<-	0.27
+  b.mar <- 0.05
+	left.spc	<-	0.3
 	pan.size	<-	(fig.w-2*(h.spc+left.spc)-r.mar-l.mar)/2*h_w.ratio
 	divs	<-	4
-	par.mgp <<- c(1.05,.14,0)
+	par.mgp <<- data.frame(x=c(1.35,.08,0),y=c(1.25,.05,0),y.s=c(1.2,.05,0))
 	
 	bot.buffer	<-	pan.size/divs	# inches at base to allow 
 	fig.h	<-	(pan.size+v.spc)*3+bot.buffer+t.mar
 	print(fig.h)
 	
-	png(filename = "../Figure_08.png",
-	    width = fig.w, height = fig.h, units = "in", res=300)
+	pdf(file = "../Figure_05.pdf",title='Read et al. figure',
+	    width=fig.w, height=fig.h)
+  
+	#png(filename = "../Figure_08.png",
+	#    width = fig.w, height = fig.h, units = "in", res=300)
 
 	panels = NULL
 	for (j in 1:3){	
@@ -43,7 +47,7 @@ plot.fig8.GCB	<-	function(years){
 	
 	layout(panels)
 	
-	par(mai=c(.0,left.spc, v.spc, h.spc),mgp=par.mgp,omi=c(0,l.mar,t.mar,r.mar),ps=font.size)
+	par(mai=c(b.mar,left.spc, v.spc, h.spc),mgp=par.mgp$x,omi=c(0,l.mar,t.mar,r.mar),ps=font.size)
 	
 	# plot 1 & 4 are air temperatures
 	plot.air(years[1],col=plot_colors[2],plt.rng.x,cex.ttl,cex.box,tck,label='(a)')
@@ -53,7 +57,7 @@ plot.fig8.GCB	<-	function(years){
 	par(mai=c(fig.h/((divs*3)+1),left.spc, v.spc, h.spc))
 	plot.exceed(years[1],col=plot_colors,plt.rng.x,cex.ttl,cex.box,tck,label='(e)')
 
-	par(mai=c(.0,left.spc, v.spc, h.spc))
+	par(mai=c(b.mar,left.spc, v.spc, h.spc))
 	
 	plot.air(years[2],col=plot_colors[2],plt.rng.x,cex.ttl,cex.box,tck,label='(b)')
  	
@@ -67,12 +71,13 @@ plot.fig8.GCB	<-	function(years){
 }
 
 plot.air	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
+  par(mgp=par.mgp$y)
 	plot(c(NA,1),c(0,1), type="l", col=NA, 
 		axes=F, xlab=NA,
 		ylim=c(-15,26), xlim=plt.rng.x,
 		ylab="Air temperature (°C)",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
-	
+	par(mgp=par.mgp$x)
 	air.temps	<-	get.air.temp(year)
 	lines(air.temps$time,air.temps$temperature,type="l", lwd=2,
 		col=col)
@@ -86,13 +91,16 @@ plot.air	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 }
 
 plot.exceed	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
+  par(mgp=par.mgp$y)
 	plot(c(NA,1),c(0,1), type="l", col=col[1], 
-		axes=F, xlab="Day of year",
+		axes=F, xlab="",
 		ylim=c(0,100), xlim=plt.rng.x,
-		ylab="Lakes beyond 8.9°C (%)",
+		ylab="Lakes beyond 8.9°C (%)  ",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)
 
-	
+  par(mgp=par.mgp$y.s)
+  title(xlab="Day of year",cex.lab=cex.ttl)
+  par(mgp=par.mgp$x)
 	exceed	<-	get.hist.exceed(year)
 	polygon(x=c(exceed$x,rev(exceed$x)), y=c(exceed$line.1,rev(exceed$line.5)),
 		col = col[3],border=NA)
@@ -105,6 +113,7 @@ plot.exceed	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 		col=col[1])
 	label.loc	<-	get.text.location(par())
 	text(label.loc[1],label.loc[2],label)
+  par(mgp=par.mgp$y.s)
 	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck)
 	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
 	axis(2,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck)
@@ -112,13 +121,14 @@ plot.exceed	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 }
 
 plot.strat	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
+  par(mgp=par.mgp$y)
 	plot(c(NA,1),c(0,1), type="l", col=col[1], 
 		axes=F, xlab=NA,
 		ylim=c(0,100), xlim=plt.rng.x,
 		ylab="Lakes stratified (%)",
 		xaxs="i", yaxs="i",cex.lab=cex.ttl)		
 	
-	
+  par(mgp=par.mgp$x)
 	strat	<-	get.strat.count(year)
   
 	polygon(x=c(strat$x,rev(strat$x)), y=c(strat$line.2,rev(strat$line.3)),
@@ -141,7 +151,7 @@ plot.strat	<-	function(year,col,plt.rng.x,cex.ttl,cex.box,tck,label){
 	par(mgp=c(.9,.04,0))
 	axis(1,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
 	
-	par(mgp=par.mgp)
+	par(mgp=par.mgp$x)
 	axis(3,at=seq(0, 200, 20),las=1, cex.axis=cex.box, tck=tck,labels=NA)
 	axis(2,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck)
 	axis(4,at=seq(0, 100, 25),las=1, cex.axis=cex.box, tck=tck,labels=NA)
