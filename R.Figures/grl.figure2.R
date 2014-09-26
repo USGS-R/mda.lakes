@@ -13,6 +13,7 @@ all.slopes[,week2:=(floor(week/2)*2)]
 all.slopes[,week4:=(floor(week/4)*4)]
 all.slopes = all.slopes[,rel.depth:=floor(10*depth/zmax)/10]
 all.slopes = all.slopes[rel.depth <= 1,]
+#all.slopes = all.slopes[rel.depth <0.5,]
 
 tiff(paste(prefix, '.figure.2.tiff',sep=''), width=2000, height=2000, res=300, compression='lzw')
 par(mfrow=c(2,1), mar=c(1,5,0,0), oma=c(5,0,1,0))
@@ -29,7 +30,7 @@ confint = ddply(all.slopes, 'week',
 
 plot(slopes$week, slopes$V1, ylim=c(-0.1, 0.4),
 		 frame.plot=F, xlim=c(0,52),
-		 xaxt='n',
+		 #xaxt='n',
 		 ylab=expression(Median~Trend~(degree*C~yr^-1)),
 		 xlab=expression(Week~of~year))
 text(1, 0.35, "(a)")

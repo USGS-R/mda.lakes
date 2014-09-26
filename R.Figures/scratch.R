@@ -132,3 +132,57 @@ lines(x, predict(ma, x), col='red', lwd=2)
 
 
 
+## Some stuff on sheltering
+
+source('../R/Libraries/GLM.functions.R')
+library(data.table)
+library(plyr)
+all.slopes = fread('all.slopes.csv')
+
+#u.wbic = unique(all.slopes$wbic)
+#wst    = rep(NA, length(u.wbic))
+#for(i in 1:length(u.wbic)){
+#  wst[i] = getWstr(as.character(u.wbic[i]), method='Hondzo')
+#}
+
+#wst = data.frame(wbic=u.wbic, wst=wst)
+#tmp = merge(all.slopes, wst, by='wbic')
+
+all.slopes = all.slopes[,rel.depth:=floor(10*depth/zmax)/10]
+all.slopes = all.slopes[rel.depth <= 1,]
+
+tmp = all.slopes
+tmp[,wst:=(1.0 - exp(-0.3*area*1e-6))]
+tmp[,wst3:=wst^3]
+
+
+area.wst = unique(tmp[,list(wbic,area,wst, wst3,kd)])
+
+plot(wst~area, area.wst, log='x', ylim=c(0,2), xlim=c(5e3,5e8))
+abline(v=5e5, lwd=2)
+lines(sort(area.wst$area), sort(area.wst$wst3))
+
+wbic.slope = ddply(all.slopes[rel.depth>=0.5,],'wbic',function(df)c(median(df$area),median(df$slopes), nrow(df), median(df$kd)))
+
+#wbic.slope = ddply(all.slopes,'wbic',
+#                   function(df)c(median(df$area),
+#                                 median(df[df$rel.depth<0.5,]$slopes) - median(df[df$rel.depth>0.5,]$slopes), 
+#                                 nrow(df), median(df$kd)))
+
+wbic.slope = wbic.slope[wbic.slope$V3 >=3000,]
+
+par(new=TRUE)
+plot(wbic.slope$V1, wbic.slope$V2, col='blue', pch=16,
+     ylim=c(0,0.4),xlim=c(5e3,5e8), log='x', )
+
+
+
+wbic.slope = ddply(all.slopes[rel.depth<0.5,],'wbic',function(df)c(median(df$area),median(df$slopes), nrow(df), median(df$kd)))
+
+wbic.slope = wbic.slope[wbic.slope$V3 > 4000,]
+
+par(new=TRUE)
+plot(wbic.slope$V1, wbic.slope$V2, col='red', pch=16,
+     ylim=c(0,0.4),xlim=c(5e3,5e8), log='x', )
+
+

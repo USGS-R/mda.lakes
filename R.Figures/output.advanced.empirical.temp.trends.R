@@ -28,8 +28,9 @@ all.slopes.perms = function(times, data){
 
 wtr = fread('../supporting files/wtemp.obs.tsv')
 setnames(wtr, names(wtr), tolower(names(wtr)))
+
 setkey(wtr, wbic)
-wtr[,wtemp:=water.density(wtemp)]##Just now
+###wtr[,wtemp:=water.density(wtemp)]##Just now
 
 wtr[, datetime:=as.POSIXct(datetime)]
 wtr[, month:=as.POSIXlt(datetime)$mon+1]
@@ -102,7 +103,7 @@ for(i in 1:length(u.wbic)){
 }
 all.slopes = merge(all.slopes, data.frame(wbic=u.wbic, zmax=zmaxes), by='wbic')
 
-write.table(all.slopes,'all.slopes.density.csv', row.names=FALSE, sep=',')
-#write.table(n.rows, 'all.slopes.n.csv', row.names=FALSE, sep=',')
+write.table(all.slopes,'all.slopes.csv', row.names=FALSE, sep=',')
+#write.table(all.slopes, 'all.slopes.model.csv', row.names=FALSE, sep=',')
 
 

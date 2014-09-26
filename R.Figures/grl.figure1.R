@@ -1,5 +1,7 @@
 
 #all.slopes = fread('all.slopes.csv')
+library(data.table)
+library(plyr)
 source('../R/Libraries/GLM.functions.R')
 all.slopes = fread('all.slopes.csv')
 wi = fread('../supporting files/WI_boundary_lat_lon.tsv')
