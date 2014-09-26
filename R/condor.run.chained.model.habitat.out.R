@@ -8,7 +8,7 @@ source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()
-run.dir = 'D:/WilmaRuns/2014-03-28'
+run.dir = 'D:/WilmaRuns/2014-05-14'
 driver.dir = 'D:/WilmaDrivers/07-30'
 
 runs = Sys.glob(file.path(run.dir, 'WBIC_*'))
@@ -30,9 +30,10 @@ key.code = c(key.code, file.path(home.dir, file.path('OnClusterCode',c('run.sing
 
 key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/OnClusterCode', c('rGLM_0.1.5.tar.gz', 'rLakeAnalyzer_1.2.zip', 
                                                            'habitat.calc.condor.R', '.Renviron', 'ncdf4_1.4.zip', 
-                                                           'stringr_0.6.2.zip', 'chained.habitat.out.R')))
+                                                           'stringr_0.6.2.zip')))
 
-key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/Libraries', c('GLM.physics.R' )))
+key.code = c(key.code, file.path('D:/WILMA/WiLMA-m/R/Libraries', c('GLM.physics.R',
+																																	 'chained.habitat.out.R')))
 
 bat.file = 'D:/WILMA/WiLMA-m/R/OnClusterCode/chainedModelHabCalc.bat'
 
@@ -137,9 +138,9 @@ fOutput$dateOver18  = (as.numeric(fOutput$dateOver18) - as.numeric(as.POSIXct(pa
 fOutput$dateOver20  = (as.numeric(fOutput$dateOver20) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
 fOutput$dateOver21  = (as.numeric(fOutput$dateOver21) - as.numeric(as.POSIXct(paste(fOutput$year,'-01-01', sep=''))))/(60*60*24)
 
+dir.create(file.path(run.dir, 'Output'))
 
-
-write.table(fOutput,'omg.huge.output.tsv', row.names=FALSE, sep='\t')
+write.table(fOutput,file.path(run.dir, 'Output','omg.huge.output.tsv'), row.names=FALSE, sep='\t')
 system("rundll32 user32.dll,MessageBeep -1")
 
 

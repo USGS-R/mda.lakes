@@ -8,9 +8,9 @@ source('Libraries/GLM.functions.R')
 library(rGLM)
 
 home.dir = getwd()
-run.dir = 'D:/WilmaRuns/2014-05-04-0.92perc_increase'
-secchi.trend = 0
-driver.dir = 'D:/WilmaDrivers/07-30'
+run.dir = 'D:/WilmaRuns/2014-08-15-0.00perc/'
+secchi.trend = -0.92
+driver.dir = 'D:/WilmaDrivers/07-30-appended2012'
 
 with.kd = read.table('../supporting files/annual_mean_secchi.txt', header=TRUE, sep='\t')
 #with.kd = with.kd[is.na(with.kd$year),]
@@ -62,7 +62,7 @@ for(i in 1:length(runs)){
   write.table(info, file.path(runs[i], 'run.info.tsv'), row.names=FALSE)
   
   
-  kds = data.frame(year=1979:2011, kd=getScenarioKd(WBICs[i], 1979:2011, trend=secchi.trend))
+  kds = data.frame(year=1979:2012, kd=getScenarioKd(WBICs[i], 1979:2012, trend=secchi.trend))
   write.table(kds, file.path(runs[i], 'kd.scenario.tsv'), row.names=FALSE, sep='\t')
   
   
@@ -81,6 +81,7 @@ for(i in 1:length(runs)){
   # fix clarity values, default has been updated
   source.nml = read.nml('glm.nml','./')
   source.nml = set.nml(source.nml, 'Kw', kw)
+  source.nml = set.nml(source.nml, 'stop', '2012-12-31 00:00:00')
   write.nml(source.nml, 'glm.nml', './')
   
   #Submit
