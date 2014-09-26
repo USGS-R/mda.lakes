@@ -1,7 +1,7 @@
 allUniqueVal <- function(){
   # open all the files, find the unique WBICs across all
   val.dir <- '../GLM/Run/'
-  f.names <- c('Hondzo','SRTM','Simard','GLiHT','ASTER_pos','ASTER')
+  f.names <- c('Hondzo','ASTER','SRTM','Simard','GLiHT','ASTER_pos')
   
   un.wbic <- c()
   for (i in 1:length(f.names)){
@@ -47,7 +47,7 @@ getErrors <- function(wbics,max.all.e=3){
   
   
   d.f <- data.frame(c())
-  f.names <- c('Hondzo','SRTM','Simard','GLiHT','ASTER_pos','ASTER')
+  f.names <- c('Hondzo','ASTER','SRTM','Simard','GLiHT','ASTER_pos')
   
   if (length(wbics)==0){
     df = matrix(NA,nrow=1,ncol=length(f.names))
@@ -89,6 +89,7 @@ getErrors <- function(wbics,max.all.e=3){
       rmv.i[j] = T
     }
   }
+  cat(sum(rmv.i)); cat(' lakes removed\n')
   df <- d.f[!rmv.i, ]
   return(df)
   
