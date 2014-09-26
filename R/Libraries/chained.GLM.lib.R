@@ -36,8 +36,8 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
 	ice.in = ice.in[order(ice.in$DATE), ]
 
   #temporary hack
-  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
-    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
+  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2012-12-31')){
+    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2012-12-31')
   }
   
 
@@ -99,12 +99,14 @@ run.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE, only.
     for(i in seq_len(length(s.starts))){
       
       #Edit and output NML
+      if (!is.null(nml.args)){
+        source.nml <- set.nml(source.nml,argList=nml.args)
+      }
+      
       source.nml <- set.nml(source.nml,argList=list('start'=strftime(s.starts[i], format="%Y-%m-%d %H:%M:%S"),
                                                     'stop'=strftime(s.ends[i], format="%Y-%m-%d %H:%M:%S"),
                                                     'out_fn'=paste('output', strftime(s.starts[i],'%Y'), sep='')))
       
-      
-      if (!is.null(nml.args)){source.nml <- set.nml(source.nml,argList=nml.args)}
       write.nml(source.nml, 'glm.nml', './')
       
       #Runs this iteration of the model.
@@ -147,11 +149,6 @@ run.prefixed.chained.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TR
   
   ice.in$DATE = as.POSIXct(ice.in$DATE)
   ice.in = ice.in[order(ice.in$DATE), ]
-  
-  #temporary hack
-  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
-    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
-  }
   
   
   # Find complete seasons (pairs of off/on dates)
@@ -378,10 +375,6 @@ run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL
   ice.in$DATE = as.POSIXct(ice.in$DATE)
   ice.in = ice.in[order(ice.in$DATE), ]
   
-  #temporary hack
-  if(ice.in$DATE[nrow(ice.in)] > as.POSIXct('2011-12-31')){
-    ice.in$DATE[nrow(ice.in)] = as.POSIXct('2011-12-31')
-  }
   
   kd.in = read.table('kd.scenario.tsv', as.is=TRUE, header=TRUE, sep='\t')
   
