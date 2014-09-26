@@ -7,7 +7,7 @@ areas <<- getAreas(un.wbic)
 
 
 plot.types <- list('Forest'=c('forest'),
-                   'Other'=c('urban','agricultural','grassland','wetland'))#'water','urban',
+                   'Other'=c('urban','agricultural','grassland','wetland','water'))#'water','urban',
 
 group.def <- data.frame('error.cut'=3,'class.min'=0.1,'class.max'=10)
 
@@ -43,9 +43,9 @@ getSizeMatches <- function(areas,upper=NA,lower=NA){
   return(match.i)
 }
 
-polyplot2 <- function(pl,colors,cent.off,bin,top=4.5){
-  bin.c = c(cent.off+bin+.05,cent.off-bin-.05)
-  bin.h = c(top-0.15,top+0.15)
+polyplot2 <- function(pl,colors,cent.off,bin,top=4.45, legend=T){
+  bin.c = c(cent.off+bin+.125, cent.off, cent.off-bin-.125)
+  bin.h = c(top-0.25,top, top+0.25)
   lwd = 2
   for (i in 1:length(pl$names)){
     cent <- bin.c[i]
@@ -55,9 +55,12 @@ polyplot2 <- function(pl,colors,cent.off,bin,top=4.5){
     polygon(c(cent-bin,cent-bin,cent+bin,cent+bin),c(pl$stats[2,i],pl$stats[4,i],pl$stats[4,i],pl$stats[2,i]),col=colors[i],lwd=lwd)
     lines(c(cent-bin,cent+bin),c(pl$stats[3,i],pl$stats[3,i]),col="black",lwd=lwd)
     #text(cent,pl$stats[2,i],pl$n[i],pos=1,cex=0.75)
-    polygon(c(.55,.7,.7,.55),c(bin.h[i]-0.1,bin.h[i]-0.1,bin.h[i]+0.1,bin.h[i]+0.1),
-            col=colors[i],lwd=lwd-.5)
-    text(.65,bin.h[i]-.03,pl$names[i],pos=4,cex=01)
+    if (legend){
+      polygon(c(.55,.7,.7,.55),c(bin.h[i]-0.1,bin.h[i]-0.1,bin.h[i]+0.1,bin.h[i]+0.1),
+              col=colors[i],lwd=lwd-1)
+      text(.65,bin.h[i]-.03,pl$names[i],pos=4,cex=01)
+    }
+   
   }
   
 }
@@ -83,9 +86,12 @@ tck  <<-  0.01
 fig.h	<-	pan.size+b.mar+t.mar
 
 
-png(file = "../Figure_Hondzo_SRTM.png",res=300,
-    width=fig.w, height=fig.h,units = "in")
-par(mai=c(b.mar,l.mar, t.mar, r.mar),mgp=par.mgp,omi=c(0,0,0,0),ps = 10, cex = 1, cex.main = 1)#
+#png(file = "../Figure_Hondzo_SRTM.png",res=300,
+#    width=fig.w, height=fig.h,units = "in")
+
+svg("../Figure_Hondzo_SRTM_ASTER.svg", width= fig.w, height=fig.h)
+par(mai=c(b.mar,l.mar, t.mar, r.mar),omi=c(0,0,0,0),
+    mgp = c(1.1,.04,0),ps = 10, cex = 1, cex.main = 1)#
 
 tot.w = 0.8
 plot(c(0,NA),c(NA,NA),ylim=c(0,4.9),
@@ -94,9 +100,11 @@ plot(c(0,NA),c(NA,NA),ylim=c(0,4.9),
      axes=F,xaxs="i", yaxs="i")
 
 pl <- getErrors(un.wbic[match.lc & match.ar],max.all.e=group.def$error.cut)
-pl <- pl[, 1:2]
-print(t.test(pl$Hondzo,pl$SRTM,paired=T,alternative='greater'))
+pl <- pl[, 1:3]
+
+print(t.test(pl$Hondzo,pl$SRTM,paired=T,alternative='two.side'))
 pl <- boxplot(pl,ylim=c(0,6),plot=F)
+print(pl$n)
 par(mgp = c(.5,.04,0))
 axis(side=1,at=seq(0,(length(plot.types)+1)),labels=c(NA,names(plot.types),NA),lwd=2,tck=tck)
 par(mgp = c(0.9,.04,0))
@@ -104,14 +112,17 @@ axis(side=2,at=seq(0,10),lwd=2,tck=tck)
 axis(side=3,at=c(-100,100),lwd=2,tck=tck)
 axis(side=4,at=c(-100,100),lwd=2,tck=tck)
 
-polyplot2(pl,colors=c('grey80','white'),cent.off=1,bin=tot.w/6)
+polyplot2(pl,colors=c('grey80','white',"grey30"),cent.off=1,bin=tot.w/10)
 match.lc <- getLCmatches(land.cover,plot.types[[2]])
 match.ar <- getSizeMatches(areas,upper=group.def$class.max, lower=group.def$class.min)
 pl <- getErrors(un.wbic[match.lc & match.ar],max.all.e=group.def$error.cut)
-pl <- pl[, 1:2]
-print(t.test(pl$Hondzo,pl$SRTM,paired=T,alternative='two.side'))
+pl <- pl[, 1:3]
+
+print(t.test(pl$Hondzo,pl$SRTM,paired=T,alternative='greater'))
+print(t.test(pl$Hondzo,pl$ASTER,paired=T,alternative='greater'))
 pl <- boxplot(pl,ylim=c(0,6),plot=F)
-polyplot2(pl,colors=c('grey80','white'),cent.off=2,bin=tot.w/6)
+print(pl$n)
+polyplot2(pl,colors=c('grey80','white',"grey30"),cent.off=2,bin=tot.w/10)
 
 dev.off()
 
