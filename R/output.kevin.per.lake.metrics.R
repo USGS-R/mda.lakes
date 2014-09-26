@@ -9,7 +9,7 @@ library(data.table)
 library(plyr)
 source('Libraries/GLM.functions.R')
 
-driver.dir = 'D:/WilmaDrivers/07-30-appended2012'
+driver.dir = 'D:/WiLMA/MetDrivers/07-30-appended2012'
 
 tmp = fread('../supporting files/managed_lake_info.txt')
 
@@ -37,17 +37,18 @@ for(i in 1:length(uWBIC)){
 	names(airt.means) = c('year','annual_airt')
 	airt.means$WBIC = uWBIC[i]
 	
-	latlon             = getLatLon(wbic.char)
-	output$lat      = latlon[1]
-	output$depth_mx = getZmax(wbic.char)
-	output$area     = getArea(wbic.char)
-	output$Wstr     = getWstr(wbic.char)
+	latlon            = getLatLon(wbic.char)
+	output$lat        = latlon[1]
+	output$depth_mx   = getZmax(wbic.char)
+	output$depth_mean = getZmean(wbic.char)
+	output$area       = getArea(wbic.char)
+	output$Wstr       = getWstr(wbic.char)
 	
 	all.output = rbind(all.output, merge(airt.means, output, by='WBIC'))
 	cat(i,'\n')
 }
 
-fOut = 'D:/WilmaOutput/2014-08-16-ForKevin/lake_specific.tsv'
+fOut = 'D:/lake_specific_metrics.tsv'
 write.table(all.output, fOut, sep='\t', col.names=TRUE, row.names=FALSE)
 
 
