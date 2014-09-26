@@ -35,7 +35,10 @@ nldas.rods <- function(var.name,lat,lon){
 downsample.rods <- function(nldas.rods,var.name){
   
   flat.dates <- strptime(nldas.rods$DateTime,'%Y-%m-%d')
+  rmv.i = which(is.na(flat.dates))
+  flat.dates[rmv.i] = flat.dates[rmv.i-1]
   flat.vars <- nldas.rods$value
+  
   dwn.dates <- unique(flat.dates)
   dwn.vars <- vector(mode='numeric',length = length(dwn.dates))
   n.l <- length(dwn.dates)
@@ -58,6 +61,8 @@ downsample.rods <- function(nldas.rods,var.name){
 ds.vals <- function(values,var.name){
   if (var.name=='precipitation'){
     return(sum(values))
+  } else if (var.name=='air_temperature') {
+    return(mean(values)-273.15)
   } else {
     return(mean(values))
   }
@@ -81,8 +86,8 @@ for (i in 1:length(lakes)){
   lake = names(lakes)[i]
   lat = lakes[[i]][1]
   lon = lakes[[i]][2]
-  nldas.rods <- nldas.rods(var.name,lat,lon)
-  nldas.rods <- downsample.rods(nldas.rods,var.name)
-  write.rods(nldas.rods,var.name,f.name=lake)
+  rods <- nldas.rods(var.name,lat,lon)
+  rods <- downsample.rods(rods,var.name)
+  write.rods(rods,var.name,f.name=lake)
 }
 
