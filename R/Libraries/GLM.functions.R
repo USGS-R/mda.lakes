@@ -269,24 +269,30 @@ getCD	<-	function(WBIC=NULL,Wstr=NULL){
 }
 
 getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
-	# Markfort et al. 2010
-	minWstr	<-	0.0001
-	if (is.null(canopy)){
-		hc	<-	max(c(getCanopy(WBIC),1))
-	} else {
-		hc	<-	canopy
-	}
+
 	
 	lkeArea	<-	getArea(WBIC)
   
   if(is.na(lkeArea)){
     return(NA)
   }
-
-	Xt	<-	50*hc
 	
 	
 	if (method=='Markfort'){
+		# Markfort et al. 2010
+		minWstr	<-	0.0001
+		if (is.null(canopy)){
+			hc	<-	max(c(getCanopy(WBIC),1))
+		} else {
+			hc	<-	canopy
+		}
+		
+		if(is.na(hc) | is.null(hc)){
+			return(NA)
+		}
+		
+		Xt	<-	50*hc
+		
 		D	<-	2*sqrt(lkeArea/pi)
 		if (D<Xt){
 			wind.shelter	<-	minWstr
@@ -297,6 +303,16 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 		lkeArea.km2 = lkeArea*1.0e-6 # to km2
 		wind.shelter= 1.0 - exp(-0.3*lkeArea.km2)
 	} else {
+		# Markfort et al. 2010
+		minWstr	<-	0.0001
+		if (is.null(canopy)){
+			hc	<-	max(c(getCanopy(WBIC),1))
+		} else {
+			hc	<-	canopy
+		}
+		
+		Xt	<-	50*hc
+		
 		perim	<-	getPerim(WBIC)
 		shelArea	<-	perim*hc*12.5 # 25% of Markfort, as sheltering is single direction...
 		shelter	<-	(lkeArea-shelArea)/lkeArea

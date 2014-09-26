@@ -293,7 +293,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   empir.ice$DATE = as.POSIXct(empir.ice$DATE)
   
   #We need Hypsometry for some of Kevin's damn numbers
-  nml.data = read.nml('glm.nml', folder='./')
+  nml.data = read.nml('/glm.nml', folder=run.path)
   
   bthy.areas = nml.data$morphometry$A*1000  #GLM file has areas in 1000's of m^2
   bthy.depths = abs(nml.data$morphometry$H - max(nml.data$morphometry$H))
@@ -312,6 +312,9 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     surfT = getSurfaceT(wtr)
     floorT = getTempGLMnc(GLMnc, ref='bottom', z.out=0)
     floorT = floorT[4:nrow(floorT),]
+    
+    wtr1m = getTempGLMnc(GLMnc, ref='surface', z.out=1)
+    wtr1m = wtr1m[4:nrow(wtr1m),]
     
     raw.wtr = ncvar_get(GLMnc, 'temp')
     run.time = getTimeGLMnc(GLMnc)
@@ -372,10 +375,16 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     misc.out[['mean_schmidt_stability_JAS']] = c(misc.out[['mean_schmidt_stability_JAS']], 
                                     mean(s.s[s.s$datetime >= jul1 & s.s$datetime <=sep30,2], na.rm=TRUE))
     
+    misc.out[['mean_schmidt_stability_July']] = c(misc.out[['mean_schmidt_stability_July']], 
+    																mean(s.s[s.s$datetime >= jul1 & s.s$datetime <=jul31,2], na.rm=TRUE))
+    
     elevations = getElevGLM(wtr)
     depths = max(elevations) - elevations
     tmp = getEpiMetaHypo.GLM(wtr, depths)
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
+    
+    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]], na.rm=TRUE))
+    
 	
   	depths = get.offsets(la.wtr)
   	
@@ -400,6 +409,8 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
 		misc.out[['mean_surf_temp_365']] = c(misc.out[['mean_surf_temp_365']],
     																	 mean(c(surfT, rep(4, 365 - length(surfT)))))
 		
+		misc.out[['mean_1m_temp']] = c(misc.out[['mean_1m_temp']], mean(wtr1m[,2], na.rm=TRUE))
+		
 		jun1 = as.POSIXct(paste(years[i], '-06-01', sep=''))
 		jul1 = as.POSIXct(paste(years[i], '-07-01', sep=''))
 		jul31 = as.POSIXct(paste(years[i], '-07-31', sep=''))
@@ -421,6 +432,10 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     #Units are in ML, so 1ML = 1000 m^3
     misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE)*1000)
     misc.out[['simulation_length_days']] = c(misc.out[['simulation_length_days']], length(vols))
+		
+		mean.vol.temp = sum(ncvar_get(GLMnc,'temp')*ncvar_get(GLMnc,'V'), na.rm=TRUE)/sum(ncvar_get(GLMnc,'V'), na.rm=TRUE)
+		misc.out[['mean_volumetric_temp']] = c(misc.out[['mean_volumetric_temp']], mean.vol.temp)
+		
         
     #Cleanup this memory hog
     nc_close(GLMnc)
@@ -433,7 +448,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   
   misc.names = names(misc.out)
   for(i in 1:length(misc.names)){
-    fOutput[[misc.names[i]]] = misc.out[[misc.names[i]]]
+  	fOutput[[misc.names[i]]] = misc.out[[misc.names[i]]]
   }
   
   #Output!!
