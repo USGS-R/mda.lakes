@@ -1,23 +1,36 @@
 
-
-get_driver_path = local({ lookup=NULL; function(id){
-	require(jsonlite)
-	require(stringr)
+## The beginnings of an on-demand file retrieval function pulling from Sciencebase
+get_driver_path = local({ lookup=NULL; function(fname){
 	
 	if(is.null(lookup)){
 		lookup <<- new.env()
-		scibase_json = 'https://www.sciencebase.gov/catalog/item/51af6fd4e4b08a3322c44897?format=json'
+		scibase_json = 'https://www.sciencebase.gov/catalog/item/5427012ce4b0bb3382a533a5?format=json'
 		
-		ids = str_extract(tmp$files$name, '[0-9]+')
-		data.frame(ids=ids, fnames=tmp$files$name, urls=tmp$files$url)
-		
-		
-		
+		scibase_item = fromJSON(scibase_json)
+		#ids = str_extract(tmp$files$name, '[0-9]+')
+		lookup[['filemap']] = data.frame(fnames=scibase_item$files$name,
+																		 urls=scibase_item$files$url, local_path='',
+																		 stringsAsFactors=FALSE)
 	}
 	
+	filemap = lookup[['filemap']]
 	
+	index = which(filemap$fnames %in% fname)
 	
+	#If sciencebase doesn't have the file, error out
+	if(length(index) < 0){
+		##TODO: Give user the option to just check for file existence
+		stop('no file of name: ', fname)
+	}
 	
+	#
+	if(filemap[index, 'local_path'] == ''){
+		#download file into temporary location
+		tmp_path = tempfile(fname)
+		download.file(filemap[index,'urls'], tmp_path)
+		filemap[index, 'local_path'] = tmp_path
+		lookup[['filemap']] = filemap
+	}
 	
-	
-}
+	filemap[index, 'local_path']
+}})
