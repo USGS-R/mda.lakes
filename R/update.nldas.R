@@ -1,4 +1,5 @@
-#update.nldas <- function(time.start,time.end,chunk){
+#TODO: This needs work
+update.nldas <- function(time.start,time.end,chunk){
   require(geoknife)
   geoknife  <-	geoknife()
   # ---- variables -----
@@ -66,4 +67,4 @@
     cat(status.geoknife$status)
   }
   
-#}
+}
