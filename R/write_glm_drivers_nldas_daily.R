@@ -1,5 +1,5 @@
 
-library(plyr)
+require(plyr)
 
 #fname is string name
 #tz.offset is timezone offset in hours (CST is -6)
@@ -36,98 +36,106 @@ qsat = function(Ta, Pa){
 	return(q)
 }
 
-base.dir = 'D:/NLDAS'
-precip 	= load_gdp_file(file.path(base.dir, 'apcpsfc.tsv'), tz.offset=-6)
-dwLW 		= load_gdp_file(file.path(base.dir, 'dlwrfsfc.tsv'), tz.offset=-6)
-dwSW 		= load_gdp_file(file.path(base.dir, 'dswrfsfc.tsv'), tz.offset=-6)
-press 	= load_gdp_file(file.path(base.dir, 'pressfc.tsv'), tz.offset=-6)
-spfHum 	= load_gdp_file(file.path(base.dir, 'spfh2m.tsv'), tz.offset=-6)
-airT_k 	= load_gdp_file(file.path(base.dir, 'tmp2m.tsv'), tz.offset=-6)
-uwnd 		= load_gdp_file(file.path(base.dir, 'ugrd10m.tsv'), tz.offset=-6)
-vwnd 		= load_gdp_file(file.path(base.dir, 'vgrd10m.tsv'), tz.offset=-6)
+
+drivers_from_nldas = function(nldas_dir, output_dir, append_files=TRUE, overwrite=FALSE){
+
+	precip 	= load_gdp_file(file.path(nldas_dir, 'apcpsfc.tsv'), tz.offset=-6)
+	dwLW 	= load_gdp_file(file.path(nldas_dir, 'dlwrfsfc.tsv'), tz.offset=-6)
+	dwSW 	= load_gdp_file(file.path(nldas_dir, 'dswrfsfc.tsv'), tz.offset=-6)
+	press 	= load_gdp_file(file.path(nldas_dir, 'pressfc.tsv'), tz.offset=-6)
+	spfHum 	= load_gdp_file(file.path(nldas_dir, 'spfh2m.tsv'), tz.offset=-6)
+	airT_k 	= load_gdp_file(file.path(nldas_dir, 'tmp2m.tsv'), tz.offset=-6)
+	uwnd 	= load_gdp_file(file.path(nldas_dir, 'ugrd10m.tsv'), tz.offset=-6)
+	vwnd 	= load_gdp_file(file.path(nldas_dir, 'vgrd10m.tsv'), tz.offset=-6)
 
 
-kelvinConv = -273.15
-out.dir = 'D:/WiLMA/MetDrivers/2014-08-14'
+	kelvinConv = -273.15
 
-lakeids = names(precip)[-1]
+	lakeids = names(precip)[-1]
 
-for(i in 1:length(lakeids)){
-	
-	data = precip[,c('datetime',lakeids[i])]
-	data = merge(data, dwLW[,c('datetime',lakeids[i])], by='datetime')
-	data = merge(data, dwSW[,c('datetime',lakeids[i])], by='datetime')
-	data = merge(data, press[,c('datetime',lakeids[i])], by='datetime')
-	data = merge(data, spfHum[,c('datetime',lakeids[i])], by='datetime')
-	data = merge(data, airT_k[,c('datetime',lakeids[i])], by='datetime')
-	data = merge(data, uwnd[,c('datetime',lakeids[i])], by='datetime')
-	data = merge(data, vwnd[,c('datetime',lakeids[i])], by='datetime')
-	
-	
-	names(data) = c('datetime','precip','dwLW','dwSW','press','spfHum','airT_k','uwnd','vwnd')
-	
-	headers = 'time,ShortWave,LongWave,AirTemp,RelHum,WindSpeed,Rain,Snow\n';
-	
-	data$time = as.POSIXct(trunc(data$datetime, units='days'))
-	out.data = data.frame(time=unique(data$time))
-	
-	## drop any days with less than 24 observations
-	data = ddply(data, 'time', function(df){
-		if(nrow(df) >=24){
-			return(df)
+	for(i in 1:length(lakeids)){
+		
+		data = precip[,c('datetime',lakeids[i])]
+		data = merge(data, dwLW[,c('datetime',lakeids[i])], by='datetime')
+		data = merge(data, dwSW[,c('datetime',lakeids[i])], by='datetime')
+		data = merge(data, press[,c('datetime',lakeids[i])], by='datetime')
+		data = merge(data, spfHum[,c('datetime',lakeids[i])], by='datetime')
+		data = merge(data, airT_k[,c('datetime',lakeids[i])], by='datetime')
+		data = merge(data, uwnd[,c('datetime',lakeids[i])], by='datetime')
+		data = merge(data, vwnd[,c('datetime',lakeids[i])], by='datetime')
+		
+		
+		names(data) = c('datetime','precip','dwLW','dwSW','press','spfHum','airT_k','uwnd','vwnd')
+		
+		headers = 'time,ShortWave,LongWave,AirTemp,RelHum,WindSpeed,Rain,Snow\n';
+		
+		data$time = as.POSIXct(trunc(data$datetime, units='days'))
+		out.data = data.frame(time=unique(data$time))
+		
+		## drop any days with less than 24 observations
+		data = ddply(data, 'time', function(df){
+			if(nrow(df) >=24){
+				return(df)
+			}else{
+				return(data.frame())
+			}
+			
+		})
+		
+		## convert and downsample wind
+		out.data = merge(out.data, ddply(data[,c('time','uwnd', 'vwnd')], 'time', function(df){
+			
+			tmp = sqrt(df$uwnd^2 + df$vwnd^2) #just need non-directional speed
+			tmp = mean(tmp^3)^(1/3) 		      #use power averaging
+			
+			return(data.frame('WindSpeed'=tmp))
+		}))
+		
+		out.data = merge(out.data, ddply(data[,c('time','dwSW')], 'time', function(df){
+			return(data.frame('ShortWave'=mean(df$dwSW)))
+		}))
+		
+		out.data = merge(out.data, ddply(data[,c('time','dwLW')], 'time', function(df){
+			return(data.frame('LongWave'=mean(df$dwLW)))
+		}))
+		
+		out.data = merge(out.data, ddply(data[,c('time','airT_k')], 'time', function(df){
+			return(data.frame('AirTemp'=mean(df$airT_k - 273.15))) #convert to C
+		}))
+		
+		out.data = merge(out.data, ddply(data[,c('time','precip')], 'time', function(df){
+			return(data.frame('Rain'=mean(df$precip*24/1000)))
+		}))
+		
+		out.data = merge(out.data, ddply(data[,c('time','press', 'spfHum', 'airT_k')], 'time', function(df){
+			sat_hum = qsat(df$airT_k-273.15, df$press*0.01)
+			rh = 100*df$spfHum/sat_hum
+			return(data.frame(RelHum=mean(rh)))
+			
+		}))
+		
+		out.data$Snow = 0
+		
+		out.data = out.data[order(out.data$time), c('time','ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow')]
+		
+		#Format time as string in the correct way
+		out.data$time = format(out.data$time,'%Y-%m-%d %H:%M:%S')
+		
+		fout = file.path(out_dir,paste0('WBIC_', lakeids[i], '.csv'))
+		
+		if(append_files){
+			#append new year to data
+			write.table(format(out.data, digits=4), fout, sep=',', row.names=FALSE, 
+				col.names=FALSE, quote=FALSE,	append=TRUE)
 		}else{
-			return(data.frame())
+			if(file.exists(fout) & !overwrite){
+				stop(fout, ' exists and overwrite is set to FALSE')
+			}
+			write.table(out.data, fout, sep=',', row.names=FALSE, col.names=TRUE, quote=FALSE)
 		}
 		
-	})
-	
-	## convert and downsample wind
-	out.data = merge(out.data, ddply(data[,c('time','uwnd', 'vwnd')], 'time', function(df){
-		
-		tmp = sqrt(df$uwnd^2 + df$vwnd^2) #just need non-directional speed
-		tmp = mean(tmp^3)^(1/3) 		      #use power averaging
-		
-		return(data.frame('WindSpeed'=tmp))
-	}))
-	
-	out.data = merge(out.data, ddply(data[,c('time','dwSW')], 'time', function(df){
-		return(data.frame('ShortWave'=mean(df$dwSW)))
-	}))
-	
-	out.data = merge(out.data, ddply(data[,c('time','dwLW')], 'time', function(df){
-		return(data.frame('LongWave'=mean(df$dwLW)))
-	}))
-	
-	out.data = merge(out.data, ddply(data[,c('time','airT_k')], 'time', function(df){
-		return(data.frame('AirTemp'=mean(df$airT_k - 273.15))) #convert to C
-	}))
-	
-	out.data = merge(out.data, ddply(data[,c('time','precip')], 'time', function(df){
-		return(data.frame('Rain'=mean(df$precip*24/1000)))
-	}))
-	
-	out.data = merge(out.data, ddply(data[,c('time','press', 'spfHum', 'airT_k')], 'time', function(df){
-		sat_hum = qsat(df$airT_k-273.15, df$press*0.01)
-		rh = 100*df$spfHum/sat_hum
-		return(data.frame(RelHum=mean(rh)))
-		
-	}))
-	
-	out.data$Snow = 0
-	
-	out.data = out.data[order(out.data$time), c('time','ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow')]
-	
-	#Format time as string in the correct way
-	out.data$time = format(out.data$time,'%Y-%m-%d %H:%M:%S')
-	
-	fout = file.path(out.dir,paste0('WBIC_', lakeids[i], '.csv'))
-	write.table(out.data, fout, sep=',', row.names=FALSE, col.names=TRUE, quote=FALSE)
-	
-	#append new year to data
-	#write.table(format(out.data, digits=4), fout, sep=',', row.names=FALSE, 
-	# col.names=FALSE, quote=FALSE,	append=TRUE)
-}
-	
+	}#lakes for loop
+}#function close	
 
 
 
