@@ -1,12 +1,12 @@
-source("Libraries/GLM.functions.R")
-require("rGLM")
+#source("Libraries/GLM.functions.R")
+#require("rGLM")
 lyrDz	<<-	0.25
 #year	<-	'2009'
 
 
 calc.strat.onset	<-	function(WBIC,year,min.duration=30,mix.diff=1.0){
-	source("Libraries/GLM.functions.R")
-	require("rGLM")
+	#source("Libraries/GLM.functions.R")
+	#require("rGLM")
 	# min.duration is in TIME UNITS
 	# mix diff is °C
 	folder	<-	paste("../supporting files/10-06Final/WBIC_",WBIC,'/',sep='')
@@ -71,8 +71,8 @@ call.lakes	<-	function(year){
 }
 
 
-years = seq(1979,2011,1)
-print(years)
-for (i in 1:length(years)){
-	call.lakes(years[i])
-}
+#years = seq(1979,2011,1)
+#print(years)
+#for (i in 1:length(years)){
+#	call.lakes(years[i])
+#}
