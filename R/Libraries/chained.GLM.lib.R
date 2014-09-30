@@ -1,9 +1,9 @@
 ## Run a chained GLM run
 
-iscondor = FALSE
-if(iscondor){
-	install.packages("ncdf4_1.4.zip", lib='./rLibs', repos=NULL)
-}
+#iscondor = FALSE
+#if(iscondor){
+#	install.packages("ncdf4_1.4.zip", lib='./rLibs', repos=NULL)
+#}
 
 Sys.setenv(TZ='GMT')
 
