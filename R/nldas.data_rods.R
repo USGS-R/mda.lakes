@@ -74,20 +74,20 @@ write.rods <- function(nldas.rods,var.name,f.name){
   write.table(write.out,file=output,col.names=TRUE, quote=FALSE, row.names=FALSE, sep="\t")
 }
 
-var.name = "precipitation"
-lakes <- list("Delavan"=c(42+36/60+0/3600,-88-36/60-30/3600),
-              'Mendota'=c(42+6/60+0/3600,-89-25/60-0/3600),
-              'Green'=c(43+49/60+0/3600,-88-59/60-0/3600),
-              'Winnebago'=c(44+0/60+0/3600,-88-25/60-0/3600),
-              'Anvil'=c(45+56/60+34/3600,-89-3/60-50/3600),
-              'St_Germaine'=c(45+54/60+50/3600,-89-29/60-0/3600))
-
-for (i in 1:length(lakes)){
-  lake = names(lakes)[i]
-  lat = lakes[[i]][1]
-  lon = lakes[[i]][2]
-  rods <- nldas.rods(var.name,lat,lon)
-  rods <- downsample.rods(rods,var.name)
-  write.rods(rods,var.name,f.name=lake)
-}
+#var.name = "precipitation"
+#lakes <- list("Delavan"=c(42+36/60+0/3600,-88-36/60-30/3600),
+#              'Mendota'=c(42+6/60+0/3600,-89-25/60-0/3600),
+#              'Green'=c(43+49/60+0/3600,-88-59/60-0/3600),
+#              'Winnebago'=c(44+0/60+0/3600,-88-25/60-0/3600),
+#              'Anvil'=c(45+56/60+34/3600,-89-3/60-50/3600),
+#              'St_Germaine'=c(45+54/60+50/3600,-89-29/60-0/3600))
+#
+#for (i in 1:length(lakes)){
+#  lake = names(lakes)[i]
+#  lat = lakes[[i]][1]
+#  lon = lakes[[i]][2]
+#  rods <- nldas.rods(var.name,lat,lon)
+#  rods <- downsample.rods(rods,var.name)
+#  write.rods(rods,var.name,f.name=lake)
+#}
 
