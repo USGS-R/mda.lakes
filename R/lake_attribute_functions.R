@@ -5,15 +5,12 @@
 #'@param site_id The character ID for the requested data
 #'
 #'@return
-#' 
-#'@details
+#'Data frame with columns \code{depth} and \code{area}
 #'
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
-#'
-#'@examples
 #'
 #'
 #'@export
@@ -45,14 +42,14 @@ getBathy	<-	function(site_id){
 #' Lake surface area in meters^2
 #' 
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Jordan Read, Luke Winslow
 #'
 #'@examples
-#'
+#'TODO
 #'
 #'@export
 getArea	<-	local({ lookup=NULL; function(site_id){
@@ -64,7 +61,7 @@ getArea	<-	local({ lookup=NULL; function(site_id){
 		lookup <<- new.env()
 		
 		for (i in 1:nrow(d)){
-			lookup[[toString(d$site_id[i])]]	<-	acre2m2*d$acres[i]
+			lookup[[toString(d$WBIC[i])]]	<-	acre2m2*d$acres[i]
 		}
 	}
 	lookup[[site_id]]
@@ -79,7 +76,7 @@ getArea	<-	local({ lookup=NULL; function(site_id){
 #'@return
 #' Estimated residence time in days
 #'@details
-#'
+#'TODO
 #'
 #'@references
 #'TODO: Data source needed
@@ -88,7 +85,7 @@ getArea	<-	local({ lookup=NULL; function(site_id){
 #'Luke Winslow, Jordan Read
 #'
 #'@examples
-#'
+#'TODO
 #'
 #'@export
 getResidenceTime	<-	local(
@@ -130,13 +127,11 @@ getResidenceTime	<-	local(
 #'@return
 #' Canopy height above lake surface level in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
-#'
-#'@examples
 #'
 #'
 #'@export
@@ -205,13 +200,12 @@ getCanopy	<-	local(
 #' light attenuation coefficient in m^-1
 #' 
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -280,13 +274,12 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
 #'@return
 #' Light attenuation coefficient in m^-1
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -333,13 +326,12 @@ getClarity	<-	local(
 #'@return
 #' Elevation in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -375,13 +367,11 @@ getElevation <- local({ lookup=NULL;
 #' Lat/lon on the WGS84 datum
 #' 
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
-#'
-#'@examples
 #'
 #'
 #'@export
@@ -410,13 +400,12 @@ getLatLon <- local({ lookup=NULL; function(WBIC) {
 #'@return
 #' Perimeter in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -451,7 +440,6 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -478,13 +466,12 @@ getSDF	<-	function(WBIC){
 #'@return
 #' Coefficient of wind drag 
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -509,13 +496,12 @@ getCD	<-	function(WBIC=NULL,Wstr=NULL){
 #'@return
 #' The wind sheltering coefficient (between 0 and 1)
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -581,13 +567,12 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 #'@return
 #' Max observed depth in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -616,13 +601,12 @@ getZmax <- local({ lookup=NULL; function(WBIC) {
 #'@return
 #' Mean calculated depth in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -650,13 +634,12 @@ getZmean	<-	function(WBIC){
 #'@return
 #' Max observed depth in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
@@ -699,13 +682,12 @@ getIceOn	<-	function(WBIC,year){
 #'@return
 #' Max observed depth in meters
 #'@details
-#'
+#'TODO
 #'
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
-#'@examples
 #'
 #'
 #'@export
