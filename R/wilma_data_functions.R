@@ -1,5 +1,18 @@
 
-## The beginnings of an on-demand file retrieval function pulling from Sciencebase
+#'@title Return driver file location for given lake
+#'
+#'@description
+#'This functoin returns a path to the driver file for a lake. Retrieve and cache
+#'the file from Sciencebase if necessary
+#'
+#'@param fname Name of the file, generally based on the unique site_id
+#'
+#'@author Luke Winslow
+#'
+#'@examples
+#'
+#'
+#'@export
 get_driver_path = local({ lookup=NULL; function(fname){
 	
 	if(is.null(lookup)){
@@ -18,7 +31,7 @@ get_driver_path = local({ lookup=NULL; function(fname){
 	index = which(filemap$fnames %in% fname)
 	
 	#If sciencebase doesn't have the file, error out
-	if(length(index) < 0){
+	if(length(index) <= 0){
 		##TODO: Give user the option to just check for file existence
 		stop('no file of name: ', fname)
 	}
