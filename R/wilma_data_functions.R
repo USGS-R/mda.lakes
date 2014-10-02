@@ -9,9 +9,8 @@
 #'
 #'@author Luke Winslow
 #'
-#'@examples
 #'
-#'
+#'@importFrom jsonlite fromJSON
 #'@export
 get_driver_path = local({ lookup=NULL; function(fname){
 	
