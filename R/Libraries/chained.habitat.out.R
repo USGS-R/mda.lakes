@@ -7,7 +7,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   require(ncdf4)
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
-  years = wbics = str_extract(basename(nc.files),"[0-9]+")
+  years = str_extract(basename(nc.files),"[0-9]+")
   
   if(missing(lakeid)){
     lakeid = basename(run.path)
