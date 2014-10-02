@@ -299,51 +299,6 @@ output.cal.chained = function(run.dir){
 }
 
 
-get.wtr.chained.prefix = function(run.dir){
-  
-  require(ncdf4)
-  require(glmtools)
-  origin = getwd()
-  setwd(run.dir)
-  #output.cal.chained
-  #This tries to take calibration data and join it with model output data
-  # THis particular version deals with the damn chained runs
-  
-  
-  nc.files = Sys.glob('output*.nc')
-  
-  
-  for(i in 1:length(nc.files)){
-    glm.ncs[[i]] = nc_open(nc.files[i])
-  }
-  
-  ## Subsample run to get water temp data at 4D obs points
-  
-  wtr = get_temp(file = nc.files[i], 0.25)
-  wtr = wtr[4:nrow(wtr), ] #Drop the first three burn-in days
-  
-  for(i in 2:length(glm.ncs)){
-    tryCatch({
-      tmp = getTempGLMnc(glm.ncs[[i]], lyr.elevations=getElevGLM(wtr))
-      
-      wtr = rbind(wtr, tmp[4:nrow(tmp), ]) #Drop the first three days which were "burn-in" days
-      
-    }, error=function(e){}) #If we error, just skip this year
-  }
-
-  #write.table(wtr, 'output.wtr', sep='\t', col.names=TRUE, row.names=FALSE)
-  
-  #Close these pesky memory hogs
-  for(i in 1:length(glm.ncs)){
-    nc_close(glm.ncs[[i]])
-  }
-  
-  setwd(origin)
-  
-  return(wtr)
-  
-}
-
 run.prefixed.chained.kd.scenario.GLM = function(run.dir, glm.path, nml.args=NULL, verbose=TRUE){
   require(glmtools)
   #run.dir is the home for all model inputs
