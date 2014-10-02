@@ -3,7 +3,8 @@
 \alias{prep_run_glm}
 \title{Prepare and run model based on unique site_id}
 \usage{
-prep_run_glm(site_id, path)
+prep_run_glm(site_id, path, start = as.POSIXct("2008-04-01"),
+  end = as.POSIXct("2008-06-01"), nml_args = NULL)
 }
 \description{
 Pulls in the required information to do a simple GLM
