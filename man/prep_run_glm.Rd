@@ -9,4 +9,8 @@ prep_run_glm(site_id, path)
 Pulls in the required information to do a simple GLM
 run. Grabs driver data from Sciencbase and
 }
+\examples{
+dir.create('~/test')
+prep_run_chained_glm('10000', '~/test')
+}
 

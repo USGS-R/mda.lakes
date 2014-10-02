@@ -3,7 +3,14 @@
 \alias{prep_run_chained_glm}
 \title{Prepare and run chained model based on unique site_id}
 \usage{
-prep_run_chained_glm(site_id, path)
+prep_run_chained_glm(site_id, path, nml_args = NULL)
+}
+\arguments{
+\item{site_id}{}
+
+\item{path}{}
+
+\item{nml_args}{}
 }
 \description{
 Pulls in the required information to do a simple GLM
