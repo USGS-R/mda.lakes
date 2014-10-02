@@ -10,4 +10,8 @@ Pulls in the required information to do a simple GLM
 run. Grabs driver data from Sciencbase and attribute data
 from the internal package DB.
 }
+\examples{
+dir.create('~/test')
+prep_run_chained_glm('10000', '~/test')
+}
 
