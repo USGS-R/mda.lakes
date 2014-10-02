@@ -1,5 +1,5 @@
-source("Libraries/GLM.functions.R")
-require(rGLM)
+#source("Libraries/GLM.functions.R")
+#require(rGLM)
 lyrDz	<<-	0.25
 #year	<-	'2009'
 
@@ -65,5 +65,5 @@ call.lakes	<-	function(year){
 	names(write.out) <- col.names
 	write.table(x=write.out,file=file.out,sep='\t',col.names=TRUE,quote=FALSE,row.names = FALSE)
 }
-call.lakes(1998)
-call.lakes(1996)
+#call.lakes(1998)
+#call.lakes(1996)
