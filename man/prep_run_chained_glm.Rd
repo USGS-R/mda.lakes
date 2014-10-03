@@ -3,11 +3,23 @@
 \alias{prep_run_chained_glm}
 \title{Prepare and run chained model based on unique site_id}
 \usage{
-prep_run_chained_glm(site_id, path)
+prep_run_chained_glm(site_id, path, start = as.POSIXct("2008-04-01"),
+  end = as.POSIXct("2008-06-01"), nml_args = NULL)
+}
+\arguments{
+\item{site_id}{}
+
+\item{path}{}
+
+\item{nml_args}{}
 }
 \description{
 Pulls in the required information to do a simple GLM
 run. Grabs driver data from Sciencbase and attribute data
 from the internal package DB.
+}
+\examples{
+dir.create('~/test')
+prep_run_chained_glm('10000', '~/test')
 }
 

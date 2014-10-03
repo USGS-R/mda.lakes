@@ -20,9 +20,21 @@ get_driver_path = local({ lookup=NULL; function(fname){
 		
 		scibase_item = fromJSON(scibase_json)
 		#ids = str_extract(tmp$files$name, '[0-9]+')
-		lookup[['filemap']] = data.frame(fnames=scibase_item$files$name,
+		filemap = data.frame(fnames=scibase_item$files$name,
 																		 urls=scibase_item$files$url, local_path='',
 																		 stringsAsFactors=FALSE)
+		
+		##Do this twice because we had to split the drivers
+		scibase_json = 'https://www.sciencebase.gov/catalog/item/542dc7e6e4b092f17defcb06?format=json'
+		scibase_item = fromJSON(scibase_json)
+		
+		filemap = rbind(filemap, 
+										data.frame(fnames=scibase_item$files$name,
+												 urls=scibase_item$files$url, local_path='',
+												 stringsAsFactors=FALSE))
+		
+		
+		lookup[['filemap']] = filemap
 	}
 	
 	filemap = lookup[['filemap']]
