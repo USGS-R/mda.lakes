@@ -1,7 +1,7 @@
-Package: WiLMA
+Package: mda.lakes
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Tools for combining models, data, and processing for lakes
+Version: 1.1
 Date: 2014-09-29
 Author: Luke Winslow, Jordan Read
 Maintainer: Luke Winslow <lwinslow@usgs.gov>
@@ -12,4 +12,4 @@ Imports:
     jsonlite, 
     GLMr
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
+License: LICENSE file
