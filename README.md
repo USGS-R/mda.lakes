@@ -1,6 +1,6 @@
-WiLMA
+mda.lakes
 =====
-##Wisconsin Lake Modeling Aggregation.
+##Model Data Assimilation - Lakes
 
 By: Jordan Read, Luke Winslow, Gretchen Hansen
 
