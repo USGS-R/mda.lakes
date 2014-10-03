@@ -104,11 +104,11 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     #Make sure the last date is within 2 days of one of the ice-ons
     # If it isn't, then the model probably failed early
-    if( !any(abs(difftime(run.time[length(run.time)],empir.ice$DATE, units='days')) < 2.1) ){
-      cat('Wrong ice-off date:', lakeid, '\n')
-      nc_close(GLMnc)
-      bad[i] = TRUE
-      next
+    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, years[i])), units='days')) < 2.1) ){
+    	cat('Wrong ice-off date:', lakeid, '\n')
+    	nc_close(GLMnc)
+    	bad[i] = TRUE
+    	next
     }
     
     
@@ -270,13 +270,21 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   }
 }
 
-
+#'@title Chained habitat out functoin for Krose metrics
+#'
+#'
+#'@import stringr
+#'@import glmtools
+#'@import ncdf4
+#'@import rLakeAnalyzer
+#'
+#'@export
 chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   
-  require(stringr)
-  require(rGLM)
-  require(ncdf4)
-  require(rLakeAnalyzer)
+  #require(stringr)
+  #require(glmtools)
+  #require(ncdf4)
+  #require(rLakeAnalyzer)
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
   years = wbics = str_extract(basename(nc.files),"[0-9]+")
@@ -350,7 +358,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     
     #Make sure the last date is within 2 days of one of the ice-ons
     # If it isn't, then the model probably failed early
-    if( !any(abs(difftime(run.time[length(run.time)],empir.ice$DATE, units='days')) < 2.1) ){
+    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, years[i])), units='days')) < 2.1) ){
       cat('Wrong ice-off date:', lakeid, '\n')
       nc_close(GLMnc)
       bad[i] = TRUE
