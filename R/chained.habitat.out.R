@@ -287,7 +287,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   #require(rLakeAnalyzer)
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
-  years = wbics = str_extract(basename(nc.files),"[0-9]+")
+  years = str_extract(basename(nc.files),"[0-9]+")
   
   if(missing(lakeid)){
     lakeid = basename(run.path)
@@ -297,14 +297,15 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   
   bad = rep(FALSE, length(years))
   
-  empir.ice = read.table(file.path(run.path, 'icecal.in.tsv'), sep='\t', header=TRUE)
-  empir.ice$DATE = as.POSIXct(empir.ice$DATE)
+  #empir.ice = read.table(file.path(run.path, 'icecal.in.tsv'), sep='\t', header=TRUE)
+  #empir.ice$DATE = as.POSIXct(empir.ice$DATE)
   
   #We need Hypsometry for some of Kevin's damn numbers
-  nml.data = read.nml('/glm.nml', folder=run.path)
+  nml.data = read_nml(file.path(run.path, 'glm.nml'))
+  bathy = getBathy(lakeid)
   
-  bthy.areas = nml.data$morphometry$A*1000  #GLM file has areas in 1000's of m^2
-  bthy.depths = abs(nml.data$morphometry$H - max(nml.data$morphometry$H))
+  bthy.areas = bathy$area #nml.data$morphometry$A*1000  #GLM file has areas in 1000's of m^2
+  bthy.depths = bathy$depth #abs(nml.data$morphometry$H - max(nml.data$morphometry$H))
   
   bathy = data.frame(depths=bthy.depths, areas=bthy.areas)
   bathy = bathy[order(bathy$depths),]  #sort by depth, I think we want ascending
@@ -312,45 +313,49 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   for(i in 1:length(nc.files)){
     
     #Open the NC file and get data frame of wtr temp
-    GLMnc = nc_open(nc.files[i], readunlim=FALSE)
-    test.get = ncvar_get(GLMnc,'temp')
+    #GLMnc = nc_open(nc.files[i], readunlim=FALSE)
+ 	  
+  	GLMnc = nc.files[i]
+    #test.get = ncvar_get(GLMnc,'temp')
     
-    wtr = getGLMwtr(GLMnc)
-    ice = getGLMice(GLMnc)
-    surfT = getSurfaceT(wtr)
-    floorT = getTempGLMnc(GLMnc, ref='bottom', z.out=0)
-    floorT = floorT[4:nrow(floorT),]
+    wtr = get_temp(GLMnc)
+    ice = get_ice(GLMnc)
+    surfT = get_temp(GLMnc, reference='surface', z_out=0)
+    floorT = get_temp(GLMnc, reference='bottom', z_out=0)
+    #floorT = floorT[4:nrow(floorT),]
     
-    wtr1m = getTempGLMnc(GLMnc, ref='surface', z.out=1)
-    wtr1m = wtr1m[4:nrow(wtr1m),]
+    wtr1m = get_temp(GLMnc, reference='surface', z_out=1)
+    #wtr1m = wtr1m[4:nrow(wtr1m),]
     
-    raw.wtr = ncvar_get(GLMnc, 'temp')
-    run.time = getTimeGLMnc(GLMnc)
+  	#tmp = nc_open(GLMnc, readunlim=FALSE)
+    raw.wtr = get_raw(GLMnc, 'temp')
+  	#nc_close(tmp)
+    run.time = wtr[,1]
     
     
     #Drop the first 3 days
-    wtr = wtr[4:nrow(wtr), , drop=FALSE]
-    ice = ice[4:nrow(wtr),]
-    surfT = surfT[4:nrow(wtr)]
-    raw.wtr = raw.wtr[,4:ncol(raw.wtr), drop=FALSE] #this is a matrix with a different orientation
-    run.time = run.time[4:length(run.time)]
+    #wtr = wtr[4:nrow(wtr), , drop=FALSE]
+    #ice = ice[4:nrow(wtr),]
+    #surfT = surfT[4:nrow(wtr)]
+    #raw.wtr = raw.wtr#[,4:ncol(raw.wtr), drop=FALSE] #this is a matrix with a different orientation
+    #run.time = run.time#[4:length(run.time)]
     
-    censor.days = 3  #used for later functions to censor burn-in days
+    censor.days = 0  #used for later functions to censor burn-in days
     
     #Make sure temps are in a sane range
     if(any(raw.wtr > 50, na.rm=TRUE) | any(raw.wtr < -20, na.rm=TRUE)){
       
       cat('Unreasonable temp values found:', lakeid, '\n')
-      nc_close(GLMnc)
+      #nc_close(GLMnc)
       bad[i] = TRUE
       next
     }
     
     #Ok, sometimes the first modeled day gives a really bad temp value
     # at the surface. Drop those!
-    if(any(raw.wtr[,1] > 13, na.rm=TRUE)){
+    if(any(raw.wtr[,1] > 30, na.rm=TRUE)){
       cat('Unreasonable first day temps found:', lakeid, '\n')
-      nc_close(GLMnc)
+      #nc_close(GLMnc)
       bad[i] = TRUE
       next
     }
@@ -360,7 +365,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     # If it isn't, then the model probably failed early
     if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, years[i])), units='days')) < 2.1) ){
       cat('Wrong ice-off date:', lakeid, '\n')
-      nc_close(GLMnc)
+      #nc_close(GLMnc)
       bad[i] = TRUE
       next
     }
@@ -372,8 +377,8 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     jul31 = as.POSIXct(paste(years[i], '-07-31', sep=''))
     sep30 = as.POSIXct(paste(years[i], '-09-30', sep=''))
     
-    la.wtr = getTempGLMnc(GLMnc, ref='surface')
-    la.wtr = la.wtr[4:nrow(la.wtr),] # drop those pesky intro days
+    la.wtr = get_temp(GLMnc, ref='surface')
+    #la.wtr = la.wtr[4:nrow(la.wtr),] # drop those pesky intro days
     names(la.wtr) = tolower(names(la.wtr)) ## fix the header to make it 'rLA' compatible
     
     s.s = ts.schmidt.stability(la.wtr, bathy, na.rm=TRUE)
@@ -386,12 +391,11 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     misc.out[['mean_schmidt_stability_July']] = c(misc.out[['mean_schmidt_stability_July']], 
     																mean(s.s[s.s$datetime >= jul1 & s.s$datetime <=jul31,2], na.rm=TRUE))
     
-    elevations = getElevGLM(wtr)
-    depths = max(elevations) - elevations
-    tmp = getEpiMetaHypo.GLM(wtr, depths)
+  	browser()
+  	tmp = ts.thermo.depth(la.wtr, seasonal=TRUE, na.rm=TRUE)
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
     
-    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]], na.rm=TRUE))
+    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$thermo.depth[start.end[1]:start.end[2]], na.rm=TRUE))
     
 	
   	depths = get.offsets(la.wtr)
