@@ -11,6 +11,7 @@
 #'
 #'
 #'@importFrom jsonlite fromJSON
+#'@importFrom RCurl getBinaryURL
 #'@export
 get_driver_path = local({ lookup=NULL; function(fname){
 	
@@ -51,7 +52,8 @@ get_driver_path = local({ lookup=NULL; function(fname){
 	if(filemap[index, 'local_path'] == ''){
 		#download file into temporary location
 		tmp_path = tempfile(fname)
-		download.file(filemap[index,'urls'], tmp_path)
+		bin = getBinaryURL(filemap[index,'urls']) 
+		writeBin(bin, tmp_path)
 		filemap[index, 'local_path'] = tmp_path
 		lookup[['filemap']] = filemap
 	}
