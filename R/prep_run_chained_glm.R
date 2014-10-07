@@ -11,7 +11,12 @@
 #'
 #'@examples
 #'dir.create('~/test')
-#'prep_run_chained_glm('10000', '~/test')
+#'	dir.create(to_run[i])
+#'	
+#'	prep_run_chained_glm(to_run[i], path=to_run[i], 
+#'									 start=as.POSIXct('1979-01-01'), 
+#'									 end=as.POSIXct('2011-12-31'))
+#'									 
 #'
 #'@import glmtools
 #'@import GLMr
@@ -35,8 +40,11 @@ prep_run_chained_glm <- function(site_id, path, start=as.POSIXct('2008-04-01'),
 	#iterate over all years
 	start_year = as.POSIXlt(start)$year+1900
 	end_year = as.POSIXlt(end)$year+1900
+	years = start_year:end_year
+	out_vals = rep(NA, length(years))
 	
-	for(year in start_year:end_year){
+	for(i in 1:length(years)){
+		year = years[i]
 		
 		off_date = getIceOff(site_id, year)
 		on_date = getIceOn(site_id, year)
@@ -54,9 +62,9 @@ prep_run_chained_glm <- function(site_id, path, start=as.POSIXct('2008-04-01'),
 		
 		nml_out_path = file.path(path, "glm.nml")
 		write_nml(nml_obj, nml_out_path)
-		run_glm(path)
+		out_vals[i] = run_glm(path)
 	}
 	
+	return(out_vals)
 }
-
 
