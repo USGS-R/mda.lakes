@@ -26,4 +26,3 @@ dir.create('~/test')
 									 start=as.POSIXct('1979-01-01'),
 									 end=as.POSIXct('2011-12-31'))
 }
-

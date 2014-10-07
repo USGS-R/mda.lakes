@@ -271,7 +271,8 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
 }
 
 #'@title Chained habitat out functoin for Krose metrics
-#'
+#'@description
+#'Calculates all the different metrics requested by Krose
 #'
 #'@import stringr
 #'@import glmtools
@@ -391,7 +392,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     misc.out[['mean_schmidt_stability_July']] = c(misc.out[['mean_schmidt_stability_July']], 
     																mean(s.s[s.s$datetime >= jul1 & s.s$datetime <=jul31,2], na.rm=TRUE))
     
-  	browser()
+  	
   	tmp = ts.thermo.depth(la.wtr, seasonal=TRUE, na.rm=TRUE)
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
     
@@ -412,14 +413,14 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   	misc.out[['mean_epi_temp']] = c(misc.out[['mean_epi_temp']], mean(epi.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
   	misc.out[['mean_hypo_temp']] = c(misc.out[['mean_hypo_temp']], mean(hypo.temps$layer.temp[start.end[1]:start.end[2]], na.rm=TRUE))
       
-    misc.out[['mean_surf_temp']] = c(misc.out[['mean_surf_temp']], mean(surfT))
+    misc.out[['mean_surf_temp']] = c(misc.out[['mean_surf_temp']], mean(surfT[,2]))
     misc.out[['mean_bottom_temp']] = c(misc.out[['mean_bottom_temp']], mean(floorT[,2]))
     
     misc.out[['mean_bottom_temp_365']] = c(misc.out[['mean_bottom_temp_365']],
-    																			 mean(c(floorT[,2], rep(4, 365 - nrow(floorT)))))
+    																			 mean(c(floorT[,2], rep(4, 365 - length(floorT[,2])))))
     																			 		 
 		misc.out[['mean_surf_temp_365']] = c(misc.out[['mean_surf_temp_365']],
-    																	 mean(c(surfT, rep(4, 365 - length(surfT)))))
+    																	 mean(c(surfT[,2], rep(4, 365 - length(surfT[,2])))))
 		
 		misc.out[['mean_1m_temp']] = c(misc.out[['mean_1m_temp']], mean(wtr1m[,2], na.rm=TRUE))
 		
@@ -433,24 +434,24 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
 						mean(getSurfaceT(wtr[wtr$DateTime >= jul1 & wtr$DateTime <= aug31, ])))
 	
     ## GDD calcs
-    dd10 = surfT - 10
-    dd5  = surfT - 5
+    dd10 = surfT[,2] - 10
+    dd5  = surfT[,2] - 5
     misc.out[['GDD_wtr_5c']] = c(misc.out[['GDD_wtr_5c']], sum(dd5[dd5 > 0], na.rm=TRUE))
     misc.out[['GDD_wtr_10c']] = c(misc.out[['GDD_wtr_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
     
-    vols = ncvar_get(GLMnc,'Tot_V')
+    vols = get_raw(GLMnc,'Tot_V')
     vols = vols[c(-1,-2,-3)]
     
     #Units are in ML, so 1ML = 1000 m^3
     misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE)*1000)
     misc.out[['simulation_length_days']] = c(misc.out[['simulation_length_days']], length(vols))
 		
-		mean.vol.temp = sum(ncvar_get(GLMnc,'temp')*ncvar_get(GLMnc,'V'), na.rm=TRUE)/sum(ncvar_get(GLMnc,'V'), na.rm=TRUE)
+		mean.vol.temp = sum(get_raw(GLMnc,'temp')*get_raw(GLMnc,'V'), na.rm=TRUE)/sum(get_raw(GLMnc,'V'), na.rm=TRUE)
 		misc.out[['mean_volumetric_temp']] = c(misc.out[['mean_volumetric_temp']], mean.vol.temp)
 		
         
     #Cleanup this memory hog
-    nc_close(GLMnc)
+    #nc_close(GLMnc)
     cat("Vols calculated", years[i], '\n')
   }
   
