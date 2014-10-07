@@ -1,38 +1,11 @@
 # fish code for WiLMA 
 # **jread-usgs, lawinslow 2013-04-07
 
-require(rGLM)
+
 
 # -- shared variables --
 timeID  <-  "DateTime"
-iceID <-  "Ice"
-folder  <-  "../Data/"
-
-################################################################################
-#
-################################################################################
-getGLMnc  <-  function(folder=folder){
-  
-  GLMnc <- getGLMnc(fileName='output.nc',folder=folder)
-  return(GLMnc)
-}
-
-################################################################################
-#
-################################################################################
-getGLMwtr  <-  function(GLMnc){
-  GLMwtr <-	getTempGLMnc(GLMnc)
-  return(GLMwtr)
-}
-
-################################################################################
-#
-################################################################################
-getGLMice  <-  function(GLMnc){
-  
-  GLMice <-  data.frame("DateTime"=getTimeGLMnc(GLMnc),"Ice"=getIceGLMnc(GLMnc))
-  return(GLMice)
-}
+iceID <-  "ice.m."
 
 ################################################################################
 #
