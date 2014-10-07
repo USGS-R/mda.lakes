@@ -20,6 +20,10 @@ from the internal package DB.
 }
 \examples{
 dir.create('~/test')
-prep_run_chained_glm('10000', '~/test')
+	dir.create(to_run[i])
+
+	prep_run_chained_glm(to_run[i], path=to_run[i],
+									 start=as.POSIXct('1979-01-01'),
+									 end=as.POSIXct('2011-12-31'))
 }
 
