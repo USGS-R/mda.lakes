@@ -52,7 +52,7 @@ get_driver_path = local({ lookup=NULL; function(fname){
   if(filemap[index, 'local_path'] == ''){
     #download file into temporary location
     tmp_path = tempfile(fname)
-    bin = getBinaryURL(filemap[index,'urls']) 
+    bin = getBinaryURL(filemap[index,'urls'], ssl.verifypeer = FALSE) 
     writeBin(bin, tmp_path)
     filemap[index, 'local_path'] = tmp_path
     lookup[['filemap']] = filemap
