@@ -98,10 +98,27 @@ populate_base_lake_nml = function(site_id){
 	nml_obj = set_nml(nml_obj, 'coef_wind_drag', 
 										getCD(Wstr=getWstr(site_id, method='Markfort')))
 	
+  #Max layer thickness
+	max_z = getZmax(site_id)
+  max_layer = 1
+  if(max_z >= 20){
+    max_layer = 1.5
+  }else if(max_z >= 8 & max_z < 20){
+    max_layer = 1
+  }else if(max_z >= 5 & max_z < 8){
+    max_layer = 0.8
+  }else if(max_z >=3 & max_z < 5){
+    max_layer = 0.5
+  }else{
+    max_layer = 0.3
+  }
+	nml_obj = set_nml(nml_obj, 'max_layer_thick', max_layer)
+    
 	
 	## Pull in driver data
 	driver_path = get_driver_path(paste0('WBIC_', site_id, '.csv'))
 	
+  
 	nml_obj = set_nml(nml_obj, 'meteo_fl', gsub('\\\\', '/', driver_path))
 	
 	return(nml_obj)
