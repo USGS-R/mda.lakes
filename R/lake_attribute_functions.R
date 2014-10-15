@@ -643,35 +643,46 @@ getZmean	<-	function(WBIC){
 #'
 #'
 #'@export
-getIceOn	<-	function(WBIC,year){
+getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
   early.freeze	<-	8	# month of year
 	# the ice on for each lake for a given year
 	# ice on is assumed to either happen during the same calendar year, or within the NEXT year
+  if (is.null(lookup)) { 
+  	cat('Caching ice info.\n')
+  	
+	  fname <- system.file('supporting_files/empirical.ice.tsv', package=getPackageName())
+		empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
+	  empir.ice$posix = as.POSIXct(empir.ice$DATE)
+		lookup <<- new.env()
+		lookup[["dt"]] = empir.ice
+  }
   
-  fname <- system.file('supporting_files/empirical.ice.tsv', package=getPackageName())
-	empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
+  empir.ice = lookup[["dt"]]
+  
+  first.plausible = as.POSIXct(paste0(year,'-08-01'))
+  last.plausible = as.POSIXct(paste0(year+1,'-02-15'))
 	
   ice.on	<-	vector(length=length(WBIC))
+  
 	for (j in 1:length(WBIC)){
-		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
-			substr(empir.ice$DATE,1,4)==as.character(year)) 
-    	if (!any(use.i)){
-      		# not found for this year
-      		use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
-        		substr(empir.ice$DATE,1,4)==as.character(year+1)) 
-			if (any(use.i)){
-				pos.results  <-  empir.ice$DATE[use.i]
-			} else {pos.results=NA}
-      		
-      		ice.on[j]<- pos.results[1]
-    	} else {
-      		# found for this year, but could be 2 matches
-      		pos.results  <-	empir.ice$DATE[use.i]
-      		ice.on[j]<- tail(pos.results,1)
-    	}
+		
+		use.i	<- WBIC[j]==empir.ice$WBIC & 
+											empir.ice$ON.OFF=="on" & 
+											empir.ice$posix > first.plausible & 
+											empir.ice$posix < last.plausible
+		
+		pos.results = empir.ice$DATE[use.i]
+		
+		if(length(pos.results) > 1){
+			warning(sprintf("Ambiguous ice on in year %i for lake %s, using last value", year, WBIC))
+			ice.on[j]<- tail(pos.results,1)
+		}else{
+			ice.on[j]<- pos.results
+		}
+		
 	}
 	return(ice.on)
-}
+}})
 
 #'@title Get the ice off date for a given lake
 #'@description
