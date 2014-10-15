@@ -104,7 +104,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     #Make sure the last date is within 2 days of one of the ice-ons
     # If it isn't, then the model probably failed early
-    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, years[i])), units='days')) < 2.1) ){
+    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, as.numeric(years[i]) )), units='days')) < 2.1) ){
     	cat('Wrong ice-off date:', lakeid, '\n')
     	nc_close(GLMnc)
     	bad[i] = TRUE
@@ -364,7 +364,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
     
     #Make sure the last date is within 2 days of one of the ice-ons
     # If it isn't, then the model probably failed early
-    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, years[i])), units='days')) < 2.1) ){
+    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, as.numeric(years[i]) )), units='days')) < 2.1) ){
       cat('Wrong ice-off date:', lakeid, '\n')
       #nc_close(GLMnc)
       bad[i] = TRUE
