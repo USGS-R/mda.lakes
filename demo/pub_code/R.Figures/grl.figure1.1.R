@@ -3,11 +3,12 @@
 library(data.table)
 library(plyr)
 library(fields)
-source('../R/Libraries/GLM.functions.R')
+library(mda.lakes)
+#source('../R/Libraries/GLM.functions.R')
 source('luke.legend.R')
 source('sens.confint.mod.R')
 all.slopes = fread('all.slopes.csv')
-wi = fread('../supporting files/WI_boundary_lat_lon.tsv')
+wi = fread('../../../inst/supporting_files/WI_boundary_lat_lon.tsv')
 
 
 wbic.slopes = ddply(all.slopes, 'wbic', function(df){
@@ -39,23 +40,34 @@ tiff('grl.figure.1.1.tiff', width=1600, height=2100, res=300, compression='lzw')
 
 plot(wi$Lon, wi$Lat, type='l', lwd=2, bty='n', ylab='Lat', xlab='Lon', col='grey')
 
+
+luke.colors = function(values){
+	
+	values[values < -0.1] = -0.1
+	values[values > 0.1] = 0.1
+	#l.levels = c(-0.2, -0.1, 0, 0.1, 0.2)
+	
+	my.col = color.scale(
+		values, 
+		zlim=c(-0.11,0.11),
+		col=(two.colors(n=256, start="blue", end="red", middle="grey",
+										alpha=1.0)),
+		transparent.color="grey")
+		
+	return(my.col)
+}
+
+
 points(wbic.slopes$lon, wbic.slopes$lat, 
-			 col=color.scale(
-			 		wbic.slopes$slope, 
-			 		zlim=c(-0.5,0.5),
-			 		col=(tim.colors(256,alpha=255)),
-			 		transparent.color="grey"),
+			 col=luke.colors(wbic.slopes$slope),
 			 pch=16, cex=wbic.slopes$cex)#cex=log(wbic.slopes$n+10))
 
-l.levels = c(-0.49,-0.25, 0, 0.25, 0.49, 0.6)
-my.col = color.scale(
-						l.levels, 
-						zlim=c(-0.5,0.5),
-						col=(tim.colors(256,alpha=255)),
-						transparent.color="grey")
+l.levels = c(-0.1, -0.05, 0, 0.05, 0.1)
+
+my.col = luke.colors(l.levels)
 
 luke.legend("topright", fill = my.col, title=expression(Trend~degree*C~yr^-1),
-			 legend = c("-0.5", "-0.25", "0", "0.25", "0.5", "NA"),
+			 legend = c("<= -0.1", "-0.05", "0", "0.05", ">= 0.1"),
 			 horiz=FALSE,x.intersp=0.3, y.intersp=1, adj=c(-0.1,0.5), 
 			 title.adj=c(0,0.0), bty='n', fill.x.cex=1.2, fill.y.cex=1.3)
 
