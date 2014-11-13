@@ -13,7 +13,7 @@ Just musing here...
 
 Want to encapsulate as much of the whole WiLMA running process in one file as possible. A single model run could look like this
 
-````
+```R
 library(WiLMA) 
 
 #Setup and run model
@@ -43,5 +43,5 @@ habitat_metrics_krose = calculate_habitat_chained_krose(path='~/run_dir')
 cal_val = run_compare_validation(run_path='~/run_dir')
 plot_cal_val(run_path='~/run_dir')
 
-````
+```
 
