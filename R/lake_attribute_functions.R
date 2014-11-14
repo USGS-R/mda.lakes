@@ -17,7 +17,7 @@
 getBathy	<-	function(site_id){
 	numZ	<-	15
 	fileN	<-	system.file(paste(c('supporting_files/Bathy/', site_id, '.bth'), collapse=''), 
-											 package=getPackageName())
+											 package=packageName())
 	if (file.exists(fileN)){
 		data	<-	read.table(fileN,header=TRUE,sep='\t')
 		bathymetry	<-	data.frame(depth=data$depth,area=data$area)
@@ -56,7 +56,7 @@ getArea	<-	local({ lookup=NULL; function(site_id){
 	if (is.null(lookup)) { 
 		cat('Caching area info.\n')
 		acre2m2	<-	4046.85642
-		fname = system.file('supporting_files/managed_lake_info.txt', package=getPackageName())
+		fname = system.file('supporting_files/managed_lake_info.txt', package=packageName())
 		d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"")
 		lookup <<- new.env()
 		
@@ -96,7 +96,7 @@ getResidenceTime	<-	local(
 		function(WBIC,default.if.null=FALSE) {
 			if (is.null(lookup)) { 
 				cat('Caching residence time info.\n')
-				fname = system.file('supporting_files/Res.time.Diebel.csv', package=getPackageName())
+				fname = system.file('supporting_files/Res.time.Diebel.csv', package=packageName())
 				d	<-	read.table(fname, header=TRUE, sep=',')
 				lookup <<- new.env()
 				for (i in 1:nrow(d)){
@@ -145,7 +145,7 @@ getCanopy	<-	local(
         if (tolower(method) == 'aster'){
           cat('Caching canopy info.\n')
           fname = system.file('supporting_files/canopyht_zonal_no_zero_num5_positivehts.csv', 
-          										package =getPackageName())
+          										package =packageName())
           d	<-	read.table(fname, header=TRUE, sep=',')
           lookup <<- new.env()
           
@@ -154,7 +154,7 @@ getCanopy	<-	local(
           }
         } else if (tolower(method) == "landcover"){
           cat('Caching landcover info.\n')
-          system.file('supporting_files/buffers_land_cover.csv', package=getPackageName())
+          system.file('supporting_files/buffers_land_cover.csv', package=packageName())
           d  <-	read.table(fname, header=TRUE, sep=',')
           lookup <<- new.env()
           
@@ -222,7 +222,7 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
   default.kd  <-	0.6983965
   
   secchiConv  <-	1.7
-  fname = system.file('supporting_files/annual_mean_secchi.txt', package=getPackageName())
+  fname = system.file('supporting_files/annual_mean_secchi.txt', package=packageName())
   d	<-	read.table(fname, header=TRUE, sep='\t')
   
   useI  <-	d$WBIC==WBIC
@@ -292,7 +292,7 @@ getClarity	<-	local(
 				cat('Caching clarity info.\n')
 				secchiConv	<-	1.7
 				
-				fname <- system.file('supporting_files/annual_mean_secchi.txt', package=getPackageName())
+				fname <- system.file('supporting_files/annual_mean_secchi.txt', package=packageName())
 				d	<-	read.table(fname, header=TRUE, sep='\t')
 				
 				lookup <<- new.env()
@@ -339,7 +339,7 @@ getElevation <- local({ lookup=NULL;
 	function(WBIC) {
 	  if (is.null(lookup)) { 
 	    cat('Caching elevation info\n')
-	    fname <- system.file('supporting_files/WI_ManagedLakes_elevation.tsv', package=getPackageName())
+	    fname <- system.file('supporting_files/WI_ManagedLakes_elevation.tsv', package=packageName())
 	    d <-  read.table(fname, header=TRUE, sep='\t')
 	    WBIC.names= names(d[-1]) # remove first col, it is junk
 	    lookup <<- new.env()
@@ -379,7 +379,7 @@ getLatLon <- local({ lookup=NULL; function(WBIC) {
 	if (is.null(lookup)) { 
 		cat('Caching lat/lon info.\n')
 		
-		fname <- system.file('supporting_files/WI_Lakes_WbicLatLon.tsv', package=getPackageName())
+		fname <- system.file('supporting_files/WI_Lakes_WbicLatLon.tsv', package=packageName())
 		d <- read.table(fname, header=TRUE, as.is=TRUE) 
 		
 		lookup <<- new.env()
@@ -413,7 +413,7 @@ getPerim <- local({ lookup=NULL; function(WBIC) {
 	if (is.null(lookup)) { 
 		cat('Caching perimeter info.\n')
 		
-		fname <- system.file('supporting_files/wbicAreaPerim.tsv', package=getPackageName())
+		fname <- system.file('supporting_files/wbicAreaPerim.tsv', package=packageName())
 		d <- read.table(fname, header=TRUE, as.is=TRUE) 
 		
 		lookup <<- new.env()
@@ -579,7 +579,7 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 getZmax <- local({ lookup=NULL; function(WBIC) {
   if (is.null(lookup)) { 
     cat('Caching depth info.\n')
-    fname <- system.file('supporting_files/managed_lake_info.txt', package=getPackageName())
+    fname <- system.file('supporting_files/managed_lake_info.txt', package=packageName())
     d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"")
     
     lookup <<- new.env()
@@ -612,7 +612,7 @@ getZmax <- local({ lookup=NULL; function(WBIC) {
 #'@export
 getZmean	<-	function(WBIC){
 	ft2m	<-	0.3048
-	fname <-  system.file('supporting_files/managed_lake_info.txt', package=getPackageName())
+	fname <-  system.file('supporting_files/managed_lake_info.txt', package=packageName())
 	data	<-	read.table(fname, header=TRUE, sep='\t', quote="\"")
 	useI	<-  data$WBIC==as.numeric(WBIC)
 	mean.depth	<-	NA
@@ -643,35 +643,46 @@ getZmean	<-	function(WBIC){
 #'
 #'
 #'@export
-getIceOn	<-	function(WBIC,year){
+getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
   early.freeze	<-	8	# month of year
 	# the ice on for each lake for a given year
 	# ice on is assumed to either happen during the same calendar year, or within the NEXT year
+  if (is.null(lookup)) { 
+  	cat('Caching ice info.\n')
+  	
+	  fname <- system.file('supporting_files/empirical.ice.tsv', package=packageName())
+		empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
+	  empir.ice$posix = as.POSIXct(empir.ice$DATE)
+		lookup <<- new.env()
+		lookup[["dt"]] = empir.ice
+  }
   
-  fname <- system.file('supporting_files/empirical.ice.tsv', package=getPackageName())
-	empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
+  empir.ice = lookup[["dt"]]
+  
+  first.plausible = as.POSIXct(paste0(year,'-08-01'))
+  last.plausible = as.POSIXct(paste0(year+1,'-02-15'))
 	
   ice.on	<-	vector(length=length(WBIC))
+  
 	for (j in 1:length(WBIC)){
-		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
-			substr(empir.ice$DATE,1,4)==as.character(year)) 
-    	if (!any(use.i)){
-      		# not found for this year
-      		use.i  <-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="on" & (
-        		substr(empir.ice$DATE,1,4)==as.character(year+1)) 
-			if (any(use.i)){
-				pos.results  <-  empir.ice$DATE[use.i]
-			} else {pos.results=NA}
-      		
-      		ice.on[j]<- pos.results[1]
-    	} else {
-      		# found for this year, but could be 2 matches
-      		pos.results  <-	empir.ice$DATE[use.i]
-      		ice.on[j]<- tail(pos.results,1)
-    	}
+		
+		use.i	<- WBIC[j]==empir.ice$WBIC & 
+											empir.ice$ON.OFF=="on" & 
+											empir.ice$posix > first.plausible & 
+											empir.ice$posix < last.plausible
+		
+		pos.results = empir.ice$DATE[use.i]
+		
+		if(length(pos.results) > 1){
+			warning(sprintf("Ambiguous ice on in year %i for lake %s, using last value", year, WBIC))
+			ice.on[j]<- tail(pos.results,1)
+		}else{
+			ice.on[j]<- pos.results
+		}
+		
 	}
 	return(ice.on)
-}
+}})
 
 #'@title Get the ice off date for a given lake
 #'@description
@@ -695,7 +706,7 @@ getIceOff	<-	function(WBIC,year) {
 	# the ice off for each lake for a given year
 	# ice off is assumed to happen during the same calendar year
 
-	fname <- system.file('supporting_files/empirical.ice.tsv', package=getPackageName())
+	fname <- system.file('supporting_files/empirical.ice.tsv', package=packageName())
 	empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
 	
 	ice.off	<-	vector(length=length(WBIC))

@@ -45,6 +45,7 @@ lookup$month_name = mon.lookup[lookup$month]
 raw.slopes = fread('all.slopes.csv')
 raw.slopes = raw.slopes[,rel.depth:=floor(10*depth/zmax)/10]
 raw.slopes = raw.slopes[rel.depth <= 1,]
+#raw.slopes = raw.slopes[week > 12 & week < 47,]
 
 tiff('grl.figure.5.tiff', width=2400, height=2400, res=300, compression='lzw')
 par(mfrow=c(2,2), mar=c(0.5,0.5,0,0), oma=c(7, 7, 2, 2))
