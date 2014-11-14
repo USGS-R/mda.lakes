@@ -6,6 +6,6 @@
 chained.habitat.calc.kevin(run.path, output.path = NULL, lakeid)
 }
 \description{
-Chained habitat out functoin for Krose metrics
+Calculates all the different metrics requested by Krose
 }
 

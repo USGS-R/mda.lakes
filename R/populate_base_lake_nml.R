@@ -26,7 +26,7 @@ populate_base_lake_nml = function(site_id){
 	'min_layer_thick'=0.2,
 	'max_layer_thick'=1,
 	'Kw'=0.63,
-	'coef_inf_entrain'=0,
+	#'coef_inf_entrain'=0,
 	'coef_mix_conv'=0.23,
 	'coef_wind_stir'=0.23,
 	'coef_mix_shear'=0.20,
@@ -45,7 +45,7 @@ populate_base_lake_nml = function(site_id){
 	'wind_factor'=1.0,
 	'ce'=0.0013,
 	'ch'=0.0014,
-	'coef_wind_drag'=0.0013,
+	'cd'=0.0013,
 	'rain_sw'=FALSE,
 	'snow_sw'=TRUE,
 	'num_inflows'=0,
@@ -95,7 +95,7 @@ populate_base_lake_nml = function(site_id){
 	nml_obj = set_nml(nml_obj, 'longitude', latlon[2])
 	
 	#wind sheltering
-	nml_obj = set_nml(nml_obj, 'coef_wind_drag', 
+	nml_obj = set_nml(nml_obj, 'cd', 
 										getCD(Wstr=getWstr(site_id, method='Markfort')))
 	
   #Max layer thickness

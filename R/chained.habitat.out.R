@@ -276,16 +276,10 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
 #'
 #'@import stringr
 #'@import glmtools
-#'@import ncdf4
 #'@import rLakeAnalyzer
 #'
 #'@export
 chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
-  
-  #require(stringr)
-  #require(glmtools)
-  #require(ncdf4)
-  #require(rLakeAnalyzer)
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
   years = str_extract(basename(nc.files),"[0-9]+")
@@ -302,7 +296,7 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
   #empir.ice$DATE = as.POSIXct(empir.ice$DATE)
   
   #We need Hypsometry for some of Kevin's damn numbers
-  nml.data = read_nml(file.path(run.path, 'glm.nml'))
+  nml.data = read_nml(file.path(run.path, 'glm2.nml'))
   bathy = getBathy(lakeid)
   
   bthy.areas = bathy$area #nml.data$morphometry$A*1000  #GLM file has areas in 1000's of m^2

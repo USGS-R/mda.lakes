@@ -23,7 +23,7 @@ prep_run_glm <- function(site_id, path, start=as.POSIXct('2008-04-01'),
 	nml_obj = set_nml(nml_obj, arg_list=nml_args)
 	
 	#Write nml file
-	nml_out_path = file.path(path, "glm.nml")
+	nml_out_path = file.path(path, "glm2.nml")
 	write_nml(nml_obj, nml_out_path)
 	
 	## Run 
