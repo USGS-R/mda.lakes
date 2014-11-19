@@ -11,8 +11,7 @@ Imports:
     glmtools,
     jsonlite,
     GLMr,
-		httr, 
-Enhances:
-		geoknife
+    httr,
+Enhances: geoknife
 Description: More about what it does (maybe more than one line)
 License: LICENSE file
