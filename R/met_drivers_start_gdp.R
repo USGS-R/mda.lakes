@@ -19,7 +19,7 @@
 #'@import geoknife
 #'
 #'@export
-get_met_drivers_gdp <- function(dest_path='.', service='regclim:ncep',
+met_drivers_start_gdp <- function(service='regclim:ncep',
 																start=as.POSIXct('1990-01-01'), end=as.POSIXct('1990-01-03')){
 
 	
@@ -108,35 +108,5 @@ get_met_drivers_gdp <- function(dest_path='.', service='regclim:ncep',
 		cat(vars[i], ':', geoknife@processID, '\n')
   }
   
-  #return(output)
-	
-	
-	#wait and recheck the runs every 10 seconds
-	repeat{
-		Sys.sleep(10)
-		
-		for(i in 1:length(output)){
-			#cat(i,'\n')
-			gk = output[[i]]
-			
-	    if (isSuccessful(gk)){
-	    	cat(names(output)[i], ' is done. Downloading....\n')
-	    	status.geoknife = checkProcess(gk)
-	    	download.file(status.geoknife$URL, file.path(dest_path, names(output)[i]))
-	    	output[[i]] = NULL
-	    	break
-	    }
-			
-		  if (isError(gk)){
-		  	status.geoknife = checkProcess(gk)
-		  	cat(status.geoknife$status, '\n')
-		  	output[[i]] = NULL
-		  	break
-		  }
-		}
-		
-		if(length(output) == 0){
-			break
-		}
-	}
+  return(output)
 }
