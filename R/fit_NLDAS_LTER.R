@@ -54,7 +54,7 @@ LTER_NLDAS_gapper <- function(file_out = '../inst/extdata/LTER_met_gapped.csv'){
         val_in <- mean(nl[u_i]*m+b)
         if (is.na(val_in)){
           u_i <- nl_dt %in% fin_dates[c(j-1, j+1)] # to catch 2012-12-31 missing from NLDAS
-          val_in <- approx(x= fin_dates[c(j-1, j+1)], y = nl[u_i]*m+b, fin_dates[j])
+          val_in <- approx(x= fin_dates[c(j-1, j+1)], y = nl[u_i]*m+b, fin_dates[j])$y
         }
         val_out[j,col] <- val_in
       }
