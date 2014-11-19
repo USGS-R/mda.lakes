@@ -2,6 +2,8 @@ mda.lakes
 =====
 ##Model Data Assimilation - Lakes
 
+[![Build status](https://ci.appveyor.com/api/projects/status/mr0ndtt1rf3cireh?svg=true)](https://ci.appveyor.com/project/jread-usgs/mda-lakes)
+
 By: Jordan Read, Luke Winslow, Gretchen Hansen
 
 This code base is part of the modeling effort for Wisconsin Lakes. 
