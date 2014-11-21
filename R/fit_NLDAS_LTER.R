@@ -3,7 +3,6 @@
 #'@description see title
 #'@export
 LTER_NLDAS_gapper <- function(file_out = '../inst/extdata/LTER_met_gapped.csv'){
-  
   LTER <- read.csv('../inst/extdata/NTL_LTER_met.csv')
   
   # Sparkling Lake data used as the NLDAS comparison here
@@ -60,7 +59,10 @@ LTER_NLDAS_gapper <- function(file_out = '../inst/extdata/LTER_met_gapped.csv'){
       }
       
     }
-    val_out
+    if (col == 6){
+      val_out
+      val_out = val_out*1/m - b #convert to NLDAS wind
+    }
   }
   
   val_out[, 7] <- val_out[, 7]*0.001 # mm/day to m/day
