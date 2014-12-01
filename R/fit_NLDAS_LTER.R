@@ -60,11 +60,11 @@ LTER_NLDAS_gapper <- function(file_out = '../inst/extdata/LTER_met_gapped.csv'){
       
     }
     if (col == 6){
-      val_out
-      val_out = val_out*1/m - b #convert to NLDAS wind
+      val_out[,6] = val_out[,6]*1/m - b #convert to NLDAS wind
     }
   }
   
   val_out[, 7] <- val_out[, 7]*0.001 # mm/day to m/day
+  val_out[,1] <- as.POSIXct(val_out[,1],format = '%Y-%m-%d %H:%M:%S', tz = 'GMT')
   write.table(x = val_out, file = file_out,quote = F, sep = ',', row.names = F, col.names = T)
 }
