@@ -7,19 +7,23 @@ LTER_NLDAS_gapper <- function(file_out = '../inst/extdata/LTER_met_gapped.csv'){
   
   # Sparkling Lake data used as the NLDAS comparison here
   NLDAS <- read.csv(get_driver_path('WBIC_1881900.csv'))
-  lt_dt <- as.Date(LTER[, 1])
-  nl_dt <- as.Date(NLDAS[, 1])
+  lt_dt <- as.POSIXct(LTER[, 1], tz = "Etc/GMT+6" )
+  nl_dt <- as.POSIXct(NLDAS[, 1], tz = "Etc/GMT+6")
   # subset the times to only include overlapping
   st_dt <- max(c(min(lt_dt),min(nl_dt)))
+  st_dt <- as.POSIXct(as.numeric(st_dt), origin=as.POSIXct("1969-12-31 18:00:00"),
+             tz="Etc/GMT+6") # this is so lame that it hurts my stomach
   en_dt <- min(c(max(lt_dt),max(nl_dt)))
-  fin_dates <- seq(st_dt,en_dt, by = 'days')
+  en_dt <- as.POSIXct(as.numeric(en_dt), origin=as.POSIXct("1969-12-31 18:00:00"),
+                      tz="Etc/GMT+6")
+  fin_dates <- seq(st_dt,en_dt, by = 'days', tz = "Etc/GMT+6")
   
   val_out <- val_out <- data.frame(matrix(ncol = 7, nrow = length(fin_dates)))
   val_out[,1] <- fin_dates
   names(val_out) <- names(LTER)[1:7]
   for (col in 2:7){
-    lt_dt <- as.Date(LTER[!is.na(LTER[,col]),1])
-    nl_dt <- as.Date(NLDAS[, 1])
+    lt_dt <- as.POSIXct(LTER[!is.na(LTER[,col]),1], tz = "Etc/GMT+6" )
+    nl_dt <- as.POSIXct(NLDAS[, 1], tz = "Etc/GMT+6" )
     
     # Assumption: NLDAS is complete, LTER is a subset.
     lt <- LTER[!is.na(LTER[,col]),col]
@@ -65,6 +69,6 @@ LTER_NLDAS_gapper <- function(file_out = '../inst/extdata/LTER_met_gapped.csv'){
   }
   
   val_out[, 7] <- val_out[, 7]*0.001 # mm/day to m/day
-  val_out[,1] <- as.POSIXct(val_out[,1],format = '%Y-%m-%d %H:%M:%S', tz = 'GMT')
+  val_out[,1] <- as.POSIXct(val_out[,1],format = '%Y-%m-%d %H:%M:%S', tz = "Etc/GMT+6")
   write.table(x = val_out, file = file_out,quote = F, sep = ',', row.names = F, col.names = T)
 }
