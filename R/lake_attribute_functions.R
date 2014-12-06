@@ -36,36 +36,44 @@ getBathy	<-	function(site_id){
 #'@description
 #'Returns the surface area for a lake with given ID
 #'
-#'@param site_id The character ID for the requested data
+#'@param site_id The character ID for the requested data (can be vector of ids)
 #'
 #'@return
-#' Lake surface area in meters^2
+#' Lake surface areas in meters^2. NA if no value available
 #' 
 #'@details
-#'TODO
+#'Looks for given site_ids and returns values if availalbe. All site_ids 
+#'are coerced to character regardless of input type.
 #'
 #'
 #'@author 
 #'Jordan Read, Luke Winslow
 #'
 #'@examples
-#'TODO
+#'#Multiple values
+#'getArea(c('10000', '6100'))
+#'
+#'#this should return NA
+#'getArea('asdf')
 #'
 #'@export
-getArea	<-	local({ lookup=NULL; function(site_id){
-	if (is.null(lookup)) { 
-		cat('Caching area info.\n')
-		acre2m2	<-	4046.85642
-		fname = system.file('supporting_files/managed_lake_info.txt', package=packageName())
-		d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"")
-		lookup <<- new.env()
-		
-		for (i in 1:nrow(d)){
-			lookup[[toString(d$WBIC[i])]]	<-	acre2m2*d$acres[i]
-		}
-	}
-	lookup[[site_id]]
-}})
+getArea = function(site_id){
+	
+	site_id = as.character(site_id)
+	
+	##Load data
+	acre2m2	<-	4046.85642
+	fname = system.file('supporting_files/managed_lake_info.txt', package=packageName())
+	d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"", colClasses=c(WBIC='character'))
+	
+	#Lookup
+	vals = merge(data.frame(site_id, order=1:length(site_id)), 
+							 d, by.x='site_id', by.y='WBIC', all.x=TRUE)
+
+	vals = vals[order(vals$order),]
+	
+	return(vals$acres * acre2m2)
+}
 
 #'@title Get estimated lake residence time
 #'@description
@@ -135,55 +143,49 @@ getResidenceTime	<-	local(
 #'
 #'
 #'@export
-getCanopy	<-	local(
-	{ lookup=NULL 
+getCanopy = function(site_id, default.if.null=FALSE, method="aster"){
+	
+	if (tolower(method) == 'aster'){
+			
+		fname = system.file('supporting_files/canopyht_zonal_no_zero_num5_positivehts.csv', 
+												package =packageName())
+		d	= read.table(fname, header=TRUE, sep=',')
 		
-		default.hc	<-	0.5
+		vals = merge(data.frame(site_id, order=1:length(site_id)), 
+								 d, by='site_id', all.x=TRUE)
+		vals = vals[order(vals$order),]
 		
-		function(WBIC,default.if.null=FALSE,method="aster") {
-			if (is.null(lookup)) { 
-        if (tolower(method) == 'aster'){
-          cat('Caching canopy info.\n')
-          fname = system.file('supporting_files/canopyht_zonal_no_zero_num5_positivehts.csv', 
-          										package =packageName())
-          d	<-	read.table(fname, header=TRUE, sep=',')
-          lookup <<- new.env()
-          
-          for (i in 1:nrow(d)){
-            lookup[[toString(d$WBIC[i])]]	<-	d[i,2]
-          }
-        } else if (tolower(method) == "landcover"){
-          cat('Caching landcover info.\n')
-          system.file('supporting_files/buffers_land_cover.csv', package=packageName())
-          d  <-	read.table(fname, header=TRUE, sep=',')
-          lookup <<- new.env()
-          
-          for (i in 1:nrow(d)){
-            #100 urban
-            #110 ag
-            #150 grassland
-            #160 forest 
-            #200 open water
-            #210 wetland
-            table.lc = data.frame("lc_200"=0.5,"lc_160"=11.5,"lc_100"=0.5,"lc_150"=0.65,"lc_110"=0.8,"lc_210"=0.5)
-            val = table.lc[paste("lc_",as.character(d[i,2]),sep='')]
-            lookup[[toString(d$WBDY_WBIC[i])]]	<-	as.numeric(val)
-          }
-        }
-				
-			}
-			wbic.val = lookup[[as.character(WBIC)]]
-
-			if (is.null(wbic.val) & default.if.null==TRUE){
-			  return(default.hc)
-			} else if (is.null(wbic.val) & default.if.null==FALSE){
-			  return(NA)
-			} else {
-			  return(wbic.val)
-			}
-		}
+		return(vals$MEAN_HT)
+		
+	}else if (tolower(method) == "landcover"){
+		
+		fname = system.file('supporting_files/buffers_land_cover.csv', 
+												package=packageName())
+		d = read.table(fname, header=TRUE, sep=',')
+		#100 urban
+		#110 ag
+		#150 grassland
+		#160 forest 
+		#200 open water
+		#210 wetland
+		lc_types = data.frame(majority_cover=c(200, 160,  100, 150,  110, 210),
+													height=        c(0.5, 11.5, 0.5, 0.65, 0.8, 0.5))
+		
+		vals = merge(data.frame(site_id, order=1:length(site_id)),
+								 d, by='site_id', all.x=TRUE)
+		
+		heights = merge(vals, lc_types, all.x=TRUE, by='majority_cover')
+		
+		#merge does not preserve order, re-order before returning
+		heights = heights[order(heights$order),]
+		
+		return(heights$height)
+		
+	}else{
+		stop('Unidentified method ', method, ' for getCanopy [aster, landcover]')
 	}
-)
+}
+
 #'@title Get light attenuation based on long-term trend scenario for a given lake
 #'@description
 #'Calculate the long-term values of light attenuation for a given lake based on
@@ -280,42 +282,44 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
 #'@author 
 #'Luke Winslow, Jordan Read
 #'
+#'@examples
+#'#NA returned when no site with that ID found
+#'getClarity(c('6100', '10000', 'asdf'))
+#'
+#'#Default can be requested as well
+#'getClarity(c('6100','asdf', '10000', 'asdf'), default.if.null=TRUE)
 #'
 #'
 #'@export
-getClarity	<-	local(
-	{ lookup <- NULL
-		default.kd	<-	0.6983965
-		
-		function(WBIC, default.if.null=FALSE){
-			if (is.null(lookup)){
-				cat('Caching clarity info.\n')
-				secchiConv	<-	1.7
-				
-				fname <- system.file('supporting_files/annual_mean_secchi.txt', package=packageName())
-				d	<-	read.table(fname, header=TRUE, sep='\t')
-				
-				lookup <<- new.env()
-				unWBIC	<-	unique(as.character(d$WBIC))
-				for (i in 1:length(unWBIC)){
-					useI	<-	d$WBIC==unWBIC[i]
-					secchi 	<-	d$secchi.m.mean[useI]
-					attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
-					lookup[[unWBIC[i]]] 	<- attenuation.coefficient
-				}
-			}
-			wbic.val = lookup[[as.character(WBIC)]]
-
-			if (is.null(wbic.val) & default.if.null==TRUE){
-				return(default.kd)
-			} else if (is.null(wbic.val) & default.if.null==FALSE){
-			  return(NA)
-			} else {
-        return(wbic.val)
+getClarity = function(site_id, default.if.null=FALSE){
+			
+	default.kd	<-	0.6983965
+	
+	secchiConv	<-	1.7
+	
+	fname <- system.file('supporting_files/annual_mean_secchi.txt', package=packageName())
+	d	<-	read.table(fname, header=TRUE, sep='\t')
+	
+	#lookup <<- new.env()
+	#unWBIC	<-	unique(as.character(d$WBIC))
+	unWBIC = site_id
+	kds    = rep(NA, length(site_id))
+	
+	for (i in 1:length(unWBIC)){
+		useI	<-	d$WBIC==unWBIC[i]
+		if(any(useI)){
+			secchi 	<-	d$secchi.m.mean[useI]
+			attenuation.coefficient	<-	secchiConv/mean(secchi,na.rm=TRUE)
+			kds[i] 	<- attenuation.coefficient
+		}else{
+			if(default.if.null){
+				kds[i] = default.kd
 			}
 		}
 	}
-)
+	return(kds)
+}
+
 
 #'@title Get surface elevation for a given lake
 #'@description
