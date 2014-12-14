@@ -5,11 +5,11 @@ library(plyr)
 
 median.slopes = data.frame()
 cutoff = 5e5
+source('grl.resample.calcs.R')
 
 for(l in 1:1000){
-	source('grl.resample.calcs.R')
 	
-	sampled.slopes = fread('downsampled.slopes.csv')
+	sampled.slopes = data.table(grl.resample.calcs())
 	
 	sampled.slopes = sampled.slopes[!is.na(area),]
 	
@@ -29,9 +29,9 @@ for(l in 1:1000){
 
 
 
-tiff('new.figure.4.2.tiff', width=2000, height=2000, res=450, compression='lzw')
+tiff('new.figure.4.3.tiff', width=2000, height=2000, res=450, compression='lzw')
 i=2
-order = c(2, 2.2, 1, 1.2)
+order = c(2.2, 2, 1.2, 1)
 tmp = median.slopes[,i]
 tmp = sort(tmp)
 plot(rep(order[i], length(tmp)), tmp,  xlim=c(0.8,2.5), ylim=c(-0.05,0.1), 
@@ -43,7 +43,7 @@ points(rep(order[i], length(tmp)), tmp, pch=16, col=rgb(0.4,0.4,0.4,0.1))
 
 for(i in c(1,3)){
 	tmp = median.slopes[,i]
-	points(rep(order[i], length(tmp)), tmp, pch=16, col=rgb(0.5,0,0,0.1))
+	points(rep(order[i], length(tmp)), tmp, pch=16, col=rgb(0.4,0.4,0.4,0.1))
 }
 
 
@@ -53,7 +53,7 @@ medians = unlist(lapply(median.slopes, median))
 means = unlist(lapply(median.slopes, mean))
 gr = rgb(0.5,0.5, 0.5)
 
-order = c(2, 2.2, 1, 1.2)
+order = c(2.2, 2, 1.2, 1)
 col = c('white',gr,'white',gr)
 	
 
@@ -72,11 +72,20 @@ for(i in 1:4){
 par()
 axis(1, at=c(1.1,2.1), labels=c('Shallow\nWaters', 'Deep\nWaters'), mgp = c(0, 1.5, 0))
 legend('topright', legend=c(expression(''<0.5~km^2), expression(''>0.5~km^2)), 
-			 horiz=TRUE, fill=c(rgb(0.4,0.4,0.4), rgb(0.5,0,0)),  bty='n', 
-			 x.intersp=0.2,y.intersp=1.2, adj=c(0,0.25), inset=-0.01)
-points(order, means[1:4], pch=23, cex=1.5, 
+			 horiz=TRUE, pch=c(23,23),  bty='n', 
+			 pt.bg=c(rgb(0.9,0.9,0.9,1),rgb(0.2,0.2,0.2,1)),
+			 x.intersp=0.2,y.intersp=1.2, adj=c(0,0.25), inset=-0.01, 
+			 pt.cex=1.5, lwd=2, lty='blank', seg.len=1)
+
+
+points(order[c(2,4)], means[c(2,4)], pch=23, cex=1.5, 
 			 col=c('black','black','black','black'),
-			 xlab='',xaxt="n", bg=c(rgb(0.5,0,0,1),rgb(0.4,0.4,0.4,1),rgb(0.5,0,0,1),rgb(0.4,0.4,0.4,1)), lwd=2)
+			 xlab='',xaxt="n", bg=c(rgb(0.9,0.9,0.9,1)), lwd=2)
+
+points(order[c(1,3)], means[c(1,3)], pch=23, cex=1.5, 
+			 col=c('black','black','black','black'),
+			 xlab='',xaxt="n", bg=c(rgb(0.2,0.2,0.2,1)), lwd=2)
+
 
 prefix = 'downsamp'
 dev.off()
