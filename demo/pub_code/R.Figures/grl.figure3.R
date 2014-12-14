@@ -5,25 +5,20 @@ library(data.table)
 library(plyr)
 source('sens.confint.mod.R')
 
-bootstrap.estim = matrix(nrow=1000, ncol=5)
-
-
-bins=c(0, 5e5, 1.3e6, 3e6, 6.4e6, 600e6)
-
-
 ## Just a try
 all.med.area = c()
 all.med.slope = c()
 all.index = c()
+source('grl.resample.calcs.R')
 
 for(l in 1:1000){
-	source('grl.resample.calcs.R')
-	all.slopes = fread('downsampled.slopes.csv')
+	all.slopes = data.table(grl.resample.calcs())
+	#all.slopes = fread('downsampled.slopes.csv')
 	
-	meandt = ddply(all.slopes,'wbic',function(df)mean(df$dt))
+	#meandt = ddply(all.slopes,'wbic',function(df)mean(df$dt))
 	#meandt = meandt#[meandt$V1 > 5,]
-	all.slopes = all.slopes[wbic%in%sample(unique(all.slopes$wbic),100), ]
-	nrow(meandt)
+	all.slopes = all.slopes[wbic%in%sample(unique(all.slopes$wbic),70), ]
+	#nrow(meandt)
 	
 	#all.slopes = all.slopes[wbic%in%meandt$wbic, ]
 	
@@ -48,7 +43,7 @@ for(l in 1:1000){
 	cat(l,'\n')
 }
 
-tiff('new.figure.3.2.tiff', width=2000, height=1500, res=300, compression='lzw')
+tiff('figure.3.2.tiff', width=2000, height=1500, res=300, compression='lzw')
 
 plot(all.med.area,all.med.slope, log='x', xaxt='n', pch=20, bg=rgb(0.5,0.5,0.5, 0.025), col=rgb(0.5,0.5,0.5, 0.05),
 		 ylab=expression(Median~Trend~(degree*C~yr^-1)), xlab=expression(Median~Lake~Area~(km^2)), cex=0.5)
