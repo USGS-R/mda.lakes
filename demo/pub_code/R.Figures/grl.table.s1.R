@@ -58,7 +58,7 @@ metrics$missingyear[metrics$missingyear < 0] = 0
 names(metrics) = c('WBIC', '# Sampling Events', '# Samples per Year', 'Earliest Year', 'Latest Year', 'N Years Unsampled (from 1990-2012)', '# Individual Observations')
 
 
-write.table(metrics, 'lake.sampling.metrics.tsv', sep='\t', 
+write.table(metrics, 'lake.sampling.metrics.csv', sep=',', 
 						row.names=FALSE)
 
 
