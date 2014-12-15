@@ -1,8 +1,11 @@
-#'@importFrom lubridate parse_date_time2
+
 #'@importFrom plyr ddply
 #'@export
 load_gdp_file = function(fname, tz.offset=0){
 	
+	if(!require(lubridate)){
+		stop('need to install lubridate for load_gdp_file')
+	}
 	
 	## open file
 	fid = file(fname, open='r')

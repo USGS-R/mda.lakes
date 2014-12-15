@@ -6,11 +6,14 @@
 #'
 #'@return The list with finished entries removed
 #'
-#'@import geoknife
 #'
 #'@export
 met_check_download_gdp = function(gdp_list, dest_path='.'){
 
+	if(!require(geoknife)){
+		stop('Geoknife must be installed for met_drivers functions')
+	}
+	
 	if(length(gdp_list) == 0){
 		return(list())
 	}

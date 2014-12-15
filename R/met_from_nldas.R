@@ -14,6 +14,10 @@ qsat = function(Ta, Pa){
 #'@export
 met_from_nldas = function(data_dir, output_dir, append_files=TRUE, overwrite=FALSE, tz.offset=0){
 
+	if(!require(lubridate)){
+		stop('lubridate must be installed for met_from* functions')
+	}
+	
 	precip 	= load_gdp_file(file.path(data_dir, 'apcpsfc.tsv'), tz.offset=tz.offset)
 	dwLW 	= load_gdp_file(file.path(data_dir, 'dlwrfsfc.tsv'), tz.offset=tz.offset)
 	dwSW 	= load_gdp_file(file.path(data_dir, 'dswrfsfc.tsv'), tz.offset=tz.offset)
