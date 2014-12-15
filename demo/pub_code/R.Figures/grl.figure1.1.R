@@ -40,7 +40,7 @@ wbic.slopes = wbic.slopes[order(wbic.slopes$n, decreasing=TRUE),]
 
 wbic.slopes = merge(wbic.slopes, confint) #merge is.sig into it
 
-tiff('grl.figure.1.2.tiff', width=1600, height=2100, res=300, compression='lzw')
+tiff('grl.figure.1.2.tiff', width=2400, height=3150, res=450, compression='lzw')
 
 plot(wi$Lon, wi$Lat, type='l', lwd=2, bty='n', ylab='Lat', xlab='Lon', col='grey')
 
@@ -84,8 +84,4 @@ luke.legend("topright", fill = my.col, title=expression(Trend~degree*C~yr^-1),
 
 dev.off()
 
-
-
-confint = ddply(all.slopes, 'week',
-								function(df){sens.confint.mod(df$slopes, pval=0.95)})
 
