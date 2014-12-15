@@ -1,10 +1,14 @@
 
 ################################################################################
 
-#'@importFrom lubridate parse_date_time2
+
 #'@importFrom plyr ddply
 #'@export
 met_from_hostetler = function(data_dir, output_dir, append_files=FALSE, overwrite=TRUE, tz.offset=0){
+	
+	if(!require(lubridate)){
+		stop('lubridate must be installed for met_from* functions')
+	}
 	
 	precip 	= load_gdp_file(file.path(data_dir, 'RT'), tz.offset=tz.offset)
 	dwLW 	= load_gdp_file(file.path(data_dir, 'LWD'), tz.offset=tz.offset)
