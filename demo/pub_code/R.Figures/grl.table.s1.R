@@ -45,17 +45,22 @@ wtr = fread('../../../inst/supporting_files/wtemp.obs.tsv')
 
 wbics = unique(grl.resample.calcs(no.resamp=TRUE)$wbic)
 
-wtr = wtr[WBIC%in%wbics, ]
+#wtr = wtr[WBIC%in%wbics, ]
 
 wtr[,DATETIME:= as.POSIXct(DATETIME)]
 wtr[,YEAR:=as.POSIXlt(DATETIME)$year+1900]
 wtr = wtr[YEAR >= 1990,]
 
 metrics = ddply(wtr, 'WBIC', metrics.calc)
-metrics = metrics[order(metrics$nevents,decreasing = TRUE),]
 metrics$missingyear[metrics$missingyear < 0] = 0
 
-names(metrics) = c('WBIC', '# Sampling Events', '# Samples per Year', 'Earliest Year', 'Latest Year', 'N Years Unsampled (from 1990-2012)', '# Individual Observations')
+metrics$included = 'No'
+metrics$included[metrics$WBIC%in%wbics] = 'Yes'
+metrics = metrics[order(metrics$nevents, decreasing = TRUE),]
+metrics = metrics[order(metrics$included, decreasing = TRUE),]
+
+
+names(metrics) = c('WBIC', '# Sampling Events', '# Samples per Year', 'Earliest Year', 'Latest Year', 'N Years Unsampled (from 1990-2012)', '# Individual Observations', 'In Analysis')
 
 
 write.table(metrics, 'lake.sampling.metrics.csv', sep=',', 
