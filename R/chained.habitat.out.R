@@ -2,9 +2,9 @@
 
 chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   
-  require(stringr)
-  require(rGLM)
-  require(ncdf4)
+  if(!require(stringr) | require(glmtools)){
+  	stop('Need stringr and glmtools for chained.habitat.calc')
+  }
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
   years = str_extract(basename(nc.files),"[0-9]+")
