@@ -80,7 +80,7 @@ populate_base_lake_nml = function(site_id){
 	#min_layer_thick & max_
 	
 	#clarity
-	nml_obj = set_nml(nml_obj, 'Kw', getClarity(site_id))
+	nml_obj = set_nml(nml_obj, 'Kw', getClarity(site_id, default.if.null=TRUE))
 	
 	
 	#lake basin
