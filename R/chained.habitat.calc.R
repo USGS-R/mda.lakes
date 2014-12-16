@@ -125,20 +125,23 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     misc.out[['spring_days_in_10.5_15.5']] = c(misc.out[['spring_days_in_10.5_15.5']],
                                                getDaysBetweenT(wtr[wtr$DateTime < jun1, ], 10.5, 15.5))
     
-    #elevations = getElevGLM(wtr)
-    depths = get.offsets(wtr)
-    depths = depths[2:length(depths)]
-    tmp = getEpiMetaHypo.GLM(wtr, depths)
+		#Use rLA, headers must be lowercase
+    la.wtr = wtr
+		names(la.wtr) = tolower(names(wtr))
+		
+    t.d = ts.thermo.depth(la.wtr)
+    m.d = ts.meta.depths(la.wtr)
+    
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
     
-    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$SthermoD[start.end[1]:start.end[2]], na.rm=TRUE))
-    misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(tmp$metaTopD[start.end[1]:start.end[2]], na.rm=TRUE))
+    misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(t.d$thermo.depth[start.end[1]:start.end[2]], na.rm=TRUE))
+    misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(m.d$top[start.end[1]:start.end[2]], na.rm=TRUE))
     
     ## Get epi and hypo volumes
     water.level = water.level.glm(GLMnc)
     
-    meta.top.heights = water.level - tmp$metaTopD
-    meta.bot.heights = water.level - tmp$metaBotD
+    meta.top.heights = water.level - m.d$top
+    meta.bot.heights = water.level - m.d$bottom
     
     epi.vols = volsAboveHeight.GLM(GLMnc, meta.top.heights)
     hyp.vols = volsBelowHeight.GLM(GLMnc, meta.bot.heights)

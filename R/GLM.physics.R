@@ -311,69 +311,6 @@ getUnmixedStartEnd <-  function(GLMwtr, GLMice, minStrat, arr.ind=FALSE){
 }
 
 ################################################################################
-# GetEpiMetaHypo.GLM
-#
-# Get EpiMetaHypo layer depths from the water temperature profile.
-# this will probably be slow
-################################################################################
-
-getEpiMetaHypo.GLM <- function(GLMwtr, depths){
-  require(rLakeAnalyzer)
-  
-	n = nrow(GLMwtr)
-	metaTopD = vector(mode="double", length=n)
-	SthermoD = vector(mode="double", length=n)
-	metaBotD = vector(mode="double", length=n)
-	
-	if(is.data.frame(GLMwtr)){
-		GLMwtr = as.matrix(GLMwtr[,-1])
-		GLMwtr = unname(GLMwtr)
-	}
-	
-	for(i in 1:n){
-    #browser()
-		#Grab the temps at that depth
-		wtr = GLMwtr[i,]
-		valsI = which(!is.na(wtr), arr.ind=TRUE)
-		
-		iter_wtr = wtr[valsI]
-		iter_depths = depths[valsI]
-		iter_depths = iter_depths - min(iter_depths)
-		
-    ##Ok, just here temporarily
-    oldD = iter_depths
-    oldT = iter_wtr
-    
-    #smoothed = smooth.spline(iter_depths,iter_wtr, df=25)
-    #iter_depths = smoothed$x
-    #iter_wtr = smoothed$y
-  
-  
-		SthermoD[i] = thermo.depth(iter_wtr, iter_depths, seasonal=TRUE)
-		if(length(depths) != length(unique(depths))){
-			stop('argh')
-		}
-		
-		#list(botDepth = metaBot_depth, topDepth = metaTop_depth)
-		
-		tmpMeta = meta.depths(iter_wtr, iter_depths)
-		metaBotD[i] = tmpMeta[2]
-		metaTopD[i] = tmpMeta[1]
-		
-    #plot(oldT, oldD)
-		#lines(iter_wtr,iter_depths)
-		
-		#lines(c(min(iter_wtr,na.rm=TRUE),max(iter_wtr,na.rm=TRUE)),c(1,1)*metaBotD[i])
-		#lines(c(min(iter_wtr,na.rm=TRUE),max(iter_wtr,na.rm=TRUE)),c(1,1)*metaTopD[i])
-		#print(i)
-	  #browser()
-		
-	}
-	
-	list(metaTopD = metaTopD, SthermoD = SthermoD, metaBotD = metaBotD)
-}
-
-################################################################################
 # volInTemp.GLM
 #
 # Calculates the total volume within a temperature range.
