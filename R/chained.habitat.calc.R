@@ -1,8 +1,9 @@
-## Code to calculate important derivatives for chained runs
 
+
+#'@export
 chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   
-  if(!require(stringr) | require(glmtools)){
+  if(!(require(stringr) & require(glmtools))){
   	stop('Need stringr and glmtools for chained.habitat.calc')
   }
   
@@ -48,69 +49,22 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   
   bad = rep(FALSE, length(years))
   
-  empir.ice = read.table(file.path(run.path, 'icecal.in.tsv'), sep='\t', header=TRUE)
-  empir.ice$DATE = as.POSIXct(empir.ice$DATE)
-  
   #used for calcs which need the previous year's data available
   previous.wtr = NA 
   
   for(i in 1:length(nc.files)){
     
-    #Open the NC file and get data frame of wtr temp
-    GLMnc = nc_open(nc.files[i], readunlim=FALSE)
-    test.get = ncvar_get(GLMnc,'temp')
-    
-    #if(length(dim(test.get)) < 2){
-      #bad[i] = TRUE
+    #get data frame of wtr temp
+    GLMnc = nc.files[i]
       
-      #next
-    #}
-      
-    wtr = getGLMwtr(GLMnc)
-    ice = getGLMice(GLMnc)
-    surfT = getSurfaceT(wtr)
+    wtr = get_temp(GLMnc, reference='surface')
+    ice = get_ice(GLMnc)
+    surfT = get_temp(GLMnc, reference='surface', z_out=0)[,2]
     
-    raw.wtr = ncvar_get(GLMnc, 'temp')
-    run.time = getTimeGLMnc(GLMnc)
-    
-    
-    #Drop the first 3 days
-    wtr = wtr[4:nrow(wtr), , drop=FALSE]
-    ice = ice[4:nrow(wtr),]
-    surfT = surfT[4:nrow(wtr)]
-    raw.wtr = raw.wtr[,4:ncol(raw.wtr), drop=FALSE] #this is a matrix with a different orientation
-    run.time = run.time[4:length(run.time)]
-    
-    censor.days = 3  #used for later functions to censor burn-in days
-    
-    #Make sure temps are in a sane range
-    if(any(raw.wtr > 50, na.rm=TRUE) | any(raw.wtr < -20, na.rm=TRUE)){
-      
-      cat('Unreasonable temp values found:', lakeid, '\n')
-      nc_close(GLMnc)
-      bad[i] = TRUE
-      next
-    }
-    
-    #Ok, sometimes the first modeled day gives a really bad temp value
-    # at the surface. Drop those!
-    if(any(raw.wtr[,1] > 13, na.rm=TRUE)){
-      cat('Unreasonable first day temps found:', lakeid, '\n')
-      nc_close(GLMnc)
-      bad[i] = TRUE
-      next
-    }
-    
-    
-    #Make sure the last date is within 2 days of one of the ice-ons
-    # If it isn't, then the model probably failed early
-    if( !any(abs(difftime(run.time[length(run.time)],as.POSIXct(getIceOn(lakeid, as.numeric(years[i]) )), units='days')) < 2.1) ){
-    	cat('Wrong ice-off date:', lakeid, '\n')
-    	nc_close(GLMnc)
-    	bad[i] = TRUE
-    	next
-    }
-    
+    raw.wtr = get_raw(GLMnc, 'temp')
+    run.time = wtr[,1]
+
+    censor.days = 0
     
     #Iterate through all ranges and store in name-indexed list
     for(j in 1:nrow(vol.tmp.ranges)){
@@ -121,7 +75,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
       tmp = volInTemp.GLM(GLMnc, vol.tmp.ranges[j,1], vol.tmp.ranges[j,2], censor.days=censor.days)
       
       #add to vector
-      volumes.out[[vol.name]] = c(volumes.out[[vol.name]], sum(tmp[[2]])*1000)
+      volumes.out[[vol.name]] = c(volumes.out[[vol.name]], sum(tmp)*1000)
     }
     
     #Now do vertical length of water column in temperature range.
@@ -171,8 +125,9 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     misc.out[['spring_days_in_10.5_15.5']] = c(misc.out[['spring_days_in_10.5_15.5']],
                                                getDaysBetweenT(wtr[wtr$DateTime < jun1, ], 10.5, 15.5))
     
-    elevations = getElevGLM(wtr)
-    depths = max(elevations) - elevations
+    #elevations = getElevGLM(wtr)
+    depths = get.offsets(wtr)
+    depths = depths[2:length(depths)]
     tmp = getEpiMetaHypo.GLM(wtr, depths)
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
     
@@ -181,17 +136,20 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     ## Get epi and hypo volumes
     water.level = water.level.glm(GLMnc)
-    water.level = water.level[4:length(water.level)] #Truncate damn 3 days at start
     
     meta.top.heights = water.level - tmp$metaTopD
     meta.bot.heights = water.level - tmp$metaBotD
     
-    epi.vols = volsAboveHeight.GLM(GLMnc, c(rep(NA,3), meta.top.heights))
-    hyp.vols = volsBelowHeight.GLM(GLMnc, c(rep(NA,3), meta.bot.heights))
+    epi.vols = volsAboveHeight.GLM(GLMnc, meta.top.heights)
+    hyp.vols = volsBelowHeight.GLM(GLMnc, meta.bot.heights)
     
-    mean.epi.vol = mean(epi.vols[start.end[1]:start.end[2]], na.rm=TRUE)
-    mean.hyp.vol = mean(hyp.vols[start.end[1]:start.end[2]], na.rm=TRUE)
-    
+    if(diff(start.end) < 1){
+    	mean.epi.vol = NA
+    	mean.hyp.vol = NA
+    }else{
+    	mean.epi.vol = mean(epi.vols[start.end[1]:start.end[2]], na.rm=TRUE)
+    	mean.hyp.vol = mean(hyp.vols[start.end[1]:start.end[2]], na.rm=TRUE)
+    }
     
     misc.out[['mean.epi.vol']] = c(misc.out[['mean.epi.vol']], mean.epi.vol)
     misc.out[['mean.hyp.vol']] = c(misc.out[['mean.hyp.vol']], mean.hyp.vol)
@@ -204,8 +162,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     misc.out[['GDD_wtr_5c']] = c(misc.out[['GDD_wtr_5c']], sum(dd5[dd5 > 0], na.rm=TRUE))
     misc.out[['GDD_wtr_10c']] = c(misc.out[['GDD_wtr_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
     
-    vols = ncvar_get(GLMnc,'Tot_V')
-    vols = vols[c(-1,-2,-3)]
+    vols = get_raw(GLMnc,'Tot_V')
     
     
     #Units are in ML, so 1ML = 1000 m^3
@@ -234,8 +191,6 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     previous.wtr = wtr
     
-    #Cleanup this memory hog
-    nc_close(GLMnc)
     cat("Vols calculated", years[i], '\n')
   }
   
@@ -258,7 +213,6 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   }
   misc.names = names(misc.out)
   for(i in 1:length(misc.names)){
-    
     fOutput[[misc.names[i]]] = misc.out[[misc.names[i]]]
   }
   

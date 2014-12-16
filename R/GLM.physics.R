@@ -381,20 +381,20 @@ getEpiMetaHypo.GLM <- function(GLMwtr, depths){
 ################################################################################
 volInTemp.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
   
-  layVol = ncvar_get(GLMnc,"V")
-  layTemp = ncvar_get(GLMnc,"temp")
+  layVol = get_raw(GLMnc,"V")
+  layTemp = get_raw(GLMnc,"temp")
   
   layVol = layVol[, censor.days:ncol(layVol)]
   layTemp = layTemp[, censor.days:ncol(layTemp)]
   
   volumes = vector(mode="double", length=ncol(layVol))*NaN
-  times = getTimeGLMnc(GLMnc)
+  
   
   for(i in 1:length(volumes)){
     volumes[i] = sum(layVol[layTemp[,i] >= lowT & layTemp[,i] <= highT ,i], na.rm=TRUE)
   }
   
-  return(list(times,volumes))
+  return(volumes)
 }
 
 
@@ -406,8 +406,8 @@ volInTemp.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
 ################################################################################
 heightInRange.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
   
-  layZ = ncvar_get(GLMnc,"z")
-  layTemp = ncvar_get(GLMnc,"temp")
+  layZ = get_raw(GLMnc,"z")
+  layTemp = get_raw(GLMnc,"temp")
   
   layZ = layZ[, censor.days:ncol(layZ)]
   layTemp = layTemp[, censor.days:ncol(layTemp)]
@@ -432,9 +432,9 @@ heightInRange.GLM <- function(GLMnc, lowT, highT, censor.days = 0){
 ################################################################################
 volsAboveHeight.GLM <- function(GLMnc, heights){
   
-  layZ = ncvar_get(GLMnc,"z")
+  layZ = get_raw(GLMnc,"z")
   layZ[layZ > 1e10] = NA
-  layVol = ncvar_get(GLMnc,"V")
+  layVol = get_raw(GLMnc,"V")
   
   volumes = rep(NaN, length(heights))
   
@@ -456,9 +456,9 @@ volsAboveHeight.GLM <- function(GLMnc, heights){
 ################################################################################
 volsBelowHeight.GLM <- function(GLMnc, heights){
   
-  layZ = ncvar_get(GLMnc,"z")
+  layZ = get_raw(GLMnc,"z")
   layZ[layZ > 1e10] = NA
-  layVol = ncvar_get(GLMnc,"V")
+  layVol = get_raw(GLMnc,"V")
   
   volumes = rep(NaN, length(heights))
   
@@ -476,11 +476,7 @@ volsBelowHeight.GLM <- function(GLMnc, heights){
 #Should go in GLM.nc.R in rGLM at some point
 water.level.glm = function(glm.nc){
   
-  if(!is(glm.nc, "ncdf4")){
-    stop("Must supply glm.nc object. (from nc_open)")
-  }
-  
-  sim.z = ncvar_get(glm.nc,'z')
+  sim.z = get_raw(glm.nc,'z')
   sim.z[sim.z > 1e10] = NA
   
   z.out = apply(sim.z,2,max, na.rm=TRUE)
