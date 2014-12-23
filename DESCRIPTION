@@ -11,7 +11,8 @@ Imports:
     glmtools,
     jsonlite,
     GLMr,
-		httr, 
+    httr, 
+    rLakeAnalyzer (>=1.5)
 Enhances:
 		geoknife
 Description: More about what it does (maybe more than one line)
