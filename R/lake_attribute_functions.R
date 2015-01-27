@@ -695,7 +695,7 @@ getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
 #'@param site_id The character ID for the requested data
 #'@param year The year for which you need the ice-off date
 #'@return
-#' Max observed depth in meters
+#'
 #'@details
 #'TODO
 #'
