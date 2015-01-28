@@ -81,13 +81,14 @@ getArea = function(site_id){
 #'
 #'@param site_id The character ID for the requested data
 #'
-#'@return
-#' Estimated residence time in days
-#'@details
+#'@return 
+#'Estimated residence time in days
+#'
+#'@details 
 #'TODO
 #'
-#'@references
-#'TODO: Data source needed
+#'@references 
+#'TODO Data source needed
 #'
 #'@author 
 #'Luke Winslow, Jordan Read
@@ -694,7 +695,7 @@ getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
 #'
 #'@param site_id The character ID for the requested data
 #'@param year The year for which you need the ice-off date
-#'@return
+#'@return A vector of ice off dates (as character %Y-%m-%d) with the same length as supplied \code{site_id}
 #'
 #'@details
 #'TODO
@@ -706,16 +707,16 @@ getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
 #'
 #'
 #'@export
-getIceOff	<-	function(WBIC,year) {
+getIceOff	<-	function(site_id, year) {
 	# the ice off for each lake for a given year
 	# ice off is assumed to happen during the same calendar year
 
 	fname <- system.file('supporting_files/empirical.ice.tsv', package=packageName())
 	empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
 	
-	ice.off	<-	vector(length=length(WBIC))
-	for (j in 1:length(WBIC)){
-		use.i	<-	WBIC[j]==empir.ice$WBIC & empir.ice$ON.OFF=="off" & substr(empir.ice$DATE,1,4)==as.character(year)
+	ice.off	<-	vector(length=length(site_id))
+	for (j in 1:length(site_id)){
+		use.i	<-	site_id[j]==empir.ice$WBIC & empir.ice$ON.OFF=="off" & substr(empir.ice$DATE,1,4)==as.character(year)
 		if (any(use.i)){
 			pos.results	<-	empir.ice$DATE[use.i]
 			ice.off[j]	<-	pos.results[1] # warn if length(pos.results)==2?
