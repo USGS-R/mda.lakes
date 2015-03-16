@@ -12,7 +12,7 @@ Imports:
     jsonlite,
     GLMr,
     httr,
-    rLakeAnalyzer (>=1.5)
+    rLakeAnalyzer (>= 1.4.2)
 Enhances: geoknife
 Description: More about what it does (maybe more than one line)
 License: LICENSE file
