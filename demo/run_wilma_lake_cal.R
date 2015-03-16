@@ -1,14 +1,14 @@
 # run one WiLMA lake (Mendota) using new model running technique
 
-wbic = 805400
+wbic = 977600
 lake_id = as.character(wbic)
 
 library(mda.lakes)
 library(glmtools)
 
 prep_run_chained_glm_secchi(site_id = lake_id, 
-					path = '.',
-					start = as.POSIXct('1979-01-01'), 
+					path = 'd:/test',
+					start = as.POSIXct('1990-01-01'), 
 					end = as.POSIXct('2012-12-30'),
 					secchi_trend = 0,
 					nml_args=list(
@@ -19,6 +19,9 @@ prep_run_chained_glm_secchi(site_id = lake_id,
 
 ##Now combine modeled and calibrated data and output
 sims = Sys.glob('output*.nc')
+
+plot_temp(sims[29])
+
 
 obs = read.table(system.file('supporting_files/wtemp.obs.tsv', package = 'mda.lakes'), 
 					 sep='\t', header=TRUE, as.is=TRUE)

@@ -6,19 +6,24 @@
 getArea(site_id)
 }
 \arguments{
-\item{site_id}{The character ID for the requested data}
+\item{site_id}{The character ID for the requested data (can be vector of ids)}
 }
 \value{
-Lake surface area in meters^2
+Lake surface areas in meters^2. NA if no value available
 }
 \description{
 Returns the surface area for a lake with given ID
 }
 \details{
-TODO
+Looks for given site_ids and returns values if availalbe. All site_ids
+are coerced to character regardless of input type.
 }
 \examples{
-TODO
+#Multiple values
+getArea(c('10000', '6100'))
+
+#this should return NA
+getArea('asdf')
 }
 \author{
 Jordan Read, Luke Winslow

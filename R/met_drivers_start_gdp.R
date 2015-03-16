@@ -16,12 +16,14 @@
 #'
 #'@author Luke Winslow, Jordan Read
 #'
-#'@import geoknife
 #'
 #'@export
 met_drivers_start_gdp <- function(service='regclim:ncep',
 																start=as.POSIXct('1990-01-01'), end=as.POSIXct('1990-01-03')){
 
+	if(!require(geoknife)){
+		stop('Geoknife must be installed for met_drivers functions')
+	}
 	
 	#precip  apcpsfc.tsv
 	#dwLW    dlwrfsfc.tsv

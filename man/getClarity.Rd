@@ -3,12 +3,12 @@
 \alias{getClarity}
 \title{Get light attenuation coefficient for a given lake}
 \usage{
-getClarity(WBIC, default.if.null = FALSE)
+getClarity(site_id, default.if.null = FALSE)
 }
 \arguments{
-\item{default.if.null}{boolean indicating if default Kd should be used if lake has no observations}
-
 \item{site_id}{The character ID for the requested data}
+
+\item{default.if.null}{boolean indicating if default Kd should be used if lake has no observations}
 }
 \value{
 Light attenuation coefficient in m^-1
@@ -18,6 +18,13 @@ Returns the light attenuation coefficient for a lake with the given ID
 }
 \details{
 TODO
+}
+\examples{
+#NA returned when no site with that ID found
+getClarity(c('6100', '10000', 'asdf'))
+
+#Default can be requested as well
+getClarity(c('6100','asdf', '10000', 'asdf'), default.if.null=TRUE)
 }
 \author{
 Luke Winslow, Jordan Read

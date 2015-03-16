@@ -60,7 +60,7 @@ prep_run_chained_glm <- function(site_id, path, start=as.POSIXct('2008-04-01'),
 		nml_obj = set_nml(nml_obj, 'stop', format(as.POSIXct(on_date), '%Y-%m-%d %H:%M:%S'))
 		nml_obj = set_nml(nml_obj, 'out_fn', paste0('output', year))
 		
-		nml_out_path = file.path(path, "glm.nml")
+		nml_out_path = file.path(path, "glm2.nml")
 		write_nml(nml_obj, nml_out_path)
 		out_vals[i] = run_glm(path)
 	}

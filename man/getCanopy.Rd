@@ -3,14 +3,14 @@
 \alias{getCanopy}
 \title{Get surrounding canopy height for a given lake}
 \usage{
-getCanopy(WBIC, default.if.null = FALSE, method = "aster")
+getCanopy(site_id, default.if.null = FALSE, method = "aster")
 }
 \arguments{
+\item{site_id}{The character ID for the requested data}
+
 \item{default.if.null}{Default value to return if canopy height is unknown}
 
 \item{method}{Canopy height estimation method [aster or landcover]}
-
-\item{site_id}{The character ID for the requested data}
 }
 \value{
 Canopy height above lake surface level in meters
