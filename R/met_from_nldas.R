@@ -100,7 +100,7 @@ met_from_nldas = function(data_dir, output_dir, append_files=TRUE, overwrite=FAL
 		#Format time as string in the correct way
 		out.data$time = format(out.data$time,'%Y-%m-%d %H:%M:%S')
 		
-		fout = file.path(out_dir,paste0('WBIC_', lakeids[i], '.csv'))
+		fout = file.path(output_dir, paste0('WBIC_', lakeids[i], '.csv'))
 		
 		if(append_files){
 			#append new year to data
