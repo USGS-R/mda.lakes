@@ -115,18 +115,30 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
 		misc.out[['mean_schmidt_stability_July']] = c(misc.out[['mean_schmidt_stability_July']], 
 																									mean(s.s[s.s$datetime >= jul1 & s.s$datetime <=jul31,2], na.rm=TRUE))
 		
-		
+		################################################################################
+		## Thermo Depth calcs
+		################################################################################
 		tmp = ts.thermo.depth(la.wtr, seasonal=TRUE, na.rm=TRUE)
 		start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
+		
+		misc.out[['SthermoD_mean_JAS']] = c(misc.out[['SthermoD_mean_JAS']], mean(tmp[tmp$datetime >= jul1 & tmp$datetime <=sep30, 2], na.rm=TRUE))
 		
 		misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(tmp$thermo.depth[start.end[1]:start.end[2]], na.rm=TRUE))
 		
 		
+		################################################################################
+		## Whole lake average calcs
+		################################################################################
 		depths = get.offsets(la.wtr)
 		
 		whole.lake.temps = ts.layer.temperature(la.wtr, 0, max(depths), bathy, na.rm=TRUE)
 		
 		misc.out[['lake_average_temp']] = c(misc.out[['lake_average_temp']], mean(whole.lake.temps[,2], na.rm=TRUE))
+		
+		misc.out[['peak_lake_average_temp']] = c(misc.out[['peak_lake_average_temp']], max(whole.lake.temps[,2], na.rm=TRUE))
+		
+		misc.out[['lake_average_temp_JAS']] = c(misc.out[['lake_average_temp_JAS']], 
+										mean(whole.lake.temps[whole.lake.temps$datetime >= jul1 & whole.lake.temps$datetime <= sep30,2], na.rm=TRUE))
 		
 		tmp = ts.meta.depths(la.wtr, seasonal=TRUE, na.rm=TRUE)
 		
@@ -138,6 +150,15 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
 		
 		misc.out[['mean_surf_temp']] = c(misc.out[['mean_surf_temp']], mean(surfT[,2]))
 		misc.out[['mean_bottom_temp']] = c(misc.out[['mean_bottom_temp']], mean(floorT[,2]))
+		
+		misc.out[['peak_surf_temp']] = c(misc.out[['peak_surf_temp']], max(surfT[,2], na.rm=TRUE))
+		misc.out[['peak_bottom_temp']] = c(misc.out[['peak_bottom_temp']], max(floorT[,2], na.rm=TRUE))
+		
+		misc.out[['mean_surf_temp_JAS']] = c(misc.out[['mean_surf_temp_JAS']], mean(surfT[surfT[,1] >= jul1 & surfT[,1] <= sep30,2]))
+		misc.out[['mean_bottom_temp_JAS']] = c(misc.out[['mean_bottom_temp_JAS']], mean(floorT[floorT[,1] >= jul1 & floorT[,1] <= sep30,2]))
+		
+		
+		whole.lake.temps$datetime >= jul1 & whole.lake.temps$datetime <= sep30
 		
 		misc.out[['mean_bottom_temp_365']] = c(misc.out[['mean_bottom_temp_365']],
 																					 mean(c(floorT[,2], rep(4, 365 - length(floorT[,2])))))

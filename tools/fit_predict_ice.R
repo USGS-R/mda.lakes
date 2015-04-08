@@ -10,7 +10,7 @@ source("Libraries/GLM.functions.R")
 ################################################################################
 ## Load validation ice on/off data
 ################################################################################
-ice_data = read.table('../supporting files/Validation/ice_data.csv', header=TRUE, sep=',', as.is=TRUE)
+ice_data = read.table('../supporting_files/Validation/ice_data.csv', header=TRUE, sep=',', as.is=TRUE)
 
 ice_on = ice_data[,c('WBIC','iceon_year', 'iceon_month', 'iceon_day')]
 ice_on = ice_on[complete.cases(ice_on), ]
