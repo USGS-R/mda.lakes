@@ -2,13 +2,14 @@
 #'@title Calculate optical thermal habitat using temp and light thresholds 
 #'
 #'@inheritParams area_light_temp_threshold
+#'@param interp_daily Interpolate
 #'
 #'@return data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
 #'for areas of each habitat type (with opti_therm_hab being the overlap of both)
 #'
 #'
 #'@export
-opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic"){
+opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thresh=c(0,25), interp_daily=FALSE, area_type="benthic"){
 	
 	nml = read_nml(nml_file)
 	
