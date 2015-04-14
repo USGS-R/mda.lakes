@@ -2,18 +2,21 @@
 #'@title Calculate optical thermal habitat using temp and light thresholds 
 #'
 #'@inheritParams area_light_temp_threshold
-#'@param interp_daily Interpolate
+#'@param interp_hour Interpolate to hourly data (and )
 #'
 #'@return data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
-#'for areas of each habitat type (with opti_therm_hab being the overlap of both)
+#'for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
+#'m^2*days. Divide by the number of days in the data to 
 #'
 #'
 #'@export
-opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thresh=c(0,25), interp_daily=FALSE, area_type="benthic"){
+opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE){
 	
 	nml = read_nml(nml_file)
 	
 	kd = get_nml_value(nml, 'Kw')
+	lat = get_nml_value(nml, 'latitude')
+	lon = get_nml_value(nml, 'longitude')
 	
 	#get hypso data and interp to standard resolution
 	hypso = get_hypsography(nml)
@@ -25,9 +28,35 @@ opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thr
 	
 	io = get_var(nc_file, 'I_0')
 	
-	light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type)
-	temp_alone  = area_temp_threshold(wtr, wtr_thresh, hypso, area_type)
-	light_temp  = area_light_temp_threshold(wtr, kd, io[,2], irr_thresh, wtr_thresh, hypso, area_type)
+	#Now, if we are going to interp this, we need to interp io and wtr to at least hourly or so
+	if(interp_hour){
+		io = create_irr_day_cycle(lat,lon, dates=io[,1], irr_mean = io[,2], by='hour')
+		
+		#I really hate that I have to do this, but I need to ensure it is UTC for the later approx stage
+		wtr[,1] = as.POSIXct(format(wtr[,1], '%Y-%m-%d'), tz='UTC')
+		
+		new_wtr = data.frame(datetime=io[,1])
+		for(i in 2:ncol(wtr)){
+			colname = names(wtr)[i]
+			if(sum(is.na(wtr[, colname])) < 2){
+				new_wtr[,colname] = rep(NA, nrow(new_wtr))
+			}
+			new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1])$y
+		}
+		wtr = new_wtr
+		
+		#note, the division by 24, want it in m^2*days (not hours)
+		light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type)/24
+		temp_alone  = area_temp_threshold(wtr, wtr_thresh, hypso, area_type)/24
+		light_temp  = area_light_temp_threshold(wtr, kd, io[,2], irr_thresh, wtr_thresh, hypso, area_type)/24
+		
+	}else{
+		light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type)
+		temp_alone  = area_temp_threshold(wtr, wtr_thresh, hypso, area_type)
+		light_temp  = area_light_temp_threshold(wtr, kd, io[,2], irr_thresh, wtr_thresh, hypso, area_type)
+	}
+	
+	
 	
 	return(data.frame(opti_hab=light_alone, therm_hab=temp_alone, opti_therm_hab=light_temp))
 }

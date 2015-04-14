@@ -5,11 +5,15 @@
 \title{Calculate optical thermal habitat using temp and light thresholds}
 \usage{
 opti_thermal_habitat(nc_file, nml_file, irr_thresh = c(0, 2000),
-  wtr_thresh = c(0, 25), area_type = "benthic")
+  wtr_thresh = c(0, 25), area_type = "benthic", interp_hour = FALSE)
+}
+\arguments{
+\item{interp_hour}{Interpolate to hourly data (and )}
 }
 \value{
 data.frame with three columns. opti_hab, therm_hab, opti_therm_hab
-for areas of each habitat type (with opti_therm_hab being the overlap of both)
+for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
+m^2*days. Divide by the number of days in the data to
 }
 \description{
 Calculate optical thermal habitat using temp and light thresholds

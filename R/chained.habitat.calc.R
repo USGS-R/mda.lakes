@@ -8,6 +8,7 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
   }
   
   nc.files = Sys.glob(file.path(run.path, '*.nc'))
+  nml.file = file.path(run.path, 'glm2.nml')
   years = str_extract(basename(nc.files),"[0-9]+")
   
   if(missing(lakeid)){
@@ -124,6 +125,30 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     
     misc.out[['spring_days_in_10.5_15.5']] = c(misc.out[['spring_days_in_10.5_15.5']],
                                                getDaysBetweenT(wtr[wtr$DateTime < jun1, ], 10.5, 15.5))
+    
+    
+    ##Add in the thermo-optical indices
+    #
+    #Optical and thermal habitat thresholds from Lester et al 2004
+    # temp  = 11 to 25 C
+    # light = 8  to 64 Lux
+    # Converted light thresholds to W/m^2 using Luminous efficacy of daylight from Littlefair 1985
+    # light = 0.0762 to 0.6095
+    
+    oti = opti_thermal_habitat(nc_file=GLMnc, nml_file=nml.file, irr_thresh = c(0.0762, 0.6095), 
+    																						wtr_thresh=c(11,25), interp_hour=TRUE, area_type="benthic")
+    
+    misc.out[['optic_hab_8_64']] = c(misc.out[['optic_hab_8_64']], oti$opti_hab)
+    misc.out[['thermal_hab_11_25']] = c(misc.out[['thermal_hab_11_25']], oti$therm_hab)
+    misc.out[['optic_thermal_hab']] = c(misc.out[['optic_thermal_hab']], oti$opti_therm_hab)
+    
+    
+    oti_surf = opti_thermal_habitat(nc_file=GLMnc, nml_file=nml.file, irr_thresh = c(0.0762, 0.6095), 
+    																						wtr_thresh=c(11,25), interp_hour=TRUE, area_type="surface")
+    
+    misc.out[['optic_hab_8_64_surf']] = c(misc.out[['optic_hab_8_64_surf']], oti_surf$opti_hab)
+    misc.out[['thermal_hab_11_25_surf']] = c(misc.out[['thermal_hab_11_25_surf']], oti_surf$therm_hab)
+    misc.out[['optic_thermal_hab_surf']] = c(misc.out[['optic_thermal_hab_surf']], oti_surf$opti_therm_hab)
     
 		#Use rLA, headers must be lowercase
     la.wtr = wtr

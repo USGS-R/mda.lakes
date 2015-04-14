@@ -23,10 +23,10 @@ options to ensure validity of profile (force zero area layer, monotonically
 decreasing area)
 }
 \examples{
-hypso = getBathy('1881900')
+hypso = getBathy('439800')
 new_hypso = interp_hypso(hypso, dz=0.1)
 
-plot(new_hypso$area, new_hypso$depth, ylim=rev(range(new_hypso$depth)))
-points(hypso$area, hypso$depth)
+plot(hypso$area, hypso$depth, ylim=rev(range(new_hypso$depth)), type='o')
+lines(new_hypso$area, new_hypso$depth, lty=2, col='red')
 }
 
