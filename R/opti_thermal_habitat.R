@@ -38,10 +38,14 @@ opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thr
 		new_wtr = data.frame(datetime=io[,1])
 		for(i in 2:ncol(wtr)){
 			colname = names(wtr)[i]
-			if(sum(is.na(wtr[, colname])) < 2){
+			
+			#THere may not be enough non NA values for us to run approx, check
+			if(sum(!is.na(wtr[, colname])) < 2){
 				new_wtr[,colname] = rep(NA, nrow(new_wtr))
+			}else{
+				new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1])$y
 			}
-			new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1])$y
+			
 		}
 		wtr = new_wtr
 		
