@@ -7,7 +7,7 @@ hypso = getBathy('1881900')
 lat = 43
 lon = -89.4
 
-datetime = seq(as.POSIXct('1990-01-01'), as.POSIXct('1990-01-02'), by='min')
+datetime = seq(as.POSIXct('1990-01-01'), as.POSIXct('1990-01-02'), by='hour')
 
 metjd=JD(datetime)
 

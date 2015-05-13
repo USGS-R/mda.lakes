@@ -16,7 +16,7 @@ populate_base_lake_nml = function(site_id){
 	#get default template
 	nml_obj = read_nml(nml_template_path())
 	
-	initZ = c(0,0.2,getZmax(site_id));
+	initZ = c(0,0.2, getZmax(site_id));
 	initT = c(3,4,4);
 	initS = c(0,0,0);
 	
@@ -74,7 +74,7 @@ populate_base_lake_nml = function(site_id){
 	
 	#write to NML
 	nml_obj = set_nml(nml_obj, 'H', hypso$height)
-	nml_obj = set_nml(nml_obj, 'A', hypso$area/1000)
+	nml_obj = set_nml(nml_obj, 'A', hypso$area)
 	nml_obj = set_nml(nml_obj, 'bsn_vals', nrow(hypso))
 	
 	#min_layer_thick & max_

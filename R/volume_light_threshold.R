@@ -63,9 +63,9 @@ area_light_threshold = function(kd, light_incident, irr_thresh=c(0,2000), hypso,
 		stop("Unrecognized area_type, must be 'surface' or 'benthic'")
 	}
 	
-	light_map_collapsed = apply(light_map, 2, sum)
+	light_map_collapsed = apply(light_map, 2, sum, na.rm=TRUE)
 	
-	average_area = sum(depth_area_rel * light_map_collapsed)/nrow(light_map)
+	average_area = sum(depth_area_rel * light_map_collapsed)
 	
 	return(average_area)
 }
@@ -111,9 +111,9 @@ area_temp_threshold = function(wtr, wtr_thresh=c(0,25), hypso, area_type="surfac
 		stop("Unrecognized area_type, must be 'surface' or 'benthic'")
 	}
 	
-	map_collapsed = apply(vol_map, 2, sum)
+	map_collapsed = apply(vol_map, 2, sum, na.rm=TRUE)
 	
-	average_area = sum(depth_area_rel * map_collapsed)/nrow(map)
+	average_area = sum(depth_area_rel * map_collapsed, na.rm=TRUE)
 	
 	return(average_area)
 }
@@ -130,7 +130,6 @@ area_temp_threshold = function(wtr, wtr_thresh=c(0,25), hypso, area_type="surfac
 #'
 #'@export
 area_light_temp_threshold = function(wtr, kd, light_incident, irr_thresh=c(0,2000), wtr_thresh=c(0,25), hypso, area_type="surface"){
-	
 	
 	#Interpolate both to higher resolution??
 	
@@ -160,9 +159,9 @@ area_light_temp_threshold = function(wtr, kd, light_incident, irr_thresh=c(0,200
 		stop("Unrecognized area_type, must be 'surface' or 'benthic'")
 	}
 	
-	map_collapsed = apply(both_map, 2, sum)
+	map_collapsed = apply(both_map, 2, sum, na.rm=TRUE)
 	
-	average_area = sum(depth_area_rel * map_collapsed)/nrow(map)
+	average_area = sum(depth_area_rel * map_collapsed, na.rm=TRUE)
 	
 	return(average_area)
 }
