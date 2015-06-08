@@ -3,6 +3,7 @@
 #'@param site_id 
 #'@param path Directy to start and run model
 #'@param kd Directly supplied kd value or values. Must be length 1 (repeated across all years) or same length as number of years simulated
+#'@param years Vector of numeric years to simulate.
 #'@param nml_args Arguments for nml file to override defaults
 #'
 #'
@@ -23,14 +24,12 @@
 #'@import glmtools
 #'@import GLMr
 #'@export
-prep_run_chained_glm_kd <- function(site_id, path, 
-																		start=as.POSIXct('2008-04-01'), 
-																		end=as.POSIXct('2008-06-01'), 
+prep_run_chained_glm_kd <- function(site_id, path, years, 
 																		kd = getClarity(site_id, default.if.null=TRUE), 
 																		nml_args=NULL){
 	
 	
-	nml_obj = populate_base_lake_nml(site_id)
+	nml_obj = populate_base_lake_nml(site_id, kd[1])
 	
 	
 	#finally, change supplied nml
@@ -39,9 +38,6 @@ prep_run_chained_glm_kd <- function(site_id, path,
 	}
 	
 	#iterate over all years
-	start_year = as.POSIXlt(start)$year+1900
-	end_year = as.POSIXlt(end)$year+1900
-	years = start_year:end_year
 	out_vals = rep(NA, length(years))
 	
 	#expand kd if necessary
@@ -50,6 +46,9 @@ prep_run_chained_glm_kd <- function(site_id, path,
 	}else if(length(kd) != length(years)){
 		stop('length of supplied kd must be one or the number of years')
 	}
+	
+	#delete any nc files in the model path
+	unlink(Sys.glob(paste0(path, '/output*.nc')))
 	
 	for(i in 1:length(years)){
 		year = years[i]
