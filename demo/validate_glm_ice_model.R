@@ -1,5 +1,6 @@
 
 library(glmtools)
+Sys.setenv(TZ='GMT')
 
 ice_data = read.table(system.file('supporting_files/Validation/ice_data.csv', package='mda.lakes'), header=TRUE, sep=',', as.is=TRUE)
 
@@ -76,6 +77,11 @@ plot(both_ice$doy, both_ice$emp_doy, ylab='Modeled', xlab='Observed')
 points(both_ice$doy, both_ice$glm_doy, col='red')
 abline(0,1)
 
+tmp = both_ice[both_ice$on.off == 'on', ]
+plot(tmp$doy, tmp$emp_doy, ylab='Modeled', xlab='Observed')
+points(tmp$doy, tmp$glm_doy, col='red')
+abline(0,1)
+
 
 ##We are shooting for an ~8.5 day mean absolute error as reported in Shuter et al 2013
 cat('MAE of GLM Overall, on and off date/time')
@@ -89,6 +95,15 @@ cat('Mean Absolute Errors\n')
 mean(abs(both_ice$emp_doy - both_ice$doy))
 mean(abs(both_ice[both_ice$on.off=='on',]$emp_doy - both_ice[both_ice$on.off=='on',]$doy))
 mean(abs(both_ice[both_ice$on.off=='off',]$emp_doy - both_ice[both_ice$on.off=='off',]$doy))
+
+
+cat('R^2')
+tmp = both_ice[both_ice$on.off == 'off', ]
+summary(lm(tmp$emp_doy ~ tmp$glm_doy))$r.squared
+summary(lm(tmp$doy ~ tmp$glm_doy))$r.squared
+summary(lm(tmp$doy ~ tmp$emp_doy))$r.squared
+
+
 
 
 ice_on = ice_data[,c('WBIC','iceon_year', 'iceon_month', 'iceon_day')]
