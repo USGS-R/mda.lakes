@@ -4,7 +4,8 @@
 \alias{populate_base_lake_nml}
 \title{Create basic NML file object for a lake}
 \usage{
-populate_base_lake_nml(site_id)
+populate_base_lake_nml(site_id, kd = getClarity(site_id, default.if.null =
+  TRUE))
 }
 \arguments{
 \item{site_id}{Unique lake ID}

@@ -4,14 +4,15 @@
 \alias{prep_run_chained_glm_kd}
 \title{Prepare and run chained model with Kd scenario}
 \usage{
-prep_run_chained_glm_kd(site_id, path, start = as.POSIXct("2008-04-01"),
-  end = as.POSIXct("2008-06-01"), kd = getClarity(site_id, default.if.null =
-  TRUE), nml_args = NULL)
+prep_run_chained_glm_kd(site_id, path, years, kd = getClarity(site_id,
+  default.if.null = TRUE), nml_args = NULL)
 }
 \arguments{
 \item{site_id}{}
 
 \item{path}{Directy to start and run model}
+
+\item{years}{Vector of numeric years to simulate.}
 
 \item{kd}{Directly supplied kd value or values. Must be length 1 (repeated across all years) or same length as number of years simulated}
 
