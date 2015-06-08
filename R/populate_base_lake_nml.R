@@ -11,7 +11,7 @@
 #'@import glmtools
 #'@import GLMr
 #'@export
-populate_base_lake_nml = function(site_id){
+populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.null=TRUE)){
 	## Construct NML
 	#get default template
 	nml_obj = read_nml(nml_template_path())
@@ -80,7 +80,7 @@ populate_base_lake_nml = function(site_id){
 	#min_layer_thick & max_
 	
 	#clarity
-	nml_obj = set_nml(nml_obj, 'Kw', getClarity(site_id, default.if.null=TRUE))
+	nml_obj = set_nml(nml_obj, 'Kw', kd)
 	
 	
 	#lake basin
