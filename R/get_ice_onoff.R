@@ -30,7 +30,7 @@ get_ice_onoff = function(ice, wtr){
 		
 		##get 365 days of ice after peak_temp
 		#find ice-on
-		after_ice = ice[ice$DateTime >= peak_date & ice$DateTime <= peak_plus_365, ]$ice.m.
+		after_ice = ice[ice$DateTime >= peak_date & ice$DateTime <= peak_plus_365, ]$`ice(m)`
 		
 		tmp_indx = which(after_ice > 0)
 		if(length(tmp_indx) == 0){
@@ -42,7 +42,7 @@ get_ice_onoff = function(ice, wtr){
 		
 		##get 365 days of ice before peak_temp and reverse
 		#find ice-off
-		before_ice = ice[ice$DateTime >= peak_minus_365 & ice$DateTime <= peak_date, ]$ice.m.
+		before_ice = ice[ice$DateTime >= peak_minus_365 & ice$DateTime <= peak_date, ]$`ice(m)`
 		
 		tmp_indx = which(before_ice > 0)
 		if(length(tmp_indx) == 0){

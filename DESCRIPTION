@@ -14,7 +14,8 @@ Imports:
     httr, 
     rLakeAnalyzer (>= 1.5), 
     insol, 
-    plyr
+    plyr,
+    lakeattributes
 Enhances:
 		geoknife
 Description: More about what it does (maybe more than one line)

@@ -127,23 +127,6 @@ getMaxTempIdx <-  function(GLMwtr){
   return(maxTempIdx)
 }
 
-################################################################################
-#
-################################################################################
-getSurfaceT <- function(GLMwtr){
-  temp <- getTemp(GLMwtr)
-  surfaceTemp <- apply(temp,1,function(x) x[max(which(!is.na(x)))])
-  return(surfaceTemp)
-}
-
-################################################################################
-#
-################################################################################
-getBottomT <- function(GLMwtr){
-  temp <- getTemp(GLMwtr)
-  bottomTemp <- apply(temp,1,function(x) x[min(which(!is.na(x)))])
-  return(bottomTemp)
-}
 
 ################################################################################
 #
