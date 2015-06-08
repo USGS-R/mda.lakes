@@ -117,10 +117,13 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     jul31 = as.POSIXct(paste(years[i], '-07-31', sep=''))
     sep30 = as.POSIXct(paste(years[i], '-09-30', sep=''))
     
+    surf = get_temp(GLMnc, reference='surface', z_out = 0)
+    
     misc.out[['mean_surf_jul']] = c(misc.out[['mean_surf_jul']],
-                                    mean(getSurfaceT(wtr[wtr$DateTime >= jul1 & wtr$DateTime <= jul31, ])))
+                                    mean(surf[surf$DateTime >= jul1 & surf$DateTime <= jul31, 2]))
+    
     misc.out[['mean_surf_JAS']] = c(misc.out[['mean_surf_JAS']],
-                                    mean(getSurfaceT(wtr[wtr$DateTime >= jul1 & wtr$DateTime <= sep30, ])))
+                                    mean(surf[surf$DateTime >= jul1 & surf$DateTime <= sep30, 2]))
     
     
     misc.out[['spring_days_in_10.5_15.5']] = c(misc.out[['spring_days_in_10.5_15.5']],
