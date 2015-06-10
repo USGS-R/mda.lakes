@@ -5,7 +5,7 @@
 \title{Prepare and run chained model with Kd scenario}
 \usage{
 prep_run_chained_glm_kd(site_id, path, years, kd = getClarity(site_id,
-  default.if.null = TRUE), nml_args = NULL)
+  default.if.null = TRUE), nml_args = NULL, verbose = FALSE)
 }
 \arguments{
 \item{site_id}{}
