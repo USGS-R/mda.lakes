@@ -6,15 +6,16 @@
 #'the file from Sciencebase if necessary
 #'
 #'@param fname Name of the file, generally based on the unique site_id
+#'@param driver_zip The path to the driver zip file. Assumed to be in working directory and called 'drivers.zip'
 #'
 #'@author Luke Winslow
 #'
 #'
 #'@export
-get_driver_path = function(fname){
+get_driver_path = function(fname, driver_zip='drivers.zip'){
 	
 	
-	driver_path = 'drivers.zip'
+	driver_path = driver_zip
 	
 	dest = tempdir()
 	
