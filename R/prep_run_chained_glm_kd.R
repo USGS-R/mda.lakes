@@ -50,7 +50,7 @@ prep_run_chained_glm_kd <- function(site_id, path, years,
 	}
 	
 	#delete any nc files in the model path
-	unlink(Sys.glob(paste0(path, '/output*.nc')))
+	#unlink(Sys.glob(paste0(path, '/output*.nc')))
 	
 	for(i in 1:length(years)){
 		year = years[i]
