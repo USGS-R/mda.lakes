@@ -4,7 +4,7 @@
 \alias{getIceOff}
 \title{Get the ice off date for a given lake}
 \usage{
-getIceOff(site_id, year)
+getIceOff(site_id, year, fname = "empirical.ice.tsv")
 }
 \arguments{
 \item{site_id}{The character ID for the requested data}

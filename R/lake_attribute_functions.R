@@ -648,14 +648,16 @@ getZmean	<-	function(WBIC){
 #'
 #'
 #'@export
-getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
+getIceOn	<-	local({ lookup=NULL; fcache=''; function(WBIC, year, fname='empirical.ice.tsv'){
   early.freeze	<-	8	# month of year
 	# the ice on for each lake for a given year
 	# ice on is assumed to either happen during the same calendar year, or within the NEXT year
-  if (is.null(lookup)) { 
+  if (is.null(lookup) || fname != fcache) { 
   	cat('Caching ice info.\n')
+  	#cache filename so we know which we've got cached
+  	fcache <<- fname
   	
-	  fname <- system.file('supporting_files/empirical.ice.tsv', package=packageName())
+	  fname <- system.file(paste0('supporting_files/', fname), package=packageName())
 		empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
 	  empir.ice$posix = as.POSIXct(empir.ice$DATE)
 		lookup <<- new.env()
@@ -681,7 +683,7 @@ getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
 		if(length(pos.results) > 1){
 			warning(sprintf("Ambiguous ice on in year %i for lake %s, using last value", year, WBIC))
 			ice.on[j]<- tail(pos.results,1)
-		}else{
+		}else{			
 			ice.on[j]<- pos.results
 		}
 		
@@ -707,11 +709,11 @@ getIceOn	<-	local({ lookup=NULL; function(WBIC,year){
 #'
 #'
 #'@export
-getIceOff	<-	function(site_id, year) {
+getIceOff	<-	function(site_id, year, fname='empirical.ice.tsv') {
 	# the ice off for each lake for a given year
 	# ice off is assumed to happen during the same calendar year
 
-	fname <- system.file('supporting_files/empirical.ice.tsv', package=packageName())
+	fname <- system.file(paste0('supporting_files/', fname), package=packageName())
 	empir.ice = read.table(fname, sep='\t', header=TRUE, as.is=TRUE) 
 	
 	ice.off	<-	vector(length=length(site_id))
