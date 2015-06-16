@@ -17,7 +17,7 @@ get_driver_path = function(fname, driver_zip='drivers.zip'){
 	
 	driver_path = driver_zip
 	
-	dest = tempdir()
+	dest = file.path(tempdir(), driver_zip)
 	
 	loc = unzip(driver_path, files=fname, exdir=dest)
 	if(length(loc) < 1){
