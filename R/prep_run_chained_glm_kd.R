@@ -26,7 +26,9 @@
 #'@export
 prep_run_chained_glm_kd <- function(site_id, path, years, 
 																		kd = getClarity(site_id, default.if.null=TRUE), 
-																		nml_args=NULL, verbose=FALSE){
+																		nml_args=NULL, 
+																		verbose=FALSE, 
+																		ice_src='empirical.ice.tsv'){
 	
 	
 	nml_obj = populate_base_lake_nml(site_id, kd[1])
@@ -53,8 +55,8 @@ prep_run_chained_glm_kd <- function(site_id, path, years,
 	for(i in 1:length(years)){
 		year = years[i]
 		
-		off_date = getIceOff(site_id, year)
-		on_date = getIceOn(site_id, year)
+		off_date = getIceOff(site_id, year, ice_src)
+		on_date = getIceOn(site_id, year, ice_src)
 		
 		if(is.na(off_date) | is.na(on_date)){
 			warning(site_id, ' does not have ice ON and OFF dates for ', year, '\nSkipping...')
