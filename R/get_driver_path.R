@@ -6,25 +6,40 @@
 #'the file from Sciencebase if necessary
 #'
 #'@param fname Name of the file, generally based on the unique site_id
-#'@param driver_zip The path to the driver zip file. Assumed to be in working directory and called 'drivers.zip'
+#'@param driver_name The driver source name, options ('NLDAS', 'CM2.0', 'GENMOM', 'ECHAM5')
 #'
 #'@author Luke Winslow
 #'
 #'
 #'@export
-get_driver_path = function(fname, driver_zip='drivers.zip'){
+get_driver_path = function(fname, driver_name='NLDAS', loc_cache=TRUE){
 	
+	base_url = 'http://cida-test.er.usgs.gov/mda.lakes/'
 	
-	driver_path = driver_zip
+	full_url = paste0(base_url, 'drivers_GLM_', driver_name, '/', fname)
+	dest = file.path(tempdir(), driver_name, fname)
 	
-	dest = file.path(tempdir(), driver_zip)
-	
-	loc = unzip(driver_path, files=fname, exdir=dest)
-	if(length(loc) < 1){
-		stop('file of that name does not exist.')
+	if(file.exists(dest) && loc_cache){
+		return(dest)
+	} 
+		
+	if(!file.exists(dirname(dest))){
+		dir.create(dirname(dest), recursive=TRUE)
 	}
 	
-	return(loc)
+	status = 1
+	#catch the download file error, and give more descriptive error
+	tryCatch({
+		status = download.file(full_url, destfile = dest, quiet=TRUE)
+	}, error=function(e){})
+	
+	#loc = unzip(driver_path, files=fname, exdir=dest)
+	
+	if(status != 0){
+		stop(fname, ':file of that name does not exist for driver:', driver_name)
+	}
+	
+	return(dest)
 }
 
 #@importFrom jsonlite fromJSON
