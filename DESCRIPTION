@@ -1,18 +1,22 @@
 Package: mda.lakes
 Type: Package
 Title: Tools for combining models, data, and processing for lakes
-Version: 2.0.20
+Version: 2.5.6
 Date: 2014-09-29
 Author: Luke Winslow, Jordan Read
 Maintainer: Luke Winslow <lwinslow@usgs.gov>
 Depends:
     R (>= 3.0)
 Imports:
-    glmtools,
+    glmtools (>= 0.9.6),
     jsonlite,
     GLMr,
-    httr,
-    rLakeAnalyzer (>= 1.4.2)
-Enhances: geoknife
+    httr, 
+    rLakeAnalyzer (>= 1.5), 
+    insol, 
+    plyr,
+    lakeattributes
+Enhances:
+    geoknife
 Description: More about what it does (maybe more than one line)
 License: LICENSE file

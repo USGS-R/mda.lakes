@@ -95,12 +95,16 @@ met_from_nldas = function(data_dir, output_dir, append_files=TRUE, overwrite=FAL
 		
 		out.data$Snow = 0
 		
+		# 10:1 ratio assuming 1:10 density ratio water weight
+		out.data$Snow[out.data$AirTemp < 0] = out.data$Rain[out.data$AirTemp < 0]*10 
+		out.data$Rain[out.data$AirTemp < 0] = 0
+		
 		out.data = out.data[order(out.data$time), c('time','ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow')]
 		
 		#Format time as string in the correct way
 		out.data$time = format(out.data$time,'%Y-%m-%d %H:%M:%S')
 		
-		fout = file.path(out_dir,paste0('WBIC_', lakeids[i], '.csv'))
+		fout = file.path(output_dir, paste0('WBIC_', lakeids[i], '.csv'))
 		
 		if(append_files){
 			#append new year to data
