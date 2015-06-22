@@ -1,7 +1,10 @@
 
-#'@title Chained habitat out functoin for Krose metrics
+#'@title Chained habitat out function for Krose metrics
 #'@description
 #'Calculates all the different metrics requested by Krose
+#' @param run.path
+#' @param output.path
+#' @param lakeid
 #'
 #'@import stringr
 #'@import glmtools

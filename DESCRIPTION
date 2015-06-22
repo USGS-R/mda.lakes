@@ -17,6 +17,6 @@ Imports:
     plyr,
     lakeattributes
 Enhances:
-		geoknife
+    geoknife
 Description: More about what it does (maybe more than one line)
 License: LICENSE file

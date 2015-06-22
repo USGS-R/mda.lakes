@@ -2,9 +2,16 @@
 % Please edit documentation in R/chained.habitat.calc.kevin.R
 \name{chained.habitat.calc.kevin}
 \alias{chained.habitat.calc.kevin}
-\title{Chained habitat out functoin for Krose metrics}
+\title{Chained habitat out function for Krose metrics}
 \usage{
 chained.habitat.calc.kevin(run.path, output.path = NULL, lakeid)
+}
+\arguments{
+\item{run.path}{}
+
+\item{output.path}{}
+
+\item{lakeid}{}
 }
 \description{
 Calculates all the different metrics requested by Krose
