@@ -1,4 +1,3 @@
-#library(plyr)
 
 #'@title Seasonal, cross-site Sen's slope
 #'@description
@@ -12,7 +11,7 @@
 #'@param season_i Numeric vector of season identifiers (example: week number)
 #'@param sites_i Optional numeric of site identifiers (can be numeric or string)
 #'
-#'@import plyr
+#'@importFrom plyr ddply
 #'@export
 sens_seasonal_site = function(times, data, season_i, sites_i){
   
