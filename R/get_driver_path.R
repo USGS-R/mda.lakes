@@ -36,6 +36,8 @@ get_driver_path = function(fname, driver_name='NLDAS', loc_cache=TRUE){
 	#loc = unzip(driver_path, files=fname, exdir=dest)
 	
 	if(status != 0){
+		#if download failed, delete file that might have been only partially created
+		unlink(dest)
 		stop(fname, ':file of that name does not exist for driver:', driver_name)
 	}
 	
