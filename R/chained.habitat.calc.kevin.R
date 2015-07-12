@@ -177,8 +177,10 @@ chained.habitat.calc.kevin = function(run.path, output.path=NULL, lakeid){
 		sep30 = as.POSIXct(paste(years[i], '-09-30', sep=''))
 		aug31 = as.POSIXct(paste(years[i], '-08-31', sep=''))
 		
-		misc.out[['mean_surf_JA']] = c(misc.out[['mean_surf_JA']],
-																	 mean(getSurfaceT(wtr[wtr$DateTime >= jul1 & wtr$DateTime <= aug31, ])))
+		surf = get_temp(GLMnc, reference='surface', z_out = 0)
+		
+		misc.out[['mean_surf_JA']] = c(misc.out[['mean_surf_jul']],
+		                                mean(surf[surf$DateTime >= jul1 & surf$DateTime <= aug31, 2]))
 		
 		## GDD calcs
 		dd10 = surfT[,2] - 10
