@@ -594,7 +594,19 @@ getZmax <- local({ lookup=NULL; function(WBIC) {
       lookup[[toString(d$WBIC[i])]] = mean(ft2m*mean.m)
     }
   }
-  lookup[[WBIC]]
+  out = lookup[[WBIC]]
+  
+  #try lookup up based on bathymetry if available
+  if(is.null(out)){
+    fileN	<-	system.file(paste(c('supporting_files/Bathy/', site_id, '.bth'), collapse=''), 
+                         package=packageName())
+    if (file.exists(fileN)){
+      data	<-	read.table(fileN,header=TRUE,sep='\t')
+      out = max(data$depth, na.rm=TRUE)
+    }
+  }
+  
+  return(out)
 }})
 
 #'@title Get mean depth for a given lake
