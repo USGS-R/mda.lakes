@@ -3,7 +3,7 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4041)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4044)
 
 
 clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
@@ -25,46 +25,28 @@ library(dplyr)
 library(glmtools)
 
 
-read_debias = function(prism_path, dscale_path, dbiased_path, shortwave=FALSE){
-  library(dplyr)
-  library(lubridate)
+nldas_wind_debias = function(nldas_path, dbiased_path){
   
-  dscale = read.csv(dscale_path, header=TRUE)
-  obs = read.csv(prism_path, header=TRUE)
   
-  dbiased = dscale
+  nldas = read.csv(nldas_path, header=TRUE)
+  nldas$time = as.POSIXct(nldas$time)
   
-  names(obs) = paste0('obs_', names(obs))
-  names(obs)[1] = 'time'
+  after_2001 = nldas$time > as.POSIXct('2001-12-31')
   
-  #prism is monthly avg, so avg dscale to monthly first
-  
-  mon_dscale = group_by(dscale, year = year(as.POSIXct(time)), month=month(as.POSIXct(time))) %>% 
-    summarise(AirTemp=mean(AirTemp)) 
-  mon_dscale$time = as.character(ISOdate(mon_dscale$year, mon_dscale$month, 1, hour = 0))
-  
-  overlap = merge(obs, mon_dscale , by='time')
-  
-  builk_emis = dscale$LongWave/(5.67E-8 * (dscale$AirTemp + 273.13)^4)
-  
-  #debias airT with offset model
-  dbiased$AirTemp = dbiased$AirTemp + (mean(overlap$obs_AirTemp) - mean(overlap$AirTemp))
-  
-  dbiased$LongWave = builk_emis * 5.67E-8 * (dbiased$AirTemp + 273.13)^4
+  nldas$WindSpeed[after_2001] = nldas$WindSpeed[after_2001] * 0.921
   
   if(missing(dbiased_path)){
-    return(dbiased)
+    return(nldas)
   }else{
-    write.csv(dbiased, dbiased_path, row.names=FALSE, quote=FALSE)
+    write.csv(nldas, dbiased_path, row.names=FALSE, quote=FALSE)
   }
 }
-
+clusterExport(c1, varlist = 'nldas_wind_debias')
 
 obs = read.table(system.file('supporting_files/wtemp.obs.tsv', package = 'mda.lakes'), 
                  sep='\t', header=TRUE, as.is=TRUE, , colClasses=c(WBIC='character'))
 to_run = unique(paste0('WBIC_', obs$WBIC))
 
-clusterExport(c1, varlist = 'read_debias')
 
 downscale_cal_out = function(site_id){
   
@@ -100,24 +82,23 @@ downscale_cal_out = function(site_id){
     
     write.table(lake_obs, file.path(run_dir, 'obs.tsv'), sep='\t', row.names=FALSE)
     years = unique(lake_obs$year)
-    years = years[years <= 1999 & years >=1979]
-
+    years = years[years <= 2012 & years >=1979]
+    
     cat(years)
     
     secchi = get_kd_best(site_id, years=years)
     
-    #driver_path = get_driver_path(paste0(site_id, '.csv'), 'GENMOM', loc_cache=FALSE)
+    #driver_path = get_driver_path(paste0(site_id, '.csv'), 'NLDAS', loc_cache=FALSE)
     driver_path = tempfile(fileext='.csv')
-    read_debias(get_driver_path(paste0(site_id, '.csv'), 'PRISM'),
-                           get_driver_path(paste0(site_id, '.csv'), 'GENMOM'), 
-                           dbiased_path=driver_path, shortwave=TRUE)
+    nldas_wind_debias(get_driver_path(paste0(site_id, '.csv'), 'NLDAS'),
+                dbiased_path=driver_path)
     
     driver_path = gsub('\\\\', '/', driver_path)
     
     #run with different driver and ice sources
     
-    prep_run_chained_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=years,
-                            ice_src='empirical.cm2.0.ice.tsv',
+    res = prep_run_chained_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=years,
+                            verbose=TRUE,
                             nml_args=list(
                               dt=3600, subdaily=FALSE, nsave=24, 
                               timezone=-6,
@@ -126,7 +107,9 @@ downscale_cal_out = function(site_id){
     
     
     sims = Sys.glob(file.path(run_dir, 'output*.nc'))
-    #browser()
+    if(length(sims) < 1){
+      stop('No successful sims')
+    }
     #loop over years
     cal.data = data.frame()
     for(i in 1:length(sims)){
@@ -145,15 +128,18 @@ downscale_cal_out = function(site_id){
   }, error=function(e){unlink(run_dir, recursive=TRUE);e})
 }
 
-for(i in 1:length(c1)){
-  tryCatch({
-  clusterCall(c1[i], 1, function(){R.version})
-  cat(i, ',')}, error=function(e){})
+groups = split(to_run, ceiling(seq_along(to_run)/100))
+out = list()
+for(grp in groups){
+  tmp = clusterApplyLB(c1,grp, downscale_cal_out)
+  out = c(out, tmp)
+  cat('iteration\n')
 }
+#out = clusterApplyLB(c1, 'WBIC_394400', downscale_cal_out)
 
-
-out = clusterApplyLB(c1, to_run, downscale_cal_out)
 
 all_cal = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
 
 mean(all_cal$Observed_wTemp - all_cal$Modeled_wTemp, na.rm=TRUE)
+
+sqrt(mean((all_cal$Observed_wTemp - all_cal$Modeled_wTemp)^2, na.rm=TRUE))

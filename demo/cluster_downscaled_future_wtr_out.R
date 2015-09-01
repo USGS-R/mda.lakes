@@ -3,12 +3,13 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4044)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4042)
 
 
 clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('rLakeAnalyzer', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('dplyr', repos='http://cran.rstudio.com')})
+clusterCall(c1, function(){install.packages('lubridate', repos='http://cran.rstudio.com')})
 
 
 clusterCall(c1, function(){library(devtools)})
@@ -22,6 +23,7 @@ library(lakeattributes)
 library(mda.lakes)
 library(dplyr)
 library(glmtools)
+library(reshape2)
 
 lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package = 'mda.lakes'), 
                    sep='\t', quote="\"", header=TRUE, as.is=TRUE, colClasses=c(WBIC='character'))
@@ -29,7 +31,7 @@ lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package
 to_run = paste0('WBIC_', lakes$WBIC)
 
 
-model_future_habitat = function(site_id){
+future_wtr_out = function(site_id){
   
   modern_era = 1979:1999
   future_era = 2040:2069
@@ -54,7 +56,7 @@ model_future_habitat = function(site_id){
     
     bare_wbic = substr(site_id, 6, nchar(site_id))
     
-    driver_path = get_driver_path(paste0(site_id, '.csv'), driver_name = "GENMOM")
+    driver_path = get_driver_path(paste0(site_id, '.csv'), 'ECHAM5')
     driver_path = gsub('\\\\', '/', driver_path)
     
     #run with different driver and ice sources
@@ -78,28 +80,47 @@ model_future_habitat = function(site_id){
                               csv_point_nlevs=0, 
                               meteo_fl=driver_path))
     
-    out = chained.habitat.calc(run_dir, lakeid = bare_wbic)
     
+    sims = Sys.glob(file.path(run_dir, 'output*.nc'))
+    
+    depths = get.offsets(get_temp(sims[1], reference = 'surface'))
+    
+    #loop over years
+    all.data = data.frame()
+    for(i in 1:length(sims)){
+      tmp = get_temp(sims[i], reference='surface', z_out=depths)
+      all.data = rbind(all.data, tmp)
+    }
     
     unlink(run_dir, recursive=TRUE)
     
-    secchi = get_kd_best(site_id, years=c(modern_era, future_era))
-    names(secchi) = c('year', 'secchi_avg', 'secchi_source')
-    out = merge(out, secchi, by='year')
+    all.data$site_id = site_id
     
-    out$site_id = site_id
-    
-    out
+    all.data
     
   }, error=function(e){unlink(run_dir, recursive=TRUE);e})
 }
 
 
-out = clusterApplyLB(c1, to_run, model_future_habitat)
+out = clusterApplyLB(c1, to_run, future_wtr_out)
 
-all_habitat = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
+dframes = out[unlist(lapply(out, inherits, what='data.frame'))]
 
-#fix the gap between present and future model runs
-all_habitat$`winter_dur_0-4`[all_habitat$`winter_dur_0-4` > 300] = NA
+save('dframes', file = '~/FUTURE_ECHAM5.Rdata')
 
-write.table(all_habitat, '~/2015-06-15_THE_FUTURE.tsv', sep='\t', row.names=FALSE)
+out_path = '~/FUTURE_ECHAM5'
+dir.create(out_path)
+  
+for(i in 1:length(dframes)){
+  
+  cat(i, '\n')  
+  d = dframes[[i]]
+  site_id = d$site_id[1]
+  d$site_id = NULL
+  tmp = gzfile(paste0(out_path, '/', site_id, '.tsv.gz'))
+  write.table(d, tmp , sep='\t', row.names=FALSE, quote=FALSE)
+}
+
+
+
+

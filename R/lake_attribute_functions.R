@@ -598,7 +598,7 @@ getZmax <- local({ lookup=NULL; function(WBIC) {
   
   #try lookup up based on bathymetry if available
   if(is.null(out)){
-    fileN	<-	system.file(paste(c('supporting_files/Bathy/', site_id, '.bth'), collapse=''), 
+    fileN	<-	system.file(paste(c('supporting_files/Bathy/', WBIC, '.bth'), collapse=''), 
                          package=packageName())
     if (file.exists(fileN)){
       data	<-	read.table(fileN,header=TRUE,sep='\t')

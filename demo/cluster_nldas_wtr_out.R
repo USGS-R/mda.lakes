@@ -4,11 +4,12 @@ library(parallel)
 
 #lets try 100 to start
 c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4042)
-
+c1 = makePSOCKcluster(rep('localhost', 1))
 
 clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('rLakeAnalyzer', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('dplyr', repos='http://cran.rstudio.com')})
+clusterCall(c1, function(){install.packages('lubridate', repos='http://cran.rstudio.com')})
 
 
 clusterCall(c1, function(){library(devtools)})
@@ -18,11 +19,36 @@ glmtools_install = clusterCall(c1, function(){install_github('lawinslow/glmtools
 lakeattr_install = clusterCall(c1, function(){install_github('lawinslow/lakeattributes')})
 mdalakes_install = clusterCall(c1, function(){install_github('lawinslow/mda.lakes')})
 
+stopCluster(c1)
+c1 = makePSOCKcluster(rep('localhost', 4))
+
+
 library(lakeattributes)
 library(mda.lakes)
 library(dplyr)
 library(glmtools)
 library(reshape2)
+
+
+nldas_wind_debias = function(nldas_path, dbiased_path){
+  
+  
+  nldas = read.csv(nldas_path, header=TRUE)
+  nldas$time = as.POSIXct(nldas$time)
+  
+  after_2001 = nldas$time > as.POSIXct('2001-12-31')
+  
+  nldas$WindSpeed[after_2001] = nldas$WindSpeed[after_2001] * 0.921
+  
+  if(missing(dbiased_path)){
+    return(nldas)
+  }else{
+    write.csv(nldas, dbiased_path, row.names=FALSE, quote=FALSE)
+  }
+}
+clusterExport(c1, varlist = 'nldas_wind_debias')
+
+
 
 lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package = 'mda.lakes'), 
                    sep='\t', quote="\"", header=TRUE, as.is=TRUE, colClasses=c(WBIC='character'))
@@ -30,9 +56,9 @@ lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package
 to_run = paste0('WBIC_', lakes$WBIC)
 
 
-future_wtr_out = function(site_id){
+wtr_out = function(site_id){
   
-  modern_era = 1979:1999
+  modern_era = 1979:2012
   future_era = 2040:2069
   
   library(lakeattributes)
@@ -55,29 +81,23 @@ future_wtr_out = function(site_id){
     
     bare_wbic = substr(site_id, 6, nchar(site_id))
     
-    driver_path = get_driver_path(paste0(site_id, '.csv'), 'GENMOM')
+    #driver_path = get_driver_path(paste0(site_id, '.csv'), 'NLDAS')
+    
+    driver_path = tempfile(fileext='.csv')
+    nldas_wind_debias(get_driver_path(paste0(site_id, '.csv'), 'NLDAS'),
+                      dbiased_path=driver_path)
+    
     driver_path = gsub('\\\\', '/', driver_path)
     
     #run with different driver and ice sources
     
     prep_run_chained_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=modern_era,
-                            ice_src='empirical.cm2.0.ice.tsv',
                             nml_args=list(
                               dt=3600, subdaily=FALSE, nsave=24, 
                               timezone=-6,
                               csv_point_nlevs=0, 
                               meteo_fl=driver_path))
     
-    
-    secchi = get_kd_best(site_id, years=future_era)
-    
-    prep_run_chained_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=future_era,
-                            ice_src='empirical.cm2.0.ice.tsv',
-                            nml_args=list(
-                              dt=3600, subdaily=FALSE, nsave=24, 
-                              timezone=-6,
-                              csv_point_nlevs=0, 
-                              meteo_fl=driver_path))
     
     
     sims = Sys.glob(file.path(run_dir, 'output*.nc'))
@@ -101,9 +121,13 @@ future_wtr_out = function(site_id){
 }
 
 
-out = clusterApplyLB(c1, to_run, future_wtr_out)
+out = clusterApplyLB(c1, to_run, wtr_out)
 
-out_path = '~/FUTURE_GENMOM'
+dframes = out[unlist(lapply(out, inherits, what='data.frame'))]
+
+save('dframes', file = '~/NLDAS_2001_wind_fix.Rdata')
+
+out_path = '~/FUTURE_ECHAM5'
 dir.create(out_path)
   
 for(i in 1:length(dframes)){
