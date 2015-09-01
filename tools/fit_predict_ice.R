@@ -5,12 +5,12 @@ library(stringr)
 library(lubridate)
 library(zoo)
 library(plyr)
-source("Libraries/GLM.functions.R")
+#source("Libraries/GLM.functions.R")
 
 ################################################################################
 ## Load validation ice on/off data
 ################################################################################
-ice_data = read.table('../supporting_files/Validation/ice_data.csv', header=TRUE, sep=',', as.is=TRUE)
+ice_data = read.table(system.file('supporting_files/Validation/ice_data.csv', package='mda.lakes'), header=TRUE, sep=',', as.is=TRUE)
 
 ice_on = ice_data[,c('WBIC','iceon_year', 'iceon_month', 'iceon_day')]
 ice_on = ice_on[complete.cases(ice_on), ]
@@ -37,10 +37,11 @@ names(ice_off) = c('WBIC', 'year', 'month', 'day','yday_off')
 ## Generate all driver data for all WBICS
 ################################################################################
 
-driver_root = 'D:/WiLMA/MetDrivers/07-30-appended2012'
+driver_root = 'D:/test/GLM_NLDAS'
 
 all_inputs = Sys.glob(file.path(driver_root, '*.csv'))
-wbics = unlist(str_extract_all(all_inputs, perl('(?<=WBIC_)[0-9]+')))
+wbics = unlist(str_match_all(all_inputs, 'WBIC_([0-9]*)'))
+wbics = wbics[seq(2,length(wbics), by=2)]
 
 all_ice_inputs = data.frame()
 
@@ -66,15 +67,23 @@ for(i in 1:length(all_inputs)){
 	for(j in 1:length(uyears)){
 		
 		year_data = data[data$year >= uyears[j] & data$year <= (uyears[j]+1), ]
+		if(nrow(year_data) < 360){
+			next
+		}
 		year_airt_mean = airt_mean[airt_mean$year == uyears[j], ]
 		
 		n_airt_mean = nrow(year_airt_mean)
 		
 		#if we use the diff of the sign, we get a more discerning selection function
 		zero_sp_ind = min(which(diff(sign(year_airt_mean[1:182,]$mean30))==2))+1
-		zero_sp_datetime = with_tz(year_airt_mean$time[zero_sp_ind] + minutes(12*60), tzone = 'UTC')
-		tmp = sunAngle(zero_sp_datetime, latitude = latlon[1], longitude=latlon[2])
-		ang_sp = tmp$altitude
+		if(!is.infinite(zero_sp_ind)){
+			zero_sp_datetime = with_tz(year_airt_mean$time[zero_sp_ind] + minutes(12*60), tzone = 'UTC')
+			tmp = sunAngle(zero_sp_datetime, latitude = latlon[1], longitude=latlon[2])
+			ang_sp = tmp$altitude
+		}else{
+			zero_sp_ind = 1  #Set to start of year 
+			ang_sp = NA
+		}
 		
 		
 		zero_fl_ind = 182+min(which(diff(sign(year_airt_mean[183:n_airt_mean,]$mean30))==-2))
@@ -177,7 +186,7 @@ off.output$DATE = format(ISOdate(off.output$year, 1, 1) + (off.output$yday_off_p
 names(off.output) = c('WBIC','doy','ice.year','ON.OFF','DATE')
 
 
-write.table(rbind(off.output, on.output), '../supporting files/empirical.ice.tsv',
+write.table(rbind(off.output, on.output), 'inst/supporting_files/empirical.nldas.ice.tsv',
 						quote=FALSE, sep='\t', row.names=FALSE, col.names=TRUE)
 
 

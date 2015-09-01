@@ -5,6 +5,8 @@ library(foreach)
 library(dplyr)
 library(glmtools)
 
+fastdir = tempdir()
+
 obs = read.table(system.file('supporting_files/wtemp.obs.tsv', package = 'mda.lakes'), 
 								 sep='\t', header=TRUE, as.is=TRUE, , colClasses=c(WBIC='character'))
 obs$site_id = paste0('WBIC_', obs$WBIC)
@@ -13,9 +15,10 @@ secchi_obs = filter(secchi, source=='in-situ')
 
 #currently using in-situ secchi data, switch to all?
 #best_clarity = intersect(secchi_obs$site_id, turbidity$site_id)
-to_run = intersect(obs$site_id, secchi_obs$site_id)
+to_run = intersect(obs$site_id, secchi_obs$site_id)[1:2]
 
-results = data.frame(secchi_conf=seq(1.5, 2.2, by=0.1), sat_rmse=NA, sec_rmse=NA)
+results = data.frame(secchi_conf=seq(1.5, 1.9, by=0.1), sat_rmse=NA, sec_rmse=NA)
+
 for(j in 1:nrow(results)){
 	
 secchi_conv = results$secchi_conf[j]
@@ -26,7 +29,7 @@ insitu = foreach(site_id = to_run, .combine=rbind) %do%{
 	tryCatch({
 		get_driver_path(paste0(site_id, '.csv'))
 	
-	run_dir = paste0('E:/', site_id)
+	run_dir = paste0(fastdir, site_id)
 	dir.create(run_dir)
 	
 	bare_wbic = substr(site_id, 6, nchar(site_id))
@@ -38,10 +41,12 @@ insitu = foreach(site_id = to_run, .combine=rbind) %do%{
 	kds = group_by(kds, year) %>% summarise(secchi_m = mean(secchi_m)) %>%
 		filter(year >= 1979, year <= 2012)
 	
+	kd_avg = secchi_conv/mean(get_kd_year(site_id, src='in-situ')$secchi_m, na.rm=TRUE)
+	
 	prep_run_chained_glm_kd(site_id=bare_wbic, 
 													path=run_dir, 
-													years=kds$year, 
-													kd=secchi_conv/kds$secchi_m, 
+													years=1979:2012, 
+													kd=kd_avg, 
 													nml_args=list(
 														dt=3600, subdaily=FALSE, nsave=24, 
 														timezone=-6,
@@ -63,8 +68,7 @@ insitu = foreach(site_id = to_run, .combine=rbind) %do%{
 	unlink(run_dir, recursive=TRUE)
 	
 	cal.data
-	},
-	error = function(e){}, warning=function(w){})
+	}, error = function(e){}, warning=function(w){})
 }
 
 
@@ -75,7 +79,7 @@ satellite = foreach(site_id = to_run, .combine=rbind) %do%{
 	tryCatch({
 		get_driver_path(paste0(site_id, '.csv'))
 		
-		run_dir = paste0('E:/', site_id)
+		run_dir = paste0(fastdir, site_id)
 		dir.create(run_dir)
 		
 		bare_wbic = substr(site_id, 6, nchar(site_id))
@@ -87,12 +91,12 @@ satellite = foreach(site_id = to_run, .combine=rbind) %do%{
 		kds = group_by(kds, year) %>% summarise(secchi_m = mean(secchi_m)) %>%
 			filter(year >= 1979, year <= 2012)
 		
-		mean_secchi = get_kd_avg(site_id, src='satellite')
+		kd_avg = secchi_conv/mean(get_kd_year(site_id, src='satellite')$secchi_m, na.rm=TRUE)
 		
 		prep_run_chained_glm_kd(site_id=bare_wbic, 
 														path=run_dir, 
-														years=kds$year, 
-														kd=secchi_conv/mean_secchi$kd_avg, 
+														years=1979:2012, 
+														kd=kd_avg, 
 														nml_args=list(
 															dt=3600, subdaily=FALSE, nsave=24, 
 															timezone=-6,

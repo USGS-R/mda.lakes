@@ -1,5 +1,5 @@
 # Lets make a stratification heat map
-
+library(mda.lakes)
 library(plyr)
 library(dplyr)
 library(rLakeAnalyzer)
@@ -15,6 +15,7 @@ site_ids = unlist(lapply(dframes, function(l){l$site_id[1]}))
 #names(bathy) = c('depths', 'areas')
 
 tmp = dframes[[which(site_ids=='WBIC_1881900')]]
+
 tmp$site_id = NULL
 tmp$DateTime = as.POSIXct(tmp$DateTime)
 names(tmp) = tolower(names(tmp))
