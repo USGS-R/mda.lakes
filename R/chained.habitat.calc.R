@@ -187,9 +187,9 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     	mean.hyp.vol = mean(hyp.vols[start.end[1]:start.end[2]], na.rm=TRUE)
     }
     
-    misc.out[['mean.epi.vol']] = c(misc.out[['mean.epi.vol']], mean.epi.vol)
-    misc.out[['mean.hyp.vol']] = c(misc.out[['mean.hyp.vol']], mean.hyp.vol)
-    misc.out[['mean.epi.hypo.ratio']] = c(misc.out[['mean.epi.hypo.ratio']], mean.epi.vol/mean.hyp.vol)
+    misc.out[['mean_epi_vol']] = c(misc.out[['mean_epi_vol']], mean.epi.vol)
+    misc.out[['mean_hyp_vol']] = c(misc.out[['mean_hyp_vol']], mean.hyp.vol)
+    misc.out[['mean_epi_hypo_ratio']] = c(misc.out[['mean_epi_hypo_ratio']], mean.epi.vol/mean.hyp.vol)
     
     
     ## GDD calcs
