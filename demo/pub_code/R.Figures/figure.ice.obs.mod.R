@@ -4,10 +4,10 @@ library(nlme)
 library(zyp)
 library(plyr)
 
-ice = fread('../supporting files/ice.obs.tsv')
+ice = fread('inst/supporting_files/ice.obs.tsv')
 setkey(ice, on.off, wbic)
 
-ice.mod = read.table('../supporting files/empirical.ice.tsv', sep='\t', header=TRUE)
+ice.mod = read.table('inst/supporting_files/empirical.cm2.0.ice.tsv', sep='\t', header=TRUE)
 names(ice.mod) = tolower(names(ice.mod))
 ice.mod = data.table(ice.mod)
 setkey(ice.mod, on.off, wbic)

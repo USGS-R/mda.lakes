@@ -1,5 +1,5 @@
 # Lets make a stratification heat map
-
+library(mda.lakes)
 library(plyr)
 library(dplyr)
 library(rLakeAnalyzer)
@@ -7,13 +7,14 @@ library(reshape2)
 library(lubridate)
 #Analyze!
 
-load('~/FUTURE_GENMOM.Rdata')
+load('D:/BigDatasets/WiLMA/FUTURE_GENMOM.Rdata')
 site_ids = unlist(lapply(dframes, function(l){l$site_id[1]}))
 
-bathy = getBathy('805400')
+bathy = getBathy('1842400')
 names(bathy) = c('depths', 'areas')
+rm(dframes)
 
-tmp = dframes[[which(site_ids=='WBIC_805400')]]
+tmp = dframes[[which(site_ids=='WBIC_1842400')]]
 tmp$site_id = NULL
 tmp$DateTime = as.POSIXct(tmp$DateTime)
 names(tmp) = tolower(names(tmp))
