@@ -3,13 +3,13 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4042)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4041)
 
 
 clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('rLakeAnalyzer', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('dplyr', repos='http://cran.rstudio.com')})
-
+clusterCall(c1, function(){install.packages('lubridate', repos='http://cran.rstudio.com')})
 
 clusterCall(c1, function(){library(devtools)})
 
@@ -19,15 +19,52 @@ lakeattr_install = clusterCall(c1, function(){install_github('lawinslow/lakeattr
 mdalakes_install = clusterCall(c1, function(){install_github('lawinslow/mda.lakes')})
 
 library(lakeattributes)
+library(lubridate)
 library(mda.lakes)
 library(dplyr)
 library(glmtools)
+
+
+read_debias = function(prism_path, dscale_path, dbiased_path, shortwave=FALSE){
+  library(dplyr)
+  library(lubridate)
+  
+  dscale = read.csv(dscale_path, header=TRUE)
+  obs = read.csv(prism_path, header=TRUE)
+  
+  dbiased = dscale
+  
+  names(obs) = paste0('obs_', names(obs))
+  names(obs)[1] = 'time'
+  
+  #prism is monthly avg, so avg dscale to monthly first
+  
+  mon_dscale = group_by(dscale, year = year(as.POSIXct(time)), month=month(as.POSIXct(time))) %>% 
+    summarise(AirTemp=mean(AirTemp)) 
+  mon_dscale$time = as.character(ISOdate(mon_dscale$year, mon_dscale$month, 1, hour = 0))
+  
+  overlap = merge(obs, mon_dscale , by='time')
+  
+  builk_emis = dscale$LongWave/(5.67E-8 * (dscale$AirTemp + 273.13)^4)
+  
+  #debias airT with offset model
+  dbiased$AirTemp = dbiased$AirTemp + (mean(overlap$obs_AirTemp) - mean(overlap$AirTemp))
+  
+  dbiased$LongWave = builk_emis * 5.67E-8 * (dbiased$AirTemp + 273.13)^4
+  
+  if(missing(dbiased_path)){
+    return(dbiased)
+  }else{
+    write.csv(dbiased, dbiased_path, row.names=FALSE, quote=FALSE)
+  }
+}
+
 
 obs = read.table(system.file('supporting_files/wtemp.obs.tsv', package = 'mda.lakes'), 
                  sep='\t', header=TRUE, as.is=TRUE, , colClasses=c(WBIC='character'))
 to_run = unique(paste0('WBIC_', obs$WBIC))
 
-clusterExport(c1, varlist = 'debias_drivers')
+clusterExport(c1, varlist = 'read_debias')
 
 downscale_cal_out = function(site_id){
   
@@ -71,7 +108,7 @@ downscale_cal_out = function(site_id){
     
     #driver_path = get_driver_path(paste0(site_id, '.csv'), 'GENMOM', loc_cache=FALSE)
     driver_path = tempfile(fileext='.csv')
-    debias_drivers(get_driver_path(paste0(site_id, '.csv'), 'NLDAS'),
+    read_debias(get_driver_path(paste0(site_id, '.csv'), 'PRISM'),
                            get_driver_path(paste0(site_id, '.csv'), 'GENMOM'), 
                            dbiased_path=driver_path, shortwave=TRUE)
     
@@ -106,6 +143,12 @@ downscale_cal_out = function(site_id){
     cal.data
     
   }, error=function(e){unlink(run_dir, recursive=TRUE);e})
+}
+
+for(i in 1:length(c1)){
+  tryCatch({
+  clusterCall(c1[i], 1, function(){R.version})
+  cat(i, ',')}, error=function(e){})
 }
 
 

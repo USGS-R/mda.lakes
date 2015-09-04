@@ -3,7 +3,7 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4043)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4044)
 
 
 clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})

@@ -4,7 +4,7 @@ library(parallel)
 
 #Build cluster
 c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4043)
-
+#c1 = makePSOCKcluster('localhost')
 
 clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('rLakeAnalyzer', repos='http://cran.rstudio.com')})
@@ -79,5 +79,5 @@ out = clusterApplyLB(c1, to_run, model_habitat)
 
 all_habitat = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
 
-write.table(all_habitat, '~/2015-06-15_gretchen_secchi_hierarchy.tsv', sep='\t', row.names=FALSE)
+write.table(all_habitat, '~/2015-06-24_gretchen_secchi_hierarchy.tsv', sep='\t', row.names=FALSE)
 

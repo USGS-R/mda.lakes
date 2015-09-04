@@ -1,11 +1,14 @@
 #From buildIceOffFiles.m
 
+library(mda.lakes)
 library(oce)
 library(stringr)
 library(lubridate)
 library(zoo)
 library(plyr)
-#source("Libraries/GLM.functions.R")
+
+
+
 
 ################################################################################
 ## Load validation ice on/off data
@@ -37,7 +40,7 @@ names(ice_off) = c('WBIC', 'year', 'month', 'day','yday_off')
 ## Generate all driver data for all WBICS
 ################################################################################
 
-driver_root = 'D:/test/GLM_NLDAS'
+driver_root = 'C:/test/GLM_NLDAS'
 
 all_inputs = Sys.glob(file.path(driver_root, '*.csv'))
 wbics = unlist(str_match_all(all_inputs, 'WBIC_([0-9]*)'))
@@ -185,9 +188,14 @@ off.output$ON.OFF = 'off'
 off.output$DATE = format(ISOdate(off.output$year, 1, 1) + (off.output$yday_off_predict-1) *24*60*60, '%F')
 names(off.output) = c('WBIC','doy','ice.year','ON.OFF','DATE')
 
+#This code could be used to fill in missing years if no ice on/off modeled
+#WBICs = unique(off.output$WBIC)
+#years = c(1980:1999, 2020:2089)
+#complete = data.frame(ice.year=sort(rep(years, length(WBICs))), WBIC=WBICs)
+#off.output = merge(complete, off.output, all.x=TRUE)
 
 write.table(rbind(off.output, on.output), 'inst/supporting_files/empirical.nldas.ice.tsv',
 						quote=FALSE, sep='\t', row.names=FALSE, col.names=TRUE)
 
-
+save.image(file='~/NLDAS_ICE.Rdata')
 

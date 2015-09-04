@@ -11,9 +11,7 @@ driver$time = as.POSIXct(driver$time)
 vars = names(driver)[-1]
 
 for(i in 1:length(vars)){
-
-	
-	
+  
   driver_slopes = sens_seasonal_site(year(driver$time), data = driver[,vars[i]], season_i = week(driver$time))
   
   season_slopes = ddply(driver_slopes, 'season_i', function(df){data.frame(med=median(df$slopes))})
