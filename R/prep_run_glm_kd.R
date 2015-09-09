@@ -3,6 +3,10 @@
 #'@param site_id 
 #'@param path Directy to start and run model
 #'@param kd Directly supplied kd value (if different value getClarity desired)
+#'@param years 
+#'Vector of numeric years to simulate. Will simulate from Apr 01 of the 
+#'first year to March 01 of the last year + 1
+#'
 #'@param nml_args Arguments for nml file to override defaults
 #'
 #'
@@ -24,9 +28,7 @@
 #'@import glmtools
 #'@import GLMr
 #'@export
-prep_run_glm_kd <- function(site_id, path, 
-																start=as.POSIXct('2008-04-01'), 
-																end=as.POSIXct('2008-06-01'), 
+prep_run_glm_kd <- function(site_id, path, years,
 																kd = getClarity(site_id, default.if.null=TRUE), 
 																nml_args=NULL){
 	
@@ -39,9 +41,12 @@ prep_run_glm_kd <- function(site_id, path,
 		nml_obj = set_nml(nml_obj, arg_list=nml_args)
 	}
 	
+	start = paste0(years[1], '-04-01 00:00:00')
+	end  = paste0( (years[length(years)] + 1), '-03-01 00:00:00') 
 	
-	nml_obj = set_nml(nml_obj, 'start', format(as.POSIXct(start), '%Y-%m-%d %H:%M:%S'))
-	nml_obj = set_nml(nml_obj, 'stop', format(as.POSIXct(end), '%Y-%m-%d %H:%M:%S'))
+	nml_obj[['sed_heat']] = NULL  # Drop sediment heating if it is there
+	nml_obj = set_nml(nml_obj, 'start', start)
+	nml_obj = set_nml(nml_obj, 'stop',  end)
 	nml_obj = set_nml(nml_obj, 'out_fn', 'output')
 	nml_obj = set_nml(nml_obj, 'Kw', kd)
 	

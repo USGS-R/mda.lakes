@@ -4,14 +4,16 @@
 \alias{prep_run_glm_kd}
 \title{Prepare and run  model with Kd scenario}
 \usage{
-prep_run_glm_kd(site_id, path, start = as.POSIXct("2008-04-01"),
-  end = as.POSIXct("2008-06-01"), kd = getClarity(site_id, default.if.null =
-  TRUE), nml_args = NULL)
+prep_run_glm_kd(site_id, path, years, kd = getClarity(site_id, default.if.null
+  = TRUE), nml_args = NULL)
 }
 \arguments{
 \item{site_id}{}
 
 \item{path}{Directy to start and run model}
+
+\item{years}{Vector of numeric years to simulate. Will simulate from Apr 01 of the
+first year to March 01 of the last year + 1}
 
 \item{kd}{Directly supplied kd value (if different value getClarity desired)}
 
