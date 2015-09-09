@@ -96,6 +96,9 @@ future_wtr_out = function(site_id){
     to_keep = !(years <= min(years) + nburn - 1)
     wtr_all = wtr[to_keep, ]
     
+    
+    habitat = continuous.habitat.calc(run_dir, lakeid=site_id)
+    
     secchi = get_kd_best(site_id, years=future_era)
     
     prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=future_era,
@@ -114,9 +117,13 @@ future_wtr_out = function(site_id){
     
     wtr_all = rbind(wtr_all, wtr)
     
+    
+    ##now hab
+    habitat = rbind(habitat, continuous.habitat.calc(run_dir, lakeid=site_id))
+    
     unlink(run_dir, recursive=TRUE)
     
-    all_data = list(wtr_all, site_id)
+    all_data = list(wtr_all, habitat, site_id)
 
     return(all.data)
     
@@ -125,6 +132,7 @@ future_wtr_out = function(site_id){
 
 
 out = clusterApplyLB(c1, to_run, future_wtr_out)
+
 
 stop('below code still needs fixing')
 
