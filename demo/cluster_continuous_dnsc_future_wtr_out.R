@@ -114,7 +114,6 @@ future_wtr_out = function(site_id){
     
     wtr_all = rbind(wtr_all, wtr)
     
-    
     unlink(run_dir, recursive=TRUE)
     
     all_data = list(wtr_all, site_id)
@@ -126,6 +125,8 @@ future_wtr_out = function(site_id){
 
 
 out = clusterApplyLB(c1, to_run, future_wtr_out)
+
+stop('below code still needs fixing')
 
 dframes = out[unlist(lapply(out, inherits, what='data.frame'))]
 
