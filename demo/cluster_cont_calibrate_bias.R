@@ -5,6 +5,7 @@
 #'   
 #local_url = '192.0.2.1:4040'
 
+local_url = paste0((Sys.info()["nodename"]),':4040')
 library(parallel)
 
 #lets try 50 to start
@@ -24,7 +25,7 @@ clusterCall(c1, function(){library(devtools)})
 glmr_install     = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/GLMr_3.1.4.tar.gz'))})
 glmtools_install = clusterCall(c1, function(){install_github('lawinslow/glmtools')})
 lakeattr_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/lakeattributes_0.3.0.tar.gz'))})
-mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_2.9.0.tar.gz'))})
+mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_2.10.0.tar.gz'))})
 
 library(lakeattributes)
 library(mda.lakes)

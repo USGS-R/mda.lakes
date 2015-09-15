@@ -3,10 +3,10 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4041)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4042)
 
 
-clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
+#clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('rLakeAnalyzer', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('dplyr', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('lubridate', repos='http://cran.rstudio.com')})

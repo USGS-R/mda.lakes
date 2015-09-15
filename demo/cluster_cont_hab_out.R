@@ -3,10 +3,10 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4042)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4041)
 
-
-clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
+# now devtools installed on cluster
+#clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('rLakeAnalyzer', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('dplyr', repos='http://cran.rstudio.com')})
 clusterCall(c1, function(){install.packages('lubridate', repos='http://cran.rstudio.com')})
@@ -27,22 +27,6 @@ library(reshape2)
 
 Sys.setenv(TZ='GMT')
 
-#duplicate two years of initial data
-get_driver_with_burnin = function(fname, driver_name, nyears=2){
-	drivers = read.csv(get_driver_path(fname, driver_name), header=TRUE)
-	drivers$time = as.POSIXct(drivers$time)
-	
-	for(i in 1:nyears){
-		to_dup = drivers[1:365, ]
-		to_dup$time = to_dup$time - as.difftime(365, units='days')  #drop 365 days from the date/time col
-		drivers = rbind(to_dup, drivers)
-	}
-	
-	new_fpath = tempfile(fileext='.csv')
-	write.table(drivers, new_fpath, quote=FALSE, row.names=FALSE, col.names=TRUE, sep=',')
-	return(new_fpath)
-}
-
 
 lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package = 'mda.lakes'), 
                    sep='\t', quote="\"", header=TRUE, as.is=TRUE, colClasses=c(WBIC='character'))
@@ -50,10 +34,9 @@ lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package
 to_run = paste0('WBIC_', lakes$WBIC)
 
 
-future_wtr_out = function(site_id){
-  nburn = 2
-  modern_era = 1977:1999 #with 2 burn-in years
-  future_era = 2040:2069 #will drop first two years
+future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=get_driver_path){
+  
+  modern_era = years
   
   library(lakeattributes)
   library(mda.lakes)
@@ -75,12 +58,13 @@ future_wtr_out = function(site_id){
     
     bare_wbic = substr(site_id, 6, nchar(site_id))
     
-    driver_path = get_driver_with_burnin(paste0(site_id, '.csv'), 'ECHAM5', nyears=nburn)
+    driver_path = driver_function(site_id)
     driver_path = gsub('\\\\', '/', driver_path)
     
     #run with different driver and ice sources
     
-    prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=modern_era,
+    prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, 
+                            years=modern_era,
                             nml_args=list(
                               dt=3600, subdaily=FALSE, nsave=24, 
                               timezone=-6,
@@ -90,48 +74,66 @@ future_wtr_out = function(site_id){
     
     
     ##parse the habitat and WTR info. next run will clobber output.nc
-    wtr = get_temp(file.path(run_dir, 'output.nc'), reference='surface')
+    wtr_all = get_temp(file.path(run_dir, 'output.nc'), reference='surface')
     ## drop the first n burn-in years
-    years = as.POSIXlt(wtr$DateTime)$year + 1900
-    to_keep = !(years <= min(years) + nburn - 1)
-    wtr_all = wtr[to_keep, ]
+    #years = as.POSIXlt(wtr$DateTime)$year + 1900
+    #to_keep = !(years <= min(years) + nburn - 1)
+    #wtr_all = wtr[to_keep, ]
     
     
-    habitat = continuous.habitat.calc(run_dir, lakeid=site_id)
+    habitat = continuous.habitat.calc(run_dir, lakeid=bare_wbic)
     
-    secchi = get_kd_best(site_id, years=future_era)
-    
-    prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, years=future_era,
-                            nml_args=list(
-                              dt=3600, subdaily=FALSE, nsave=24, 
-                              timezone=-6,
-                              csv_point_nlevs=0, 
-                              meteo_fl=driver_path,
-                              snow_albedo_factor=1.1))
-    
-    wtr = get_temp(file.path(run_dir, 'output.nc'), reference='surface', z_out = get.offsets(wtr))
-    ## drop the first n burn-in years
-    years = as.POSIXlt(wtr$DateTime)$year + 1900
-    to_keep = !(years <= min(years) + nburn - 1)
-    wtr = wtr[to_keep, ]
-    
-    wtr_all = rbind(wtr_all, wtr)
-    
-    
-    ##now hab
-    habitat = rbind(habitat, continuous.habitat.calc(run_dir, lakeid=site_id))
+    #Run future era only if requested
+    if(!missing(future_era)){
+      secchi = get_kd_best(site_id, years=future_era)
+      
+      prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, 
+                              years=future_era,
+                              nml_args=list(
+                                dt=3600, subdaily=FALSE, nsave=24, 
+                                timezone=-6,
+                                csv_point_nlevs=0, 
+                                meteo_fl=driver_path,
+                                snow_albedo_factor=1.1))
+      
+      wtr = get_temp(file.path(run_dir, 'output.nc'), reference='surface', z_out = get.offsets(wtr))
+      ## drop the first n burn-in years
+      #years = as.POSIXlt(wtr$DateTime)$year + 1900
+      #to_keep = !(years <= min(years) + nburn - 1)
+      #wtr = wtr[to_keep, ]
+      
+      wtr_all = rbind(wtr_all, wtr)
+      
+      
+      ##now hab
+      habitat = rbind(habitat, continuous.habitat.calc(run_dir, lakeid=bare_wbic))
+    }
     
     unlink(run_dir, recursive=TRUE)
     
     all_data = list(wtr_all, habitat, site_id)
 
-    return(all.data)
+    return(all_data)
     
   }, error=function(e){unlink(run_dir, recursive=TRUE);e})
 }
 
+################################################################################
+## Lets run nldas
+################################################################################
+driver_fun = function(site_id){get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS')}
 
-out = clusterApplyLB(c1, to_run, future_wtr_out)
+out = clusterApplyLB(c1, to_run, future_hab_wtr, years=1979:2012, driver_function=driver_fun)
+
+################################################################################
+## Lets run GENMOM
+################################################################################
+driver_fun = function(site_id){
+  drivers = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'GENMOM'), header=TRUE)
+  nldas   = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
+  drivers = driver_nldas_debias_airt_sw(drivers, nldas)
+  driver_save(drivers)
+}
 
 
 stop('below code still needs fixing')
