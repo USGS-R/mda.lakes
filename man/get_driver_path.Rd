@@ -4,12 +4,16 @@
 \alias{get_driver_path}
 \title{Return driver file location for given lake}
 \usage{
-get_driver_path(fname, driver_name = "NLDAS", loc_cache = TRUE)
+get_driver_path(fname, driver_name = "NLDAS", loc_cache = TRUE, ...)
 }
 \arguments{
 \item{fname}{Name of the file, generally based on the unique site_id}
 
 \item{driver_name}{The driver source name, options ('NLDAS', 'CM2.0', 'GENMOM', 'ECHAM5')}
+
+\item{loc_cache}{Should the locally cached version of the driver file be used if available.}
+
+\item{...}{Extra parameters are ignored}
 }
 \description{
 This functoin returns a path to the driver file for a lake. Retrieve and cache
