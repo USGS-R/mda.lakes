@@ -6,10 +6,10 @@ getDaysBetweenT.continuous <-  function(wtr, temperatureLow, temperatureHigh, an
 	# ANY or ALL depths, default is ANY
 	temp <- wtr
 	if (anyDep==TRUE){
-		tempRangeCount  <-  sum(apply(temp,1,function(x) any(x>=temperatureLow,na.rm=TRUE) & any(x<=temperatureHigh,na.rm=TRUE)))
+		tempRangeCount  <-  sum(apply(temp,1,function(x) any(x>=temperatureLow,na.rm=TRUE & x<=temperatureHigh,na.rm=TRUE)))
 	}else{
-		tempRangeCount  <-  sum(apply(temp,1,function(x) all(x>=temperatureLow,na.rm=TRUE) 
-																	& all(x<=temperatureHigh,na.rm=TRUE)))
+		tempRangeCount  <-  sum(apply(temp,1,function(x) all(x>=temperatureLow,na.rm=TRUE 
+																	& x<=temperatureHigh,na.rm=TRUE)))
 	}
 	return(tempRangeCount)
 }

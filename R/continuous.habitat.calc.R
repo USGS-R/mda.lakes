@@ -102,7 +102,7 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		
 		for(j in 1:nrow(day.tmp.ranges)){
 			name = paste('days', day.tmp.ranges[j,1], day.tmp.ranges[j,2], sep='_')
-			days.out[[name]] = c(days.out[[name]], getDaysBetweenT.continuous(wtr, day.tmp.ranges[j,1], day.tmp.ranges[j,2]))
+			days.out[[name]] = c(days.out[[name]], getDaysBetweenT.continuous(getTemp(wtr), day.tmp.ranges[j,1], day.tmp.ranges[j,2]))
 		}
 		
 		
