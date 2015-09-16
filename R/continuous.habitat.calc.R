@@ -18,6 +18,22 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 	all_raw_date = all_wtr[,1]
 	all_raw_z    = get_raw(nc.file, 'z')
   
+  ## bunch of stuff for opt-therm hab
+	nml = read_nml(nml.file)
+	hypso = get_hypsography(nml)
+	kd = get_nml_value(nml, 'Kw')
+	lat = get_nml_value(nml, 'latitude')
+	lon = get_nml_value(nml, 'longitude')
+	
+  names(hypso) = c('depth', 'area')
+	hypso = interp_hypso(hypso, dz=0.1, force_zero_area = TRUE)
+	
+	#also extract temp at the same resolution as hypsography. This will help us standardize across light and temp
+	all_opt_wtr = get_temp(nc.file, z_out=hypso$depth, reference='surface')
+	
+	all_io = get_var(nc.file, 'I_0')
+  
+  
   ice_onoff = get_ice_onoff(all_ice, all_wtr)
 	years = ice_onoff$year
 	
@@ -69,6 +85,9 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		
 		wtr = subset(all_wtr, DateTime >= onoff$off & DateTime <= onoff$on)
 		ice = subset(all_ice, DateTime >= onoff$off & DateTime <= onoff$on)
+		opt_wtr = subset(all_opt_wtr, DateTime >= onoff$off & DateTime <= onoff$on)
+    io  = subset(all_io, DateTime >= onoff$off & DateTime <= onoff$on)
+    
 		surfT = wtr[,(which.min(get.offsets(wtr))+1)]
 		
 		raw_ind = all_raw_date >= onoff$off & all_raw_date <= onoff$on
@@ -151,21 +170,20 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		# Converted light thresholds to W/m^2 using Luminous efficacy of daylight from Littlefair 1985 (105 lm/W)
 		# light = 0.0762 to 0.6476
 
-		#TODO: Fix the opti-thermal habitat calcs		
-# 		oti = opti_thermal_habitat(nc_file=GLMnc, nml_file=nml.file, irr_thresh = c(0.0762, 0.6476), 
-# 															 wtr_thresh=c(11,25), interp_hour=TRUE, area_type="benthic")
-# 		
-# 		misc.out[['optic_hab_8_64']] = c(misc.out[['optic_hab_8_64']], oti$opti_hab)
-# 		misc.out[['thermal_hab_11_25']] = c(misc.out[['thermal_hab_11_25']], oti$therm_hab)
-# 		misc.out[['optic_thermal_hab']] = c(misc.out[['optic_thermal_hab']], oti$opti_therm_hab)
-# 		
-# 		
-# 		oti_surf = opti_thermal_habitat(nc_file=GLMnc, nml_file=nml.file, irr_thresh = c(0.0762, 0.6095), 
-# 																		wtr_thresh=c(11,25), interp_hour=TRUE, area_type="surface")
-# 		
-# 		misc.out[['optic_hab_8_64_surf']] = c(misc.out[['optic_hab_8_64_surf']], oti_surf$opti_hab)
-# 		misc.out[['thermal_hab_11_25_surf']] = c(misc.out[['thermal_hab_11_25_surf']], oti_surf$therm_hab)
-# 		misc.out[['optic_thermal_hab_surf']] = c(misc.out[['optic_thermal_hab_surf']], oti_surf$opti_therm_hab)
+ 		oti = opti_thermal_habitat(opt_wtr, io, kd, lat, lon, hypso, irr_thresh = c(0.0762, 0.6476), 
+ 															 wtr_thresh=c(11,25), interp_hour=TRUE, area_type="benthic")
+ 		
+		misc.out[['optic_hab_8_64']] = c(misc.out[['optic_hab_8_64']], oti$opti_hab)
+		misc.out[['thermal_hab_11_25']] = c(misc.out[['thermal_hab_11_25']], oti$therm_hab)
+		misc.out[['optic_thermal_hab']] = c(misc.out[['optic_thermal_hab']], oti$opti_therm_hab)
+ 		
+ 		
+		oti_surf = opti_thermal_habitat(opt_wtr, io, kd, lat, lon, hypso, irr_thresh = c(0.0762, 0.6095), 
+																		wtr_thresh=c(11,25), interp_hour=TRUE, area_type="surface")
+ 		
+		misc.out[['optic_hab_8_64_surf']] = c(misc.out[['optic_hab_8_64_surf']], oti_surf$opti_hab)
+		misc.out[['thermal_hab_11_25_surf']] = c(misc.out[['thermal_hab_11_25_surf']], oti_surf$therm_hab)
+		misc.out[['optic_thermal_hab_surf']] = c(misc.out[['optic_thermal_hab_surf']], oti_surf$opti_therm_hab)
 		
 		hypso = getBathy(lakeid)
 		misc.out[['lake_benthic_area']] = c(misc.out[['lake_benthic_area']], sum(benthic_areas(hypso$depth, hypso$area)))

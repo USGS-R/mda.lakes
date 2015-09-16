@@ -4,8 +4,9 @@
 \alias{opti_thermal_habitat}
 \title{Calculate optical thermal habitat using temp and light thresholds}
 \usage{
-opti_thermal_habitat(nc_file, nml_file, irr_thresh = c(0, 2000),
-  wtr_thresh = c(0, 25), area_type = "benthic", interp_hour = FALSE)
+opti_thermal_habitat(opt_wtr, io, kd, lat, lon, hypso, irr_thresh = c(0,
+  2000), wtr_thresh = c(0, 25), area_type = "benthic",
+  interp_hour = FALSE)
 }
 \arguments{
 \item{interp_hour}{Interpolate to hourly data (and )}
