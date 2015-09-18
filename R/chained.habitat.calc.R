@@ -167,7 +167,8 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
     
     misc.out[['SthermoD_mean']] = c(misc.out[['SthermoD_mean']], mean(t.d$thermo.depth[start.end[1]:start.end[2]], na.rm=TRUE))
-    misc.out[['metaTopD_mean']] = c(misc.out[['metaTopD_mean']], mean(m.d$top[start.end[1]:start.end[2]], na.rm=TRUE))
+    misc.out[['SmetaTopD_mean']] = c(misc.out[['SmetaTopD_mean']], mean(m.d$top[start.end[1]:start.end[2]], na.rm=TRUE))
+    misc.out[['SmetaBotD_mean']] = c(misc.out[['SmetaBotD_mean']], mean(m.d$bottom[start.end[1]:start.end[2]], na.rm=TRUE))
     
     ## Get epi and hypo volumes
     water.level = water.level.glm(GLMnc)
@@ -186,9 +187,9 @@ chained.habitat.calc = function(run.path, output.path=NULL, lakeid){
     	mean.hyp.vol = mean(hyp.vols[start.end[1]:start.end[2]], na.rm=TRUE)
     }
     
-    misc.out[['mean.epi.vol']] = c(misc.out[['mean.epi.vol']], mean.epi.vol)
-    misc.out[['mean.hyp.vol']] = c(misc.out[['mean.hyp.vol']], mean.hyp.vol)
-    misc.out[['mean.epi.hypo.ratio']] = c(misc.out[['mean.epi.hypo.ratio']], mean.epi.vol/mean.hyp.vol)
+    misc.out[['mean_epi_vol']] = c(misc.out[['mean_epi_vol']], mean.epi.vol)
+    misc.out[['mean_hyp_vol']] = c(misc.out[['mean_hyp_vol']], mean.hyp.vol)
+    misc.out[['mean_epi_hypo_ratio']] = c(misc.out[['mean_epi_hypo_ratio']], mean.epi.vol/mean.hyp.vol)
     
     
     ## GDD calcs

@@ -4,7 +4,7 @@
 \alias{getIceOn}
 \title{Get the ice on date for a given lake}
 \usage{
-getIceOn(WBIC, year)
+getIceOn(WBIC, year, fname = "empirical.ice.tsv")
 }
 \arguments{
 \item{year}{The year for which you need the ice-on date}

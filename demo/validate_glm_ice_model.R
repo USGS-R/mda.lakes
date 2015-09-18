@@ -1,5 +1,7 @@
 
 library(glmtools)
+library(mda.lakes)
+
 Sys.setenv(TZ='GMT')
 
 ice_data = read.table(system.file('supporting_files/Validation/ice_data.csv', package='mda.lakes'), header=TRUE, sep=',', as.is=TRUE)
@@ -51,11 +53,12 @@ glm_ice = rbind(tmp_on, tmp_off)
 ##########################################################################################
 
 ice_obs = read.table(system.file('supporting_files/ice.obs.tsv', package='mda.lakes'), sep='\t', header=TRUE)
+names(ice_obs) = tolower(names(ice_obs))
 ice_obs = ice_obs[,c('wbic', 'ice.year', 'doy', 'on.off')]
 ice_obs$doy[ice_obs$doy < 0] = ice_obs$doy[ice_obs$doy < 0] + 365
 
 
-both_ice = merge(ice_obs, glm_ice)
+both_ice = merge(ice_obs, glm_ice, by=c('wbic', 'ice.year', 'on.off'))
 both_ice$emp_doy = NA
 
 uyear = unique(both_ice$ice.year)
@@ -67,6 +70,7 @@ for(i in 1:length(uyear)){
 	
 	indx = both_ice$ice.year == uyear[i] & both_ice$on.off == 'off'
 	both_ice$emp_doy[indx] = getIceOff(both_ice$wbic[indx], uyear[i])
+	cat(i,'\n')
 }
 
 both_ice$emp_doy = as.POSIXlt(both_ice$emp_doy)$yday+1
@@ -76,11 +80,21 @@ both_ice$emp_doy[flip_indx] = both_ice$emp_doy[flip_indx] + 365
 plot(both_ice$doy, both_ice$emp_doy, ylab='Modeled', xlab='Observed')
 points(both_ice$doy, both_ice$glm_doy, col='red')
 abline(0,1)
+legend('topleft', legend=c('Shuter et al', 'GLM'), pch=1, col=c('black', 'red'))
 
 tmp = both_ice[both_ice$on.off == 'on', ]
 plot(tmp$doy, tmp$emp_doy, ylab='Modeled', xlab='Observed')
 points(tmp$doy, tmp$glm_doy, col='red')
 abline(0,1)
+title('Ice on')
+legend('topleft', legend=c('Shuter et al', 'GLM'), pch=1, col=c('black', 'red'))
+
+tmp = both_ice[both_ice$on.off == 'off', ]
+plot(tmp$doy, tmp$emp_doy, ylab='Modeled', xlab='Observed')
+points(tmp$doy, tmp$glm_doy, col='red')
+abline(0,1)
+title('Ice on')
+legend('topleft', legend=c('Shuter et al', 'GLM'), pch=1, col=c('black', 'red'))
 
 
 ##We are shooting for an ~8.5 day mean absolute error as reported in Shuter et al 2013
@@ -89,6 +103,18 @@ cat('Mean Absolute Errors\n')
 mean(abs(both_ice$glm_doy - both_ice$doy))
 mean(abs(both_ice[both_ice$on.off=='on',]$glm_doy - both_ice[both_ice$on.off=='on',]$doy))
 mean(abs(both_ice[both_ice$on.off=='off',]$glm_doy - both_ice[both_ice$on.off=='off',]$doy))
+
+cat('STD of GLM Overall, on and off date/time')
+cat('Standard Deviation\n')
+sd((both_ice$glm_doy - both_ice$doy))
+sd((both_ice[both_ice$on.off=='on',]$glm_doy - both_ice[both_ice$on.off=='on',]$doy))
+sd((both_ice[both_ice$on.off=='off',]$glm_doy - both_ice[both_ice$on.off=='off',]$doy))
+
+cat('Bias of GLM Overall, on and off date/time')
+cat('Bias\n')
+mean((both_ice$glm_doy - both_ice$doy))
+mean((both_ice[both_ice$on.off=='on',]$glm_doy - both_ice[both_ice$on.off=='on',]$doy))
+mean((both_ice[both_ice$on.off=='off',]$glm_doy - both_ice[both_ice$on.off=='off',]$doy))
 
 cat('MAE of empirical model overall, on and off date/time')
 cat('Mean Absolute Errors\n')
@@ -103,6 +129,12 @@ summary(lm(tmp$emp_doy ~ tmp$glm_doy))$r.squared
 summary(lm(tmp$doy ~ tmp$glm_doy))$r.squared
 summary(lm(tmp$doy ~ tmp$emp_doy))$r.squared
 
+
+cat('RMSE of GLM model overall, on and off date/time')
+cat('RMSE\n')
+mean(sqrt(mean((both_ice$emp_doy - both_ice$doy)^2)))
+mean(sqrt(mean((both_ice[both_ice$on.off=='on',]$emp_doy - both_ice[both_ice$on.off=='on',]$doy)^2)))
+mean(sqrt(mean((both_ice[both_ice$on.off=='off',]$emp_doy - both_ice[both_ice$on.off=='off',]$doy)^2)))
 
 
 

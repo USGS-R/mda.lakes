@@ -10,23 +10,23 @@
 #'
 #'
 #'@export
-opti_thermal_habitat = function(nc_file, nml_file, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE){
+opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE){
 	
-	nml = read_nml(nml_file)
-	
-	kd = get_nml_value(nml, 'Kw')
-	lat = get_nml_value(nml, 'latitude')
-	lon = get_nml_value(nml, 'longitude')
-	
-	#get hypso data and interp to standard resolution
-	hypso = get_hypsography(nml)
-	names(hypso) = c('depth', 'area')
-	hypso = interp_hypso(hypso, dz=0.1, force_zero_area = TRUE)
-	
+# 	nml = read_nml(nml_file)
+# 	
+# 	kd = get_nml_value(nml, 'Kw')
+# 	lat = get_nml_value(nml, 'latitude')
+# 	lon = get_nml_value(nml, 'longitude')
+# 	
+# 	#get hypso data and interp to standard resolution
+# 	hypso = get_hypsography(nml)
+# 	names(hypso) = c('depth', 'area')
+# 	hypso = interp_hypso(hypso, dz=0.1, force_zero_area = TRUE)
+# 	
 	#also extract temp at the same resolution as hypsography. This will help us standardize across light and temp
-	wtr = get_temp(nc_file, z_out=hypso$depth, reference='surface')
+	wtr = opt_wtr
 	
-	io = get_var(nc_file, 'I_0')
+#	io = get_var(nc_file, 'I_0')
 	
 	#Now, if we are going to interp this, we need to interp io and wtr to at least hourly or so
 	if(interp_hour){
