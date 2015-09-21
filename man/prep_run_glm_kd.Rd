@@ -5,7 +5,7 @@
 \title{Prepare and run  model with Kd scenario}
 \usage{
 prep_run_glm_kd(site_id, path, years, kd = getClarity(site_id, default.if.null
-  = TRUE), nml_args = NULL)
+  = TRUE), nml_args = NULL, sed_heat = FALSE)
 }
 \arguments{
 \item{site_id}{}

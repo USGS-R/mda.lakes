@@ -90,7 +90,8 @@ driver_nldas_debias_airt_sw = function(drivers, nldas){
 #'@param months The numeric months to add rain (Defaults to summer months 7-9)
 #'@param rain_add Amount of rain to add across the months in meters
 #'
-#'@details 
+#'@details This is used to artificially add rain to a met file during 
+#'specific months (when it will impact heat budget the least).
 #'
 #'@export
 driver_add_rain = function(drivers, months=7:9, rain_add=1){
