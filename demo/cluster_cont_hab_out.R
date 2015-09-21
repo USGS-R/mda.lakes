@@ -125,6 +125,7 @@ driver_fun = function(site_id){
   nldas = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
   drivers = driver_nldas_wind_debias(nldas)
   drivers = driver_add_burnin_years(drivers, nyears=2)
+  drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
   driver_save(drivers)
 }
 
@@ -152,6 +153,7 @@ driver_fun = function(site_id, gcm){
   nldas   = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
   drivers = driver_nldas_debias_airt_sw(drivers, nldas)
   drivers = driver_add_burnin_years(drivers, nyears=2)
+  drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
   driver_save(drivers)
 }
 
