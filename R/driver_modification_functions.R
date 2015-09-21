@@ -42,6 +42,7 @@ driver_add_burnin_years = function(drivers, nyears=2){
   return(drivers)
 }
 
+
 #'@title Debias a driver dataset using NLDAS
 #'
 #'@description Debiases airT and SW based on a linear model of driver to NLDAS
@@ -82,6 +83,33 @@ driver_nldas_debias_airt_sw = function(drivers, nldas){
   #write.csv(dbiased, driver_path, row.names=FALSE, quote=FALSE)
   return(dbiased)
 }
+
+#'@title Add rain to specific month
+#'
+#'@param drivers A data.frame with driver data
+#'@param months The numeric months to add rain (Defaults to summer months 7-9)
+#'@param rain_add Amount of rain to add across the months in meters
+#'
+#'@details 
+#'
+#'@export
+driver_add_rain = function(drivers, months=7:9, rain_add=1){
+	
+	d_month = as.POSIXlt(drivers$time)$mon + 1
+	d_year  = as.POSIXlt(drivers$time)$year + 1900
+	
+	indx    = d_month %in% months
+	n_years = length(unique(d_year[indx]))
+	n_days  = sum(indx)
+	
+	per_day = (rain_add * n_years)/n_days
+
+	drivers[indx,]$Rain = drivers[indx,]$Rain + per_day
+	
+	return(drivers)
+}
+
+
 
 #'@title Save a driver data.frame to a temporary file
 #'
