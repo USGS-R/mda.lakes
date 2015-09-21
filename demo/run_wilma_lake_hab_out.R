@@ -1,5 +1,7 @@
 # run one WiLMA lake (Mendota) using new model running technique
 
+
+
 lake_id = 1571800
 lake_id = as.character(lake_id)
 
@@ -33,9 +35,7 @@ prep_run_glm_kd(site_id = lake_id,
 						timezone=-6,
 						snow_albedo_factor=1.1,
 						meteo_fl=driver_path,
-						csv_point_nlevs=0,
-						#sed_temp_mean=9, 
-						min_layer_thick=0.1))
+						csv_point_nlevs=0))
 
 
 ##Now combine modeled and calibrated data and output
