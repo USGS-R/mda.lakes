@@ -25,7 +25,7 @@ clusterCall(c1, function(){library(devtools)})
 glmr_install     = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/GLMr_3.1.4.tar.gz'))})
 glmtools_install = clusterCall(c1, function(){install_github('lawinslow/glmtools')})
 lakeattr_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/lakeattributes_0.3.0.tar.gz'))})
-mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_2.10.0.tar.gz'))})
+mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_2.10.4.tar.gz'))})
 
 library(lakeattributes)
 library(mda.lakes)
@@ -43,24 +43,8 @@ obs$site_id = paste0('WBIC_', obs$WBIC)
 #to_run = intersect(obs$site_id, secchi_obs$site_id)
 to_run = unique(obs$site_id)
 
-get_nldas_wind_debias = function(fname){
-  
-  path = get_driver_path(fname, driver_name = 'NLDAS')
-  nldas = read.csv(path, header=TRUE)
-  nldas$time = as.POSIXct(nldas$time)
-  
-  after_2001 = nldas$time > as.POSIXct('2001-12-31')
-  
-  nldas$WindSpeed[after_2001] = nldas$WindSpeed[after_2001] * 0.921
 
-  driver_path = tempfile(fileext='.csv')
-  write.csv(nldas, driver_path, row.names=FALSE, quote=FALSE)
-  return(driver_path)
-}
-
-clusterExport(c1, varlist = 'get_nldas_wind_debias')
-
-run_cal = function(site_id, years=1979:2012, driver_name='NLDAS'){
+run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nml_args=list()){
 
   
   library(lakeattributes)
@@ -94,11 +78,8 @@ run_cal = function(site_id, years=1979:2012, driver_name='NLDAS'){
     
     write.table(lake_obs, file.path(run_dir, 'obs.tsv'), sep='\t', row.names=FALSE)
     
-    if(driver_name == 'NLDAS'){
-      driver_path = get_nldas_wind_debias(paste0(site_id, '.csv'))
-    }else{
-      driver_path = get_driver_path(paste0(site_id, '.csv'), driver_name=driver_name)
-    }
+    driver_path = driver_function(site_id)
+    driver_path = gsub('\\\\', '/', driver_path)
     
     
     kds = get_kd_best(site_id, years=years)
@@ -109,12 +90,13 @@ run_cal = function(site_id, years=1979:2012, driver_name='NLDAS'){
                             path=run_dir, 
                             years=years,
                             kd=kd_avg, 
-                            nml_args=list(
+                            nml_args=c(list(
                               dt=3600, subdaily=FALSE, nsave=24, 
                               timezone=-6,
                               csv_point_nlevs=0, 
                               snow_albedo_factor=1.1, 
-                              meteo_fl=driver_path))
+                              meteo_fl=driver_path), 
+                              nml_args))
     
     cal.data = resample_to_field(file.path(run_dir, 'output.nc'), file.path(run_dir,'obs.tsv'))
     
@@ -125,23 +107,38 @@ run_cal = function(site_id, years=1979:2012, driver_name='NLDAS'){
   }, error=function(e){unlink(run_dir, recursive=TRUE);e})
 }
 
+
+driver_fun = function(site_id){
+  nldas = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
+  drivers = driver_nldas_wind_debias(nldas)
+  drivers = driver_add_burnin_years(drivers, nyears=2)
+  drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
+  driver_save(drivers)
+}
+
 #we want only ramdisk enabled nodes
 ramdisk = clusterCall(c1, function(){file.exists('/mnt/ramdisk')})
 c1 = c1[unlist(ramdisk)]
 
-groups = split(to_run, ceiling(seq_along(to_run)/100))
-out = list()
-for(grp in groups){
-  tmp = clusterApplyLB(c1,grp, run_cal)
-  out = c(out, tmp)
-  cat('iteration\n')
-}
+out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list())
+#
+# groups = split(to_run, ceiling(seq_along(to_run)/100))
+# out = list()
+# for(grp in groups){
+#   tmp = clusterApplyLB(c1,grp, run_cal, driver_fun)
+#   out = c(out, tmp)
+#   cat('iteration\n')
+# }
 
 #out = clusterApplyLB(c1, to_run[1:50], run_cal)
 
+sprintf('%i lakes ran\n', sum(unlist(lapply(out, inherits, what='data.frame'))))
+
 ##results
 out_df = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
+
 sqrt(mean((out_df$Observed_wTemp - out_df$Modeled_wTemp)^2, na.rm=TRUE))
+mean(out_df$Observed_wTemp - out_df$Modeled_wTemp, na.rm=TRUE)
 
 ################################################################################
 ## GENMOM
