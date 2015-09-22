@@ -1,8 +1,7 @@
 # run one WiLMA lake (Mendota) using new model running technique
 
 
-
-lake_id = 1571800
+lake_id = 11900
 lake_id = as.character(lake_id)
 
 library(mda.lakes)
@@ -10,7 +9,7 @@ library(lakeattributes)
 library(glmtools)
 library(rLakeAnalyzer)
 
-setwd('d:/test')
+run_dir = tempdir()
 
 secchi = get_kd_best(paste0('WBIC_', lake_id), years=1979:2012)
 
@@ -26,8 +25,8 @@ driver_path = driver_function(paste0('WBIC_', lake_id))
 driver_path = gsub('\\\\', '/', driver_path)
 
 prep_run_glm_kd(site_id = lake_id, 
-					path = '.',
-					years = 1979:2012,
+					path = run_dir,
+					years = 1977:2012,
 					sed_heat = FALSE,
 					kd = 1.7/secchi$secchi_avg,
 					nml_args=list(
@@ -40,6 +39,7 @@ prep_run_glm_kd(site_id = lake_id,
 
 ##Now combine modeled and calibrated data and output
 
-test = continuous.habitat.calc('d:/test', lakeid = lake_id)
+test = continuous.habitat.calc(run_dir, lakeid = lake_id)
+test = subset(test, year %in% 1979:2012)
 
 lake_id
