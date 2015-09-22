@@ -9,7 +9,7 @@ local_url = paste0((Sys.info()["nodename"]),':4040')
 library(parallel)
 
 #lets try 50 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4042)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4045)
 
 clusterExport(c1, varlist = 'local_url')
 

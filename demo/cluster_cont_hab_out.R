@@ -141,8 +141,8 @@ dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
 all_habitat = subset(all_habitat, year %in% 1979:2012)
 
-write.table(all_habitat, 'E:/WiLMA/Results/2015-09-15_wtr_hab/NLDAS_best_all_habitat.tsv', sep='\t', row.names=FALSE)
-save('dframes', file = 'E:/WiLMA/Results/2015-09-15_wtr_hab/NLDAS_best_all_wtr.Rdata')
+write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/NLDAS_best_all_habitat.tsv', sep='\t', row.names=FALSE)
+save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/NLDAS_best_all_wtr.Rdata')
 
 rm(out, good_data, dframes)
 gc()
@@ -191,18 +191,25 @@ out = clusterApplyLB(c1, to_run, future_hab_wtr,
                      driver_function=function(site_id){driver_fun(site_id, 'CM2.0')})
 
 good_data = out[!unlist(lapply(out, inherits, what='simpleError'))]
-
-dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
-#drop the burn-in years
-dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1970-01-01'))})
+sprintf('%i lakes ran\n', length(good_data))
 
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
 all_habitat = subset(all_habitat, year %in% c(1970:1999, 2040:2069))
 
 write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/CM2.0_all_habitat.tsv', sep='\t', row.names=FALSE)
+
+dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
+
+#remove intermidate data structures to free up memory
+rm(out, good_data)
+gc()
+
+#drop the burn-in years
+dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1970-01-01'))})
+
 save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/CM2.0_all_wtr.Rdata')
 
-rm(out, good_data, dframes)
+rm(dframes)
 gc()
 
 ################################################################################
@@ -214,15 +221,20 @@ out = clusterApplyLB(c1, to_run, future_hab_wtr,
                      driver_function=function(site_id){driver_fun(site_id, 'ECHAM5')})
 
 good_data = out[!unlist(lapply(out, inherits, what='simpleError'))]
-
-dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
-#drop the burn-in years
-dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1969-01-01'))})
+sprintf('%i lakes ran\n', length(good_data))
 
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
 all_habitat = subset(all_habitat, year %in% c(1969:1999, 2020:2099))
 
 write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/ECHAM5_all_habitat.tsv', sep='\t', row.names=FALSE)
+
+dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
+rm(out, good_data)
+gc()
+
+#drop the burn-in years
+dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1969-01-01'))})
+
 save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/ECHAM5_all_wtr.Rdata')
 
 rm(out, good_data, dframes)
