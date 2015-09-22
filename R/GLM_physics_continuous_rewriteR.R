@@ -97,6 +97,7 @@ volsAboveHeight.GLM.continuous <- function(raw_z, raw_vol, heights){
 	layZ = raw_z
 	layZ[layZ > 1e10] = NA
 	layVol = raw_vol
+	layVol[layVol > 1e10] = NA
 	
 	volumes = rep(NaN, length(heights))
 	
@@ -121,6 +122,7 @@ volsBelowHeight.GLM.continuous <- function(raw_z, raw_vol, heights){
 	layZ = raw_z
 	layZ[layZ > 1e10] = NA
 	layVol = raw_vol
+	layVol[layVol > 1e10] = NA
 	
 	volumes = rep(NaN, length(heights))
 	

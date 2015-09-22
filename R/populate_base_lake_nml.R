@@ -98,9 +98,10 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	nml_obj = set_nml(nml_obj, 'cd', 
 										getCD(Wstr=getWstr(site_id, method='Markfort')))
 	
-  #Max layer thickness
+  #Min/Max layer thickness based on total lake depth
 	max_z = getZmax(site_id)
   max_layer = 1
+  min_layer = 0.2
   if(max_z >= 20){
     max_layer = 1.5
   }else if(max_z >= 8 & max_z < 20){
@@ -111,8 +112,10 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
     max_layer = 0.5
   }else{
     max_layer = 0.3
+    min_layer = 0.1
   }
 	nml_obj = set_nml(nml_obj, 'max_layer_thick', max_layer)
+	nml_obj = set_nml(nml_obj, 'min_layer_thick', min_layer)
     
 	
 	## Pull in driver data

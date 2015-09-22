@@ -1,6 +1,6 @@
 # run one WiLMA lake (Mendota) using new model running technique
 
-lake_id = 2327500
+lake_id = 2152800 
 lake_id = as.character(lake_id)
 
 library(mda.lakes)

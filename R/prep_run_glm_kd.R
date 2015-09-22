@@ -30,7 +30,7 @@
 #'@export
 prep_run_glm_kd <- function(site_id, path, years,
 																kd = getClarity(site_id, default.if.null=TRUE), 
-																nml_args=NULL){
+																nml_args=NULL, sed_heat=FALSE){
 	
 	
 	nml_obj = populate_base_lake_nml(site_id)
@@ -44,7 +44,9 @@ prep_run_glm_kd <- function(site_id, path, years,
 	start = paste0(years[1], '-04-01 00:00:00')
 	end  = paste0( (years[length(years)] + 1), '-03-01 00:00:00') 
 	
-	nml_obj[['sed_heat']] = NULL  # Drop sediment heating if it is there
+	if(!sed_heat){
+		nml_obj[['sed_heat']] = NULL  # Drop sediment heating if it is there
+	}
 	nml_obj = set_nml(nml_obj, 'start', start)
 	nml_obj = set_nml(nml_obj, 'stop',  end)
 	nml_obj = set_nml(nml_obj, 'out_fn', 'output')

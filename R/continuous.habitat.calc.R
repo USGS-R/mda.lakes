@@ -193,8 +193,8 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		la.wtr = wtr
 		names(la.wtr) = tolower(names(wtr))
 		
-		t.d = ts.thermo.depth(la.wtr)
-		m.d = ts.meta.depths(la.wtr)
+		t.d = ts.thermo.depth(la.wtr, na.rm=TRUE)
+		m.d = ts.meta.depths(la.wtr, na.rm=TRUE)
 		
 		start.end = getUnmixedStartEnd(wtr, ice, 0.5, arr.ind=TRUE)
 		
