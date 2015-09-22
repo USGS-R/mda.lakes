@@ -36,10 +36,18 @@ get_driver_path = function(fname, driver_name='NLDAS', loc_cache=TRUE, ...){
 	
 	status = 1
 	#catch the download file error, and give more descriptive error
-	tryCatch({
-		status = download.file(full_url, destfile = dest, quiet=TRUE)
-	}, error=function(e){})
-	
+	# try three times if status was not success
+	for(i in 1:3){
+		tryCatch({
+			status = download.file(full_url, destfile = dest, quiet=TRUE)
+		}, error=function(e){})
+		
+		if(status == 0){
+			break
+		}else{
+			cat('retrying driver download...\n')
+		}
+	}
 	#loc = unzip(driver_path, files=fname, exdir=dest)
 	
 	if(status != 0){
