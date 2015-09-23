@@ -105,7 +105,7 @@ volsAboveHeight.GLM.continuous <- function(raw_z, raw_vol, heights){
 		if(is.na(heights[i])){
 			volumes[i] = NA
 		}
-		volumes[i] = sum(layVol[layZ[,i] > heights[i], ], na.rm=TRUE)
+		volumes[i] = sum(layVol[layZ[,i] > heights[i], i], na.rm=TRUE)
 	}
 	
 	return(volumes)
@@ -130,7 +130,7 @@ volsBelowHeight.GLM.continuous <- function(raw_z, raw_vol, heights){
 		if(is.na(heights[i])){
 			volumes[i] = NA
 		}
-		volumes[i] = sum(layVol[layZ[,i] < heights[i], ], na.rm=TRUE)
+		volumes[i] = sum(layVol[layZ[,i] < heights[i], i], na.rm=TRUE)
 	}
 	
 	return(volumes)
