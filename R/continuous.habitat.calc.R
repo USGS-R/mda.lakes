@@ -108,7 +108,7 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 			tmp = volInTemp.GLM.continuous(raw.vol, raw.wtr, vol.tmp.ranges[j,1], vol.tmp.ranges[j,2], censor.days=censor.days)
 			
 			#add to vector
-			volumes.out[[vol.name]] = c(volumes.out[[vol.name]], sum(tmp)*1000)
+			volumes.out[[vol.name]] = c(volumes.out[[vol.name]], sum(tmp))
 		}
 		
 		#Now do vertical length of water column in temperature range.
@@ -231,9 +231,9 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		misc.out[['GDD_wtr_10c']] = c(misc.out[['GDD_wtr_10c']], sum(dd10[dd10 > 0], na.rm=TRUE))
 		
 		
-		#Units are in ML, so 1ML = 1000 m^3
-		misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE)*1000)
-		misc.out[['volume_sum_m_3_day']] = c(misc.out[['volume_sum_m_3']], sum(vols, na.rm=TRUE)*1000)
+		#Units are in m^3
+		misc.out[['volume_mean_m_3']] = c(misc.out[['volume_mean_m_3']], mean(vols, na.rm=TRUE))
+		misc.out[['volume_sum_m_3_day']] = c(misc.out[['volume_sum_m_3']], sum(vols, na.rm=TRUE))
 		misc.out[['simulation_length_days']] = c(misc.out[['simulation_length_days']], length(vols))
 		
 		if(!is.na(previous.wtr)){
