@@ -92,7 +92,7 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		
 		raw_ind = all_raw_date >= onoff$off & all_raw_date <= onoff$on
 		raw.wtr = all_raw_wtr[,raw_ind]
-		raw.vol = all_raw_z[,raw_ind]
+		raw.vol = all_raw_vol[,raw_ind]
 		run.time = all_raw_date[raw_ind]
 		vols = all_raw_totv[raw_ind]
 		raw_z = all_raw_z[,raw_ind]
