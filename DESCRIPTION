@@ -8,7 +8,7 @@ Maintainer: Luke Winslow <lwinslow@usgs.gov>
 Depends:
     R (>= 3.0)
 Imports:
-    glmtools (>= 0.9.6),
+    glmtools (>= 0.10.2),
     jsonlite,
     GLMr,
     httr, 
