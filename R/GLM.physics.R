@@ -151,9 +151,9 @@ getIceOffDate <- function(GLMice,GLMwtr){
 #
 ################################################################################
 getIceOnDate  <-  function(GLMice,GLMwtr){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   maxTempIdx <-  as.numeric(getMaxTempIdx(GLMwtr))
     # now, look forwards
   iceOnIdx <-  min(which(GLMice[iceID][maxTempIdx:nrow(GLMice[iceID]),]!=0))+(maxTempIdx-1)
@@ -166,9 +166,9 @@ getIceOnDate  <-  function(GLMice,GLMwtr){
 #
 ################################################################################
 getLastDayAboveT <-  function(GLMwtr,temperature,anyDep=TRUE){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   if (anyDep==TRUE){
     tempRef <-  getDailyTempMax(GLMwtr)
     lastIdx <-  max(which(tempRef>temperature))
@@ -183,9 +183,9 @@ getLastDayAboveT <-  function(GLMwtr,temperature,anyDep=TRUE){
 
 ################################################################################
 getFirstDayAboveT <-  function(GLMwtr,temperature,anyDep=TRUE){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   if (anyDep==TRUE){
     tempRef <-  getDailyTempMax(GLMwtr)
     tmpIdx = which(tempRef>temperature)
@@ -211,9 +211,9 @@ getFirstDayAboveT <-  function(GLMwtr,temperature,anyDep=TRUE){
 
 ################################################################################
 getStratifiedDuration <-  function(GLMwtr,GLMice,minStrat){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   # advised that the input is shortened to the ice-free period,
   #Check to see if we found an ice on/off date. Sometimes, model was not
   #started early enough or ended late enough to have on/off date
@@ -237,9 +237,9 @@ getStratifiedDuration <-  function(GLMwtr,GLMice,minStrat){
 
 ################################################################################
 getStratifiedStartEnd <-  function(GLMwtr,GLMice,minStrat){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   # advised that the input is shortened to the ice-free period,
   startDate <- as.character(getIceOffDate(GLMice,GLMwtr))
   stopDate <- as.character(getIceOnDate(GLMice,GLMwtr))
@@ -257,9 +257,9 @@ getStratifiedStartEnd <-  function(GLMwtr,GLMice,minStrat){
 # mixing (delT < minStrat)
 ################################################################################
 getUnmixedStartEnd <-  function(GLMwtr, GLMice, minStrat, arr.ind=FALSE){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   
   # advised that the input is shortened to the ice-free period,
   startDate <- getIceOffDate(GLMice,GLMwtr)
