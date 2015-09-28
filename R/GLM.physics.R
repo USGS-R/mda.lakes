@@ -132,9 +132,9 @@ getMaxTempIdx <-  function(GLMwtr){
 #
 ################################################################################
 getIceOffDate <- function(GLMice,GLMwtr){
-  if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
-    stop("GLM ice time series must be equal or shorter than one year")
-  }
+  #if(diff(range(GLMwtr$DateTime)) > as.difftime(366,units="days")){
+  #  stop("GLM ice time series must be equal or shorter than one year")
+  #}
   
   maxTempIdx <-  as.numeric(getMaxTempIdx(GLMwtr))
   
