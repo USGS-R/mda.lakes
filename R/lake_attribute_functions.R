@@ -20,13 +20,13 @@ getBathy	<-	function(site_id){
 											 package=packageName())
 	if (file.exists(fileN)){
 		data	<-	read.table(fileN,header=TRUE,sep='\t')
-		bathymetry	<-	data.frame(depth=data$depth,area=data$area)
+		bathymetry	<-	data.frame(depths=data$depth,areas=data$area)
 	} else {
 		lkeArea	<-	getArea(site_id)
 		zMax	<-	getZmax(site_id)
 		depth	<-	seq(0,zMax,length.out=numZ)
 		area	<-	approx(c(0,zMax),c(lkeArea,0),depth)$y
-		bathymetry	<-	data.frame(depth=depth,area=area)
+		bathymetry	<-	data.frame(depths=depth,areas=area)
 	}
 	
 	return(bathymetry)

@@ -56,9 +56,9 @@ area_light_threshold = function(kd, light_incident, irr_thresh=c(0,2000), hypso,
 	
 	
 	if(tolower(area_type) == "surface"){
-		depth_area_rel = surface_areas(hypso$depth, hypso$area)
+		depth_area_rel = surface_areas(hypso$depths, hypso$areas)
 	}else if(tolower(area_type) == "benthic"){
-		depth_area_rel = benthic_areas(hypso$depth, hypso$area)
+		depth_area_rel = benthic_areas(hypso$depths, hypso$areas)
 	}else{
 		stop("Unrecognized area_type, must be 'surface' or 'benthic'")
 	}
@@ -91,7 +91,7 @@ area_temp_threshold = function(wtr, wtr_thresh=c(0,25), hypso, area_type="surfac
 	
 	#Interpolate hypso to same depths as water temp
 	new_depths = get.offsets(wtr)
-	new_areas  = approx(hypso$depth, hypso$area, xout=new_depths)$y
+	new_areas  = approx(hypso$depths, hypso$areas, xout=new_depths)$y
 	
 	wtr = drop.datetime(wtr)
 	
@@ -134,7 +134,7 @@ area_light_temp_threshold = function(wtr, kd, light_incident, irr_thresh=c(0,200
 	#Interpolate both to higher resolution??
 	
 	new_depths = get.offsets(wtr)
-	new_areas  = approx(hypso$depth, hypso$area, xout=new_depths)$y
+	new_areas  = approx(hypso$depths, hypso$areas, xout=new_depths)$y
 	
 	wtr = drop.datetime(wtr)
 	

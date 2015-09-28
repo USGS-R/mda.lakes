@@ -69,12 +69,12 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	hypso = getBathy(site_id)
 	
 	#sort by increasing height
-	hypso$height = elev-hypso$depth
+	hypso$height = elev-hypso$depths
 	hypso = hypso[order(hypso$height),]
 	
 	#write to NML
 	nml_obj = set_nml(nml_obj, 'H', hypso$height)
-	nml_obj = set_nml(nml_obj, 'A', hypso$area)
+	nml_obj = set_nml(nml_obj, 'A', hypso$areas)
 	nml_obj = set_nml(nml_obj, 'bsn_vals', nrow(hypso))
 	
 	#min_layer_thick & max_
