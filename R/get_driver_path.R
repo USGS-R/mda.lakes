@@ -8,15 +8,15 @@
 #'@param fname Name of the file, generally based on the unique site_id
 #'@param driver_name The driver source name, options ('NLDAS', 'CM2.0', 'GENMOM', 'ECHAM5')
 #'@param loc_cache Should the locally cached version of the driver file be used if available.
+#'@param base_url Root of the URL where driver files are served
 #'@param ... Extra parameters are ignored
 #'
 #'@author Luke Winslow
 #'
 #'
 #'@export
-get_driver_path = function(fname, driver_name='NLDAS', loc_cache=TRUE, ...){
+get_driver_path = function(fname, driver_name='NLDAS', loc_cache=TRUE, base_url='http://cida-test.er.usgs.gov/mda.lakes/', ...){
 	
-	base_url = 'http://cida-test.er.usgs.gov/mda.lakes/'
 	
   #if just site_id is provided, add .csv (some legacy stuff here!)
   if(substr(fname, nchar(fname)-3, nchar(fname)) != '.csv'){

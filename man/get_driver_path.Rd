@@ -4,7 +4,8 @@
 \alias{get_driver_path}
 \title{Return driver file location for given lake}
 \usage{
-get_driver_path(fname, driver_name = "NLDAS", loc_cache = TRUE, ...)
+get_driver_path(fname, driver_name = "NLDAS", loc_cache = TRUE,
+  base_url = "http://cida-test.er.usgs.gov/mda.lakes/", ...)
 }
 \arguments{
 \item{fname}{Name of the file, generally based on the unique site_id}
@@ -12,6 +13,8 @@ get_driver_path(fname, driver_name = "NLDAS", loc_cache = TRUE, ...)
 \item{driver_name}{The driver source name, options ('NLDAS', 'CM2.0', 'GENMOM', 'ECHAM5')}
 
 \item{loc_cache}{Should the locally cached version of the driver file be used if available.}
+
+\item{base_url}{Root of the URL where driver files are served}
 
 \item{...}{Extra parameters are ignored}
 }
