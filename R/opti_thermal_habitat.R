@@ -90,37 +90,37 @@ opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0
 interp_hypso = function(hypso, dz=0.1, force_zero_area=TRUE){
 	
 	#check data frame has what we need
-	if(!all(names(hypso) %in% c('area', 'depth'))){
-		stop('Bathy data.frame must have columns area and depth (currently: ', paste(names(bathy), collapse=","), ')')
+	if(!all(names(hypso) %in% c('areas', 'depths'))){
+		stop('Bathy data.frame must have columns areas and depths (currently: ', paste(names(bathy), collapse=","), ')')
 	}
 	
-	new_hypso = data.frame( depth=seq(min(hypso$depth), max(hypso$depth), by=dz) )
+	new_hypso = data.frame( depths=seq(min(hypso$depths), max(hypso$depths), by=dz) )
 	
 	
-	new_hypso$area  = approx(hypso$depth, hypso$area, new_hypso$depth)$y
+	new_hypso$areas  = approx(hypso$depths, hypso$areas, new_hypso$depths)$y
 	
 	##Now we have four cases
 	#1) We don't want to force zero hypso area
 	#2) OR new_hypso happens to have a zero value. Great, return!
   #return whatever we have
-	if(!force_zero_area || any(new_hypso$area == 0)){
+	if(!force_zero_area || any(new_hypso$areas == 0)){
 		return(new_hypso)
 	}
 	
 	
 	#3) new_hypso lost the zero that was on the hypso supplied
-	if(!any(new_hypso$area == 0) && any(hypso$area == 0) ){
-		new_hypso = rbind(new_hypso, hypso[hypso$area==0,])
-		new_hypso = new_hypso[order(new_hypso$depth), ]
+	if(!any(new_hypso$areas == 0) && any(hypso$areas == 0) ){
+		new_hypso = rbind(new_hypso, hypso[hypso$areas==0,])
+		new_hypso = new_hypso[order(new_hypso$depths), ]
 	}
 	
 	#3) new_hypso lost the zero that was on the hypso supplied
 	# in this case, add dz to max depth, and call that zero
 	# Maybe TODO: Extrapolate a zero downward linearly?
-	if(!any(new_hypso$area == 0) && !any(hypso$area == 0) ){
-		new_hypso[nrow(new_hypso)+1, 'depth'] = max(new_hypso$depth) + dz
-		new_hypso[nrow(new_hypso), 'area'] = 0
-		new_hypso = new_hypso[order(new_hypso$depth), ]
+	if(!any(new_hypso$areas == 0) && !any(hypso$areas == 0) ){
+		new_hypso[nrow(new_hypso)+1, 'depths'] = max(new_hypso$depths) + dz
+		new_hypso[nrow(new_hypso), 'areas'] = 0
+		new_hypso = new_hypso[order(new_hypso$depths), ]
 	}
 	return(new_hypso)
 	

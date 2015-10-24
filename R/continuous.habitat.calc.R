@@ -25,7 +25,7 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 	lat = get_nml_value(nml, 'latitude')
 	lon = get_nml_value(nml, 'longitude')
 	
-  names(hypso) = c('depth', 'area')
+  #names(hypso) = c('depths', 'areas')
 	hypso = interp_hypso(hypso, dz=0.1, force_zero_area = TRUE)
 	
 	#also extract temp at the same resolution as hypsography. This will help us standardize across light and temp
@@ -35,6 +35,7 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
   
   
   ice_onoff = get_ice_onoff(all_ice, all_wtr)
+  ice_onoff = fix_ice_on_off(ice_onoff, all_wtr, hypso)
 	years = ice_onoff$year
 	
 	if(missing(lakeid)){
@@ -185,8 +186,8 @@ continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
 		misc.out[['thermal_hab_11_25_surf']] = c(misc.out[['thermal_hab_11_25_surf']], oti_surf$therm_hab)
 		misc.out[['optic_thermal_hab_surf']] = c(misc.out[['optic_thermal_hab_surf']], oti_surf$opti_therm_hab)
 		
-		hypso = getBathy(lakeid)
-		misc.out[['lake_benthic_area']] = c(misc.out[['lake_benthic_area']], sum(benthic_areas(hypso$depth, hypso$area)))
+		
+		misc.out[['lake_benthic_area']] = c(misc.out[['lake_benthic_area']], sum(benthic_areas(hypso$depths, hypso$areas)))
 		misc.out[['lake_surface_area']] = c(misc.out[['lake_surface_area']], getArea(lakeid))
 		
 		#Use rLA, headers must be lowercase

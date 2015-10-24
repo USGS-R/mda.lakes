@@ -51,6 +51,8 @@ get_ice_onoff = function(ice, wtr){
 			ice_onoff$off[i] = ice[ice$DateTime >= peak_minus_365 & ice$DateTime <= peak_date, ]$DateTime[max(tmp_indx)]
 		}
 	}
+	# add this to indicate information origin
+	ice_onoff$icedate_origin = 'ice'
 	
 	return(ice_onoff)
 }

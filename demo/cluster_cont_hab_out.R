@@ -19,6 +19,9 @@ glmtools_install = clusterCall(c1, function(){install_github('lawinslow/glmtools
 lakeattr_install = clusterCall(c1, function(){install_github('lawinslow/lakeattributes')})
 mdalakes_install = clusterCall(c1, function(){install_github('lawinslow/mda.lakes')})
 
+
+out_dir = 'E:/WiLMA/Results/2015-09-23_wtr_hab'
+
 library(lakeattributes)
 library(mda.lakes)
 library(dplyr)
@@ -115,7 +118,10 @@ future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=
 
     return(all_data)
     
-  }, error=function(e){unlink(run_dir, recursive=TRUE);e})
+  }, error=function(e){
+      unlink(run_dir, recursive=TRUE);
+      return(list(error=e, site_id))
+    })
 }
 
 ################################################################################
@@ -131,7 +137,8 @@ driver_fun = function(site_id){
 
 out = clusterApplyLB(c1, to_run, future_hab_wtr, years=1977:2012, driver_function=driver_fun)
 
-good_data = out[!unlist(lapply(out, inherits, what='simpleError'))]
+good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x)}))]
+bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x)}))]
 
 sprintf('%i lakes ran\n', length(good_data))
 dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
@@ -141,8 +148,9 @@ dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
 all_habitat = subset(all_habitat, year %in% 1979:2012)
 
-write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/NLDAS_best_all_habitat.tsv', sep='\t', row.names=FALSE)
-save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/NLDAS_best_all_wtr.Rdata')
+write.table(all_habitat, file.path(out_dir, 'NLDAS_best_all_habitat.tsv'), sep='\t', row.names=FALSE)
+save('dframes', file = file.path(out_dir, 'NLDAS_best_all_wtr.Rdata'))
+save('bad_data', file = file.path(out_dir, 'NLDAS_bad_data.Rdata'))
 
 rm(out, good_data, dframes)
 gc()
@@ -157,15 +165,18 @@ driver_fun = function(site_id, gcm){
   drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
   driver_save(drivers)
 }
-
 clusterExport(c1, 'driver_fun')
+
+
 out = clusterApplyLB(c1, to_run, future_hab_wtr, 
                      years=1978:1999, #because we added burn-in years
                      future_era=2020:2089, 
                      driver_function=function(site_id){driver_fun(site_id, 'GENMOM')})
 
 
-good_data = out[!unlist(lapply(out, inherits, what='simpleError'))]
+good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x)}))]
+bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x)}))]
+
 sprintf('%i lakes ran\n', length(good_data))
 
 dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
@@ -175,8 +186,9 @@ dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1980-01
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
 all_habitat = subset(all_habitat, year %in% c(1980:1999, 2020:2089))
 
-write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/GENMOM_all_habitat.tsv', sep='\t', row.names=FALSE)
-save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/GENMOM_all_wtr.Rdata')
+write.table(all_habitat, file.path(out_dir, 'GENMOM_all_habitat.tsv'), sep='\t', row.names=FALSE)
+save('dframes', file = file.path(out_dir, 'GENMOM_all_wtr.Rdata'))
+save('bad_data', file = file.path(out_dir, 'GENMOM_bad_data.Rdata'))
 
 rm(out, good_data, dframes)
 gc()
@@ -190,13 +202,15 @@ out = clusterApplyLB(c1, to_run, future_hab_wtr,
                      future_era=2040:2069, 
                      driver_function=function(site_id){driver_fun(site_id, 'CM2.0')})
 
-good_data = out[!unlist(lapply(out, inherits, what='simpleError'))]
+good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x)}))]
+bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x)}))]
+
 sprintf('%i lakes ran\n', length(good_data))
 
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
 all_habitat = subset(all_habitat, year %in% c(1970:1999, 2040:2069))
 
-write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/CM2.0_all_habitat.tsv', sep='\t', row.names=FALSE)
+write.table(all_habitat, file.path(out_dir, 'CM2.0_all_habitat.tsv'), sep='\t', row.names=FALSE)
 
 dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
 
@@ -205,9 +219,10 @@ rm(out, good_data)
 gc()
 
 #drop the burn-in years
-dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1970-01-01'))})
+#dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1970-01-01'))})
 
-save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/CM2.0_all_wtr.Rdata')
+save('dframes', file = file.path(out_dir, 'CM2.0_all_wtr.Rdata'))
+save('bad_data', file = file.path(out_dir, 'CM2.0_bad_data.Rdata'))
 
 rm(dframes)
 gc()
@@ -217,16 +232,18 @@ gc()
 ################################################################################
 out = clusterApplyLB(c1, to_run, future_hab_wtr, 
                      years=1967:1999, #because we added burn-in years
-                     future_era=2020:2099,
+                     future_era=2020:2097,
                      driver_function=function(site_id){driver_fun(site_id, 'ECHAM5')})
 
-good_data = out[!unlist(lapply(out, inherits, what='simpleError'))]
+good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x)}))]
+bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x)}))]
+
 sprintf('%i lakes ran\n', length(good_data))
 
 all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
-all_habitat = subset(all_habitat, year %in% c(1969:1999, 2020:2099))
+all_habitat = subset(all_habitat, year %in% c(1969:1999, 2020:2097))
 
-write.table(all_habitat, 'E:/WiLMA/Results/2015-09-21_wtr_hab/ECHAM5_all_habitat.tsv', sep='\t', row.names=FALSE)
+write.table(all_habitat, file.path(out_dir, 'ECHAM5_all_habitat.tsv'), sep='\t', row.names=FALSE)
 
 dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
 rm(out, good_data)
@@ -235,7 +252,8 @@ gc()
 #drop the burn-in years
 dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1969-01-01'))})
 
-save('dframes', file = 'E:/WiLMA/Results/2015-09-21_wtr_hab/ECHAM5_all_wtr.Rdata')
+save('dframes', file = file.path(out_dir, 'ECHAM5_all_wtr.Rdata'))
+save('bad_data', file = file.path(out_dir, 'ECHAM5_bad_data.Rdata'))
 
 rm(out, good_data, dframes)
 gc()
