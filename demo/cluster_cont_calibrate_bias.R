@@ -117,8 +117,8 @@ driver_fun = function(site_id){
 }
 
 #we want only ramdisk enabled nodes
-ramdisk = clusterCall(c1, function(){file.exists('/mnt/ramdisk')})
-c1 = c1[unlist(ramdisk)]
+#ramdisk = clusterCall(c1, function(){file.exists('/mnt/ramdisk')})
+#c1 = c1[unlist(ramdisk)]
 
 out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list())
 #
