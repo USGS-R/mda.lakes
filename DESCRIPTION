@@ -11,12 +11,12 @@ Imports:
     glmtools (>= 0.10.2),
     jsonlite,
     GLMr,
-    httr, 
-    rLakeAnalyzer (>= 1.5), 
-    insol, 
+    httr,
+    rLakeAnalyzer (>= 1.5),
+    insol,
     plyr,
     lakeattributes
-Enhances:
-    geoknife
+Enhances: geoknife
 Description: More about what it does (maybe more than one line)
 License: LICENSE file
+RoxygenNote: 5.0.1
