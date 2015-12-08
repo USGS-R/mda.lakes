@@ -26,7 +26,7 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	'min_layer_thick'=0.2,
 	'max_layer_thick'=1,
 	'Kw'=0.63,
-	#'coef_inf_entrain'=0,
+	# 'coef_inf_entrain'=0,
 	'coef_mix_conv'=0.23,
 	'coef_wind_stir'=0.23,
 	'coef_mix_shear'=0.20,
