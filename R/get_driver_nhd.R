@@ -30,6 +30,8 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	#create and save formatted dataframe
 	all_drivers = Reduce(function(...) merge(..., by='DateTime'), lapply(ls(driver_env), function(x)driver_env[[x]]))
 	
+	all_drivers = na.omit(all_drivers)
+	
 	glm_drivers = nldas_to_glm(all_drivers)
 	
 	if(timestep=='daily'){
