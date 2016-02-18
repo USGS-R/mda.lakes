@@ -1,4 +1,11 @@
+# Functions for NHD linked drivers NLDAS and Hostetler
+#
+#
+#
+
 get_driver_nhd = function(id, driver_name, loc_cache, timestep){
+	
+	hostetler_names = c('ECHAM5', 'CM2.0', '')
 	
 	#get index
 	indx = get_driver_index(driver_name, loc_cache)
@@ -32,7 +39,9 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	
 	all_drivers = na.omit(all_drivers)
 	
-	glm_drivers = nldas_to_glm(all_drivers)
+	glm_drivers = drivers_to_glm(all_drivers)
+
+	
 	
 	if(timestep=='daily'){
 		daily = trunc(as.POSIXct(glm_drivers$time), units='days')
@@ -69,27 +78,36 @@ get_driver_index = function(driver_name, loc_cache){
 	return(read.table(dest, sep='\t', header=TRUE, as.is=TRUE))
 }
 
-nldas_to_glm = function(nldas_data){
+drivers_to_glm = function(driver_df){
 	
 	## convert and downsample wind
 	
-	nldas_data$WindSpeed = sqrt(nldas_data$ugrd10m^2 + nldas_data$vgrd10m^2)
-	nldas_data$ShortWave = nldas_data$dswrfsfc
-	nldas_data$LongWave  = nldas_data$dlwrfsfc
-	nldas_data$AirTemp   = nldas_data$tmp2m - 273.15 #convert K to deg C
-	nldas_data$Rain      = nldas_data$apcpsfc*24/1000 #convert to m/day rate
-	nldas_data$RelHum    = 100*nldas_data$spfh2m/qsat(nldas_data$tmp2m-273.15, nldas_data$pressfc*0.01)
+	driver_df$WindSpeed = sqrt(driver_df$ugrd10m^2 + driver_df$vgrd10m^2)
+	driver_df$ShortWave = driver_df$dswrfsfc
+	driver_df$LongWave  = driver_df$dlwrfsfc
+	driver_df$AirTemp   = driver_df$tmp2m - 273.15 #convert K to deg C
+	driver_df$Rain      = driver_df$apcpsfc*24/1000 #convert to m/day rate
+	
+	if('relhum' %in% names(driver_df)){
+		driver_df$RelHum    = 100*driver_df$relhum
+	}else if('spfh2m' %in% names(driver_df)){
+		driver_df$RelHum    = 100*driver_df$spfh2m/qsat(driver_df$tmp2m-273.15, driver_df$pressfc*0.01)
+	}else{
+		stop('Unable to find humidity data.\nDriver service must have humidity data (named relhum or spfh2m). ')
+	}
+	
 	
 	#now deal with snow
-	nldas_data$Snow = 0
+	driver_df$Snow = 0
 	
 	# 10:1 ratio assuming 1:10 density ratio water weight
-	nldas_data$Snow[nldas_data$AirTemp < 0] = nldas_data$Rain[nldas_data$AirTemp < 0]*10 
-	nldas_data$Rain[nldas_data$AirTemp < 0] = 0
+	driver_df$Snow[driver_df$AirTemp < 0] = driver_df$Rain[driver_df$AirTemp < 0]*10 
+	driver_df$Rain[driver_df$AirTemp < 0] = 0
 	
 	#convert DateTime to properly formatted string
-	nldas_data$time = nldas_data$DateTime
-	nldas_data$time = format(nldas_data$time,'%Y-%m-%d %H:%M:%S')
+	driver_df$time = driver_df$DateTime
+	driver_df$time = format(driver_df$time,'%Y-%m-%d %H:%M:%S')
 	
-	return(nldas_data[order(nldas_data$time), c('time','ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow')])
+	return(driver_df[order(driver_df$time), c('time','ShortWave','LongWave','AirTemp','RelHum','WindSpeed','Rain','Snow')])
 }
+
