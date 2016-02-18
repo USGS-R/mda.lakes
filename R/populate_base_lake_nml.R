@@ -11,10 +11,10 @@
 #'@import glmtools
 #'@import GLMr
 #'@export
-populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.null=TRUE)){
+populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.null=TRUE), nml_template=nml_template_path()){
 	## Construct NML
 	#get default template
-	nml_obj = read_nml(nml_template_path())
+	nml_obj = read_nml(nml_template)
 	
 	initZ = c(0,0.2, getZmax(site_id));
 	initT = c(3,4,4);
