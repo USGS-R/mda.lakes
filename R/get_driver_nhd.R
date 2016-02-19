@@ -5,7 +5,7 @@
 
 get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	
-	hostetler_names = c('ECHAM5', 'CM2.0', '')
+	hostetler_names = c('ECHAM5', 'CM2.0', 'GENMOM')
 	
 	#get index
 	indx = get_driver_index(driver_name, loc_cache)
@@ -85,8 +85,15 @@ drivers_to_glm = function(driver_df){
 	driver_df$WindSpeed = sqrt(driver_df$ugrd10m^2 + driver_df$vgrd10m^2)
 	driver_df$ShortWave = driver_df$dswrfsfc
 	driver_df$LongWave  = driver_df$dlwrfsfc
-	driver_df$AirTemp   = driver_df$tmp2m - 273.15 #convert K to deg C
 	driver_df$Rain      = driver_df$apcpsfc*24/1000 #convert to m/day rate
+	
+	if('tmp2m' %in% names(driver_df)){
+		driver_df$AirTemp   = driver_df$tmp2m - 273.15 #convert K to deg C
+	}else if('airtemp' %in% names(driver_df)){
+		driver_df$AirTemp   = driver_df$airtemp #no conversion neede
+	}else{
+		stop('Unable to find temperature data.\nDriver service must have temp data (named tmp2m or airtemp). ')
+	}
 	
 	if('relhum' %in% names(driver_df)){
 		driver_df$RelHum    = 100*driver_df$relhum
