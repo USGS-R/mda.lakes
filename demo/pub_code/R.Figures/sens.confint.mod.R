@@ -51,7 +51,7 @@ sens.confint.mod.hirsch = function(slopes, n.vals, pval=0.95){
 	n = length(slopes)
 	c = ceiling(z*sqrt(var_s_hirsch))  #err on the high side
 	high.i = (n+c)/2
-  low.i  = (n-c)/2
+	low.i  = (n-c)/2
 	
 	if(high.i > n){
 		high = Inf

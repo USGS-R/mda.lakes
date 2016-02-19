@@ -4,7 +4,7 @@
 \alias{getZmax}
 \title{Get max depth for a given lake}
 \usage{
-getZmax(WBIC)
+getZmax(site_id)
 }
 \arguments{
 \item{site_id}{The character ID for the requested data}

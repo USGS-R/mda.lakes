@@ -9,14 +9,18 @@
 #'
 #'
 #'@import glmtools
+#'@import lakeattributes
 #'@import GLMr
 #'@export
-populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.null=TRUE), nml_template=nml_template_path()){
+populate_base_lake_nml = function(site_id, kd=get_kd_avg(site_id)$kd_avg, nml_template=nml_template_path(),
+																	zmax=get_zmax(site_id), bathy=get_bathy(site_id), cd=getCD(site_id), 
+																	elev=get_elevation(site_id), area=get_area(site_id), latlon=get_latlon(site_id), 
+																	driver=get_driver_path(site_id)){
 	## Construct NML
 	#get default template
 	nml_obj = read_nml(nml_template)
 	
-	initZ = c(0,0.2, getZmax(site_id));
+	initZ = c(0,0.2, zmax);
 	initT = c(3,4,4);
 	initS = c(0,0,0);
 	
@@ -38,7 +42,7 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	'subdaily'=FALSE,
 	'dt'=86400,
 	'num_depths'=length(initZ),                  # number of elements in initZ
-	'lake_depth'=getZmax(site_id),
+	'lake_depth'=zmax,
 	'the_depths'=initZ,
 	'the_temps'=initT,
 	'the_sals'=initS,
@@ -60,13 +64,11 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	
 	#Run Name
 	nml_obj = set_nml(nml_obj, 'lake_name', site_id)
-	#elevation
-	elev = getElevation(site_id)
 	
 	#nml_obj = set_nml(nml_obj, 'outl_elvs', elev)
 	
 	#hypsometry
-	hypso = getBathy(site_id)
+	hypso = bathy
 	
 	#sort by increasing height
 	hypso$height = elev-hypso$depths
@@ -84,7 +86,7 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	
 	
 	#lake basin
-	area = getArea(site_id)
+	#area = getArea(site_id)
 	bsn_len = sqrt(area/pi)*2;
 	nml_obj = set_nml(nml_obj, 'bsn_wid', bsn_len)
 	nml_obj = set_nml(nml_obj, 'bsn_len', bsn_len)
@@ -95,11 +97,10 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
 	nml_obj = set_nml(nml_obj, 'longitude', latlon[2])
 	
 	#wind sheltering
-	nml_obj = set_nml(nml_obj, 'cd', 
-										getCD(Wstr=getWstr(site_id, method='Markfort')))
+	nml_obj = set_nml(nml_obj, 'cd', cd) #getCD(Wstr=getWstr(site_id, method='Markfort')))
 	
   #Min/Max layer thickness based on total lake depth
-	max_z = getZmax(site_id)
+	max_z = zmax#get_zmax(site_id)
   max_layer = 1
   min_layer = 0.2
   if(max_z >= 20){
@@ -119,10 +120,7 @@ populate_base_lake_nml = function(site_id, kd=getClarity(site_id, default.if.nul
     
 	
 	## Pull in driver data
-	driver_path = get_driver_path(paste0('WBIC_', site_id, '.csv'))
-	
-  
-	nml_obj = set_nml(nml_obj, 'meteo_fl', gsub('\\\\', '/', driver_path))
+	nml_obj = set_nml(nml_obj, 'meteo_fl', gsub('\\\\', '/', driver))
 	
 	return(nml_obj)
 }

@@ -1,102 +1,80 @@
-#'@title Get Hypsometry for a given lake
-#'@description
-#'Returns the hypsometry profile for a lake with the given ID
-#'
-#'@param site_id The character ID for the requested data
-#'
-#'@return
-#'Data frame with columns \code{depth} and \code{area}
-#'
-#'
-#'
-#'@author 
-#'Luke Winslow, Jordan Read
-#'
-#'
-#'@export
+#' @title Get Hypsometry for a given lake
+#' @description
+#' Returns the hypsometry profile for a lake with the given ID
+#' 
+#' @param site_id The character ID for the requested data
+#' 
+#' @return
+#' Data frame with columns \code{depth} and \code{area}
+#' 
+#' 
+#' 
+#' @author 
+#' Luke Winslow, Jordan Read
+#'   
+#'  
+#' @export
 getBathy	<-	function(site_id){
-	numZ	<-	15
-	fileN	<-	system.file(paste(c('supporting_files/Bathy/', site_id, '.bth'), collapse=''), 
-											 package=packageName())
-	if (file.exists(fileN)){
-		data	<-	read.table(fileN,header=TRUE,sep='\t')
-		bathymetry	<-	data.frame(depths=data$depth,areas=data$area)
-	} else {
-		lkeArea	<-	getArea(site_id)
-		zMax	<-	getZmax(site_id)
-		depth	<-	seq(0,zMax,length.out=numZ)
-		area	<-	approx(c(0,zMax),c(lkeArea,0),depth)$y
-		bathymetry	<-	data.frame(depths=depth,areas=area)
-	}
 	
-	return(bathymetry)
+	.Deprecated('get_bathy', package='lakeattributes')
+	
+	return(lakeattributes::get_bathy(site_id))
+	
 }
 
-#'@title Get lake surface area 
-#'@description
-#'Returns the surface area for a lake with given ID
-#'
-#'@param site_id The character ID for the requested data (can be vector of ids)
-#'
-#'@return
-#' Lake surface areas in meters^2. NA if no value available
+#' @title Get lake surface area 
+#' @description
+#' Returns the surface area for a lake with given ID
 #' 
-#'@details
-#'Looks for given site_ids and returns values if availalbe. All site_ids 
-#'are coerced to character regardless of input type.
-#'
-#'
-#'@author 
-#'Jordan Read, Luke Winslow
-#'
-#'@examples
-#'#Multiple values
-#'getArea(c('10000', '6100'))
-#'
-#'#this should return NA
-#'getArea('asdf')
-#'
-#'@export
+#' @param site_id The character ID for the requested data (can be vector of ids)
+#' 
+#' @return
+#'  Lake surface areas in meters^2. NA if no value available
+#'  
+#' @details
+#' Looks for given site_ids and returns values if availalbe. All site_ids 
+#' are coerced to character regardless of input type.
+#' 
+#' 
+#' @author 
+#' Jordan Read, Luke Winslow
+#' 
+#' @examples
+#' #Multiple values
+#' getArea(c('10000', '6100'))
+#' 
+#' #this should return NA
+#' getArea('asdf')
+#' 
+#' @export
 getArea = function(site_id){
 	
-	site_id = as.character(site_id)
-	
-	##Load data
-	acre2m2	<-	4046.85642
-	fname = system.file('supporting_files/managed_lake_info.txt', package=packageName())
-	d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"", colClasses=c(WBIC='character'))
-	
-	#Lookup
-	vals = merge(data.frame(site_id, order=1:length(site_id)), 
-							 d, by.x='site_id', by.y='WBIC', all.x=TRUE)
-
-	vals = vals[order(vals$order),]
-	
-	return(vals$acres * acre2m2)
+	.Deprecated('get_area', package='lakeattributes')
+	return(get_area(site_id))
 }
 
-#'@title Get estimated lake residence time
-#'@description
-#'Returns the estimated residence time for a lake with the given ID
-#'
-#'@param site_id The character ID for the requested data
-#'
-#'@return 
-#'Estimated residence time in days
-#'
-#'@details 
-#'TODO
-#'
-#'@references 
-#'TODO Data source needed
-#'
-#'@author 
-#'Luke Winslow, Jordan Read
-#'
-#'@examples
-#'TODO
-#'
-#'@export
+#' @title Get estimated lake residence time
+#' @description
+#' Returns the estimated residence time for a lake with the given ID
+#' 
+#' @param site_id The character ID for the requested data
+#' 
+#' @return 
+#' Estimated residence time in days
+#' 
+#' @details 
+#' TODO
+#' 
+#' @references 
+#' TODO Data source needed
+#' 
+#' @author 
+#' Luke Winslow, Jordan Read
+#' 
+#' @examples
+#' TODO
+#' 
+#' @export
 getResidenceTime	<-	local(
 	{ lookup=NULL 
 		
@@ -125,25 +103,25 @@ getResidenceTime	<-	local(
 	}
 )
 
-#'@title Get surrounding canopy height for a given lake
-#'@description
-#'Returns the surrounding canopy height for a lake with the given ID
-#'
-#'@param site_id The character ID for the requested data
-#'@param method Canopy height estimation method [aster or landcover]
-#'@param default.if.null Default value to return if canopy height is unknown
-#'
-#'@return
-#' Canopy height above lake surface level in meters
-#'@details
-#'TODO
-#'
-#'
-#'@author 
-#'Luke Winslow, Jordan Read
-#'
-#'
-#'@export
+#' @title Get surrounding canopy height for a given lake
+#' @description
+#' Returns the surrounding canopy height for a lake with the given ID
+#' 
+#' @param site_id The character ID for the requested data
+#' @param method Canopy height estimation method [aster or landcover]
+#' @param default.if.null Default value to return if canopy height is unknown
+#' 
+#' @return
+#'  Canopy height above lake surface level in meters
+#' @details
+#' TODO
+#' 
+#' 
+#' @author 
+#' Luke Winslow, Jordan Read
+#' 
+#' 
+#' @export
 getCanopy = function(site_id, default.if.null=FALSE, method="aster"){
 	
 	if (tolower(method) == 'aster'){
@@ -187,31 +165,31 @@ getCanopy = function(site_id, default.if.null=FALSE, method="aster"){
 	}
 }
 
-#'@title Get light attenuation based on long-term trend scenario for a given lake
-#'@description
-#'Calculate the long-term values of light attenuation for a given lake based on
-#'changing scenario
-#'
-#'@param site_id The character ID for the requested data
-#'@param years Numeric year vector across which to calculate Kd values
-#'@param year.1 The numeric year bounds of the averaging
-#' (i.e., values outside of this range will not be used)
-#'@param trend The percentage of Secchi increase per year. 
-#'Positive is increasing secchi (e.g., 0.94 is 0.94% increase per year)
-#'@param default.if.null boolean indicating if default Kd should be used if lake has no observations
-#'@return
-#' light attenuation coefficient in m^-1
+#' @title Get light attenuation based on long-term trend scenario for a given lake
+#' @description
+#' Calculate the long-term values of light attenuation for a given lake based on
+#' changing scenario
 #' 
-#'@details
-#'TODO
-#'
-#'
-#'@author 
-#'Luke Winslow, Jordan Read
-#'
-#'
-#'
-#'@export
+#' @param site_id The character ID for the requested data
+#' @param years Numeric year vector across which to calculate Kd values
+#' @param year.1 The numeric year bounds of the averaging
+#'  (i.e., values outside of this range will not be used)
+#' @param trend The percentage of Secchi increase per year. 
+#' Positive is increasing secchi (e.g., 0.94 is 0.94% increase per year)
+#' @param default.if.null boolean indicating if default Kd should be used if lake has no observations
+#' @return
+#'  light attenuation coefficient in m^-1
+#'  
+#' @details
+#' TODO
+#' 
+#' 
+#' @author 
+#' Luke Winslow, Jordan Read
+#' 
+#' 
+#' 
+#' @export
 getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.null=FALSE){
   #WBIC is a string
   #years is a single numeric or vector of numerics
@@ -267,31 +245,31 @@ getScenarioKd <- function(WBIC,years,year.1=1979,year.2=2011,trend=0,default.if.
   return(Kd)
 }
 
-#'@title Get light attenuation coefficient for a given lake
-#'@description
-#'Returns the light attenuation coefficient for a lake with the given ID
-#'
-#'@param site_id The character ID for the requested data
-#'@param default.if.null boolean indicating if default Kd should be used if lake has no observations
-#'
-#'@return
-#' Light attenuation coefficient in m^-1
-#'@details
-#'TODO
-#'
-#'
-#'@author 
-#'Luke Winslow, Jordan Read
-#'
-#'@examples
-#'#NA returned when no site with that ID found
-#'getClarity(c('6100', '10000', 'asdf'))
-#'
-#'#Default can be requested as well
-#'getClarity(c('6100','asdf', '10000', 'asdf'), default.if.null=TRUE)
-#'
-#'
-#'@export
+#' @title Get light attenuation coefficient for a given lake
+#' @description
+#' Returns the light attenuation coefficient for a lake with the given ID
+#' 
+#' @param site_id The character ID for the requested data
+#' @param default.if.null boolean indicating if default Kd should be used if lake has no observations
+#' 
+#' @return
+#'  Light attenuation coefficient in m^-1
+#' @details
+#' TODO
+#' 
+#' 
+#' @author 
+#' Luke Winslow, Jordan Read
+#' 
+#' @examples
+#' #NA returned when no site with that ID found
+#' getClarity(c('6100', '10000', 'asdf'))
+#' 
+#' #Default can be requested as well
+#' getClarity(c('6100','asdf', '10000', 'asdf'), default.if.null=TRUE)
+#' 
+#' 
+#' @export
 getClarity = function(site_id, default.if.null=FALSE){
 			
 	default.kd	<-	0.6983965
@@ -369,7 +347,7 @@ getElevation <- local({ lookup=NULL;
 #'@param site_id The character ID for the requested data
 #'
 #'@return
-#' Lat/lon on the WGS84 datum
+#' Lat/lon on the WGS84 datum as a list
 #' 
 #'@details
 #'TODO
@@ -380,21 +358,26 @@ getElevation <- local({ lookup=NULL;
 #'
 #'
 #'@export
-getLatLon <- local({ lookup=NULL; function(WBIC) {
-	if (is.null(lookup)) { 
-		cat('Caching lat/lon info.\n')
-		
-		fname <- system.file('supporting_files/WI_Lakes_WbicLatLon.tsv', package=packageName())
-		d <- read.table(fname, header=TRUE, as.is=TRUE) 
-		
-		lookup <<- new.env()
-		
-		for(i in 1:nrow(d)){
-			lookup[[toString(d$WBIC[i])]] = c(d$LAT[i], d$LON[i])
-		}
-	}
-	lookup[[WBIC]]
-}})
+getLatLon = function(site_id){
+	.Deprecated('get_latlon', package='lakeattributes')
+	return(get_latlon(site_id))
+
+}
+# getLatLon <- local({ lookup=NULL; function(WBIC) {
+# 	if (is.null(lookup)) { 
+# 		cat('Caching lat/lon info.\n')
+# 		
+# 		fname <- system.file('supporting_files/WI_Lakes_WbicLatLon.tsv', package=packageName())
+# 		d <- read.table(fname, header=TRUE, as.is=TRUE) 
+# 		
+# 		lookup <<- new.env()
+# 		
+# 		for(i in 1:nrow(d)){
+# 			lookup[[toString(d$WBIC[i])]] = c(d$LAT[i], d$LON[i])
+# 		}
+# 	}
+# 	lookup[[WBIC]]
+# }})
 
 #'@title Get perimeter for a given lake
 #'@description
@@ -480,11 +463,12 @@ getSDF	<-	function(WBIC){
 #'
 #'
 #'@export
-getCD	<-	function(WBIC=NULL,Wstr=NULL){
-	if (is.null(WBIC) & is.null(Wstr)){
+getCD	<-	function(site_id=NULL, Wstr=NULL, method='Hondzo'){
+	
+	if (is.null(site_id) & is.null(Wstr)){
 		stop('either WBIC or Wstr need to be defined')
 	} else if (is.null(Wstr)){
-		Wstr	<-	getWstr(WBIC)
+		Wstr	<-	getWstr(site_id, method=method)
 	}
 	
 	coef_wind_drag.ref	<-	0.00140
@@ -510,9 +494,9 @@ getCD	<-	function(WBIC=NULL,Wstr=NULL){
 #'
 #'
 #'@export
-getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
+getWstr	<-	function(WBIC, method='Markfort', canopy=NULL){
 
-	lkeArea	<-	getArea(WBIC)
+	lkeArea	<-	get_area(WBIC)
   
   if(is.na(lkeArea)){
     return(NA)
@@ -581,33 +565,35 @@ getWstr	<-	function(WBIC,method='Markfort',canopy=NULL){
 #'
 #'
 #'@export
-getZmax <- local({ lookup=NULL; function(WBIC) {
-  if (is.null(lookup)) { 
-    cat('Caching depth info.\n')
-    fname <- system.file('supporting_files/managed_lake_info.txt', package=packageName())
-    d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"")
-    
-    lookup <<- new.env()
-    ft2m  <-  0.3048
-    for(i in 1:nrow(d)){
-      mean.m <- d$max.depth.ft[i]
-      lookup[[toString(d$WBIC[i])]] = mean(ft2m*mean.m)
-    }
-  }
-  out = lookup[[WBIC]]
-  
-  #try lookup up based on bathymetry if available
-  if(is.null(out)){
-    fileN	<-	system.file(paste(c('supporting_files/Bathy/', WBIC, '.bth'), collapse=''), 
-                         package=packageName())
-    if (file.exists(fileN)){
-      data	<-	read.table(fileN,header=TRUE,sep='\t')
-      out = max(data$depth, na.rm=TRUE)
-    }
-  }
-  
-  return(out)
-}})
+getZmax <- function(site_id) {
+	return(get_zmax(site_id))
+}
+#   if (is.null(lookup)) { 
+#     cat('Caching depth info.\n')
+#     fname <- system.file('supporting_files/managed_lake_info.txt', package=packageName())
+#     d	<-	read.table(fname, header=TRUE, sep='\t', quote="\"")
+#     
+#     lookup <<- new.env()
+#     ft2m  <-  0.3048
+#     for(i in 1:nrow(d)){
+#       mean.m <- d$max.depth.ft[i]
+#       lookup[[toString(d$WBIC[i])]] = mean(ft2m*mean.m)
+#     }
+#   }
+#   out = lookup[[WBIC]]
+#   
+#   #try lookup up based on bathymetry if available
+#   if(is.null(out)){
+#     fileN	<-	system.file(paste(c('supporting_files/Bathy/', WBIC, '.bth'), collapse=''), 
+#                          package=packageName())
+#     if (file.exists(fileN)){
+#       data	<-	read.table(fileN,header=TRUE,sep='\t')
+#       out = max(data$depth, na.rm=TRUE)
+#     }
+#   }
+#   
+#   return(out)
+# }})
 
 #'@title Get mean depth for a given lake
 #'@description
