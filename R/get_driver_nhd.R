@@ -61,7 +61,19 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	return(dest)
 }
 
-get_driver_index = function(driver_name, loc_cache){
+#' @title Return the driver file index table
+#' 
+#' @inheritParams get_driver_path
+#' 
+#' @description 
+#' Accesses and returns the driver file index. Can be used to get list of 
+#' all available driver data for a given driver
+#' 
+#' @examples 
+#' unique(get_driver_index('NLDAS')$id)
+#' 
+#' @export
+get_driver_index = function(driver_name, loc_cache=TRUE){
 	#see if index file exists already
 	index_url = paste0(base_url, 'drivers_GLM_', driver_name, '/driver_index.tsv')
 	dest = file.path(tempdir(), driver_name, 'driver_index.tsv')

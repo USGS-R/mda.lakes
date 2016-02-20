@@ -1,17 +1,18 @@
-
-#'@title Create basic NML file object for a lake
-#'
-#'@description
-#'This creates an NML object and pre-fills it with 
-#'key parameters for the site_id
-#'
-#'@param site_id Unique lake ID
-#'
-#'
-#'@import glmtools
-#'@import lakeattributes
-#'@import GLMr
-#'@export
+#' @title Create basic NML file object for a lake
+#' 
+#' @description
+#' This creates an NML object and pre-fills it with 
+#' key parameters for the site_id
+#' 
+#' @param site_id Unique lake ID
+#' @param kd Lake clarity in m^-1
+#' 
+#' 
+#' 
+#' @import glmtools
+#' @import lakeattributes
+#' @import GLMr
+#' @export
 populate_base_lake_nml = function(site_id, kd=get_kd_avg(site_id)$kd_avg, nml_template=nml_template_path(),
 																	zmax=get_zmax(site_id), bathy=get_bathy(site_id), cd=getCD(site_id), 
 																	elev=get_elevation(site_id), area=get_area(site_id), latlon=get_latlon(site_id), 

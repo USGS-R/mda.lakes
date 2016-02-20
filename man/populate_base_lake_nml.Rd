@@ -12,6 +12,8 @@ populate_base_lake_nml(site_id, kd = get_kd_avg(site_id)$kd_avg,
 }
 \arguments{
 \item{site_id}{Unique lake ID}
+
+\item{kd}{Lake clarity in m^-1}
 }
 \description{
 This creates an NML object and pre-fills it with 
