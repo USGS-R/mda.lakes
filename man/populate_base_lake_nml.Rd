@@ -4,11 +4,16 @@
 \alias{populate_base_lake_nml}
 \title{Create basic NML file object for a lake}
 \usage{
-populate_base_lake_nml(site_id, kd = getClarity(site_id, default.if.null =
-  TRUE))
+populate_base_lake_nml(site_id, kd = get_kd_avg(site_id)$kd_avg,
+  nml_template = nml_template_path(), zmax = get_zmax(site_id),
+  bathy = get_bathy(site_id), cd = getCD(site_id),
+  elev = get_elevation(site_id), area = get_area(site_id),
+  latlon = get_latlon(site_id), driver = get_driver_path(site_id))
 }
 \arguments{
 \item{site_id}{Unique lake ID}
+
+\item{kd}{Lake clarity in m^-1}
 }
 \description{
 This creates an NML object and pre-fills it with 

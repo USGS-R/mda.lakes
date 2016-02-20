@@ -4,12 +4,12 @@
 \alias{getCD}
 \title{Get coefficient of wind drag for a given lake or given wind sheltering coefficient}
 \usage{
-getCD(WBIC = NULL, Wstr = NULL)
+getCD(site_id = NULL, Wstr = NULL, method = "Hondzo")
 }
 \arguments{
-\item{Wstr}{The wind sheltering coefficient}
-
 \item{site_id}{The character ID for the requested data}
+
+\item{Wstr}{The wind sheltering coefficient}
 }
 \value{
 Coefficient of wind drag

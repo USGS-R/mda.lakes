@@ -1,7 +1,7 @@
 # run one WiLMA lake (Mendota) using new model running technique
 
 
-lake_id = 11900
+lake_id = 2897100
 lake_id = as.character(lake_id)
 
 library(mda.lakes)
@@ -10,14 +10,16 @@ library(glmtools)
 library(rLakeAnalyzer)
 
 run_dir = tempdir()
+years = 2020:2097
 
-secchi = get_kd_best(paste0('WBIC_', lake_id), years=1979:2012)
+secchi = get_kd_best(paste0('WBIC_', lake_id), years=years)
 
-driver_function = function(site_id){
-	nldas = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
-	drivers = driver_nldas_wind_debias(nldas)
+driver_function = function(site_id, gcm='ECHAM5'){
+	drivers = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = gcm), header=TRUE)
+	nldas   = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
+	drivers = driver_nldas_debias_airt_sw(drivers, nldas)
 	drivers = driver_add_burnin_years(drivers, nyears=2)
-	drivers = driver_add_rain(drivers, month=7:9, rain_add=1)
+	drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
 	driver_save(drivers)
 }
 
@@ -26,7 +28,7 @@ driver_path = gsub('\\\\', '/', driver_path)
 
 prep_run_glm_kd(site_id = lake_id, 
 					path = run_dir,
-					years = 1977:2012,
+					years = years,
 					sed_heat = FALSE,
 					kd = 1.7/secchi$secchi_avg,
 					nml_args=list(
