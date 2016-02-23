@@ -97,8 +97,8 @@ drivers_to_glm = function(driver_df){
 	driver_df$WindSpeed = sqrt(driver_df$ugrd10m^2 + driver_df$vgrd10m^2)
 	driver_df$ShortWave = driver_df$dswrfsfc
 	driver_df$LongWave  = driver_df$dlwrfsfc
-	driver_df$Rain      = driver_df$apcpsfc*24/1000 #convert to m/day rate
 	
+	##TODO Maybe: Generalize these conversions so they aren't if/else statements
 	if('tmp2m' %in% names(driver_df)){
 		driver_df$AirTemp   = driver_df$tmp2m - 273.15 #convert K to deg C
 	}else if('airtemp' %in% names(driver_df)){
@@ -114,6 +114,17 @@ drivers_to_glm = function(driver_df){
 	}else{
 		stop('Unable to find humidity data.\nDriver service must have humidity data (named relhum or spfh2m). ')
 	}
+	
+	if('apcpsfc' %in% names(driver_df)){
+		#convert from mm/hour to m/day
+		driver_df$Rain      = driver_df$apcpsfc*24/1000 #convert to m/day rate
+	}else if('precip' %in% names(driver_df)){
+		#convert from mm/day to m/day
+		driver_df$Rain      = driver_df$precip/1000
+	}else{
+		stop('Unable to find precipitation data. \nMust be either apcpsfc or precip')
+	}
+	
 	
 	
 	#now deal with snow
