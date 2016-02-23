@@ -1,4 +1,3 @@
-
 #'@title Return driver file location for given lake
 #'
 #'@description
@@ -13,6 +12,13 @@
 #'
 #'@author Luke Winslow
 #'
+#'@examples
+#'get_driver_path('nhd_120052892')
+#'get_driver_path('nhd_120052892', 'ECHAM5')
+#'get_driver_path('nhd_120052892', 'CM2.0')
+#'
+#'
+#'get_driver_path('WBIC_1881900')
 #'
 #'@export
 get_driver_path = function(id, driver_name='NLDAS', loc_cache=TRUE, timestep='daily', ...){

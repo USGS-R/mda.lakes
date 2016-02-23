@@ -4,13 +4,13 @@
 \alias{getLatLon}
 \title{Get latitude and longitude for a given lake}
 \usage{
-getLatLon(WBIC)
+getLatLon(site_id)
 }
 \arguments{
 \item{site_id}{The character ID for the requested data}
 }
 \value{
-Lat/lon on the WGS84 datum
+Lat/lon on the WGS84 datum as a list
 }
 \description{
 Get the center lat/lon of a lake with given ID

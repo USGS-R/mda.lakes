@@ -22,6 +22,15 @@ get_driver_path(id, driver_name = "NLDAS", loc_cache = TRUE,
 This functoin returns a path to the driver file for a lake. Retrieve and cache
 the file from Sciencebase if necessary
 }
+\examples{
+get_driver_path('nhd_120052892')
+get_driver_path('nhd_120052892', 'ECHAM5')
+get_driver_path('nhd_120052892', 'CM2.0')
+
+
+get_driver_path('WBIC_1881900')
+
+}
 \author{
 Luke Winslow
 }

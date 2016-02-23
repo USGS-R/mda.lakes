@@ -59,14 +59,12 @@ future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=
     
     secchi = get_kd_best(site_id, years=modern_era)
     
-    bare_wbic = substr(site_id, 6, nchar(site_id))
-    
     driver_path = driver_function(site_id)
     driver_path = gsub('\\\\', '/', driver_path)
     
     #run with different driver and ice sources
     
-    prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, 
+    prep_run_glm_kd(site_id, kd=1.7/secchi$secchi_avg, path=run_dir, 
                             years=modern_era,
                             nml_args=list(
                               dt=3600, subdaily=FALSE, nsave=24, 
@@ -128,7 +126,7 @@ future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=
 ## Lets run nldas
 ################################################################################
 driver_fun = function(site_id){
-  nldas = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
+  nldas = read.csv(get_driver_path(site_id, driver_name = 'NLDAS'), header=TRUE)
   drivers = driver_nldas_wind_debias(nldas)
   drivers = driver_add_burnin_years(drivers, nyears=2)
   drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
