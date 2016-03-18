@@ -3,7 +3,7 @@
 library(parallel)
 
 #lets try 100 to start
-c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4041)
+c1 = makePSOCKcluster(paste0('licon', 1:50), manual=TRUE, port=4043)
 
 # now devtools installed on cluster
 #clusterCall(c1, function(){install.packages('devtools', repos='http://cran.rstudio.com')})
@@ -20,7 +20,7 @@ lakeattr_install = clusterCall(c1, function(){install_github('lawinslow/lakeattr
 mdalakes_install = clusterCall(c1, function(){install_github('lawinslow/mda.lakes')})
 
 
-out_dir = 'E:/WiLMA/Results/2015-09-23_wtr_hab'
+out_dir = 'C:/WiLMA/2016-02-19_wtr_hab'
 
 library(lakeattributes)
 library(mda.lakes)
@@ -31,11 +31,11 @@ library(reshape2)
 Sys.setenv(TZ='GMT')
 
 
-lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package = 'mda.lakes'), 
-                   sep='\t', quote="\"", header=TRUE, as.is=TRUE, colClasses=c(WBIC='character'))
+#lakes = read.table(system.file('supporting_files/managed_lake_info.txt', package = 'mda.lakes'), 
+#                   sep='\t', quote="\"", header=TRUE, as.is=TRUE, colClasses=c(WBIC='character'))
 
-to_run = paste0('WBIC_', lakes$WBIC)
-
+#to_run = paste0('WBIC_', lakes$WBIC)
+to_run = unique(get_driver_index('NLDAS')$id)
 
 future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=get_driver_path){
   
@@ -82,13 +82,13 @@ future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=
     #wtr_all = wtr[to_keep, ]
     
     
-    habitat = continuous.habitat.calc(run_dir, lakeid=bare_wbic)
+    habitat = continuous.habitat.calc(run_dir, lakeid=site_id)
     
     #Run future era only if requested
     if(!missing(future_era)){
       secchi = get_kd_best(site_id, years=future_era)
       
-      prep_run_glm_kd(bare_wbic, kd=1.7/secchi$secchi_avg, path=run_dir, 
+      prep_run_glm_kd(site_id, kd=1.7/secchi$secchi_avg, path=run_dir, 
                               years=future_era,
                               nml_args=list(
                                 dt=3600, subdaily=FALSE, nsave=24, 
@@ -107,7 +107,7 @@ future_hab_wtr = function(site_id, years=1979:2012, future_era, driver_function=
       
       
       ##now hab
-      habitat = rbind(habitat, continuous.habitat.calc(run_dir, lakeid=bare_wbic))
+      habitat = rbind(habitat, continuous.habitat.calc(run_dir, lakeid=site_id))
     }
     
     unlink(run_dir, recursive=TRUE)
@@ -156,8 +156,8 @@ gc()
 ## Lets run GENMOM 1980-1999, 2020-2089
 ################################################################################
 driver_fun = function(site_id, gcm){
-  drivers = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = gcm), header=TRUE)
-  nldas   = read.csv(get_driver_path(paste0(site_id, '.csv'), driver_name = 'NLDAS'), header=TRUE)
+  drivers = read.csv(get_driver_path(paste0(site_id, ''), driver_name = gcm, timestep = 'daily'), header=TRUE)
+  nldas   = read.csv(get_driver_path(paste0(site_id, ''), driver_name = 'NLDAS'), header=TRUE)
   drivers = driver_nldas_debias_airt_sw(drivers, nldas)
   drivers = driver_add_burnin_years(drivers, nyears=2)
   drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
