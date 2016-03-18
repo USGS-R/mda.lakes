@@ -12,7 +12,7 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	
 	#match id to index
 	match_i = which(indx$id == id)
-	if(length(match_i) < 8){
+	if(length(match_i) < 6){
 		stop('flawed or missing driver set for ', id)
 	}
 	
@@ -93,12 +93,20 @@ get_driver_index = function(driver_name, loc_cache=TRUE){
 drivers_to_glm = function(driver_df){
 	
 	## convert and downsample wind
-	
-	driver_df$WindSpeed = sqrt(driver_df$ugrd10m^2 + driver_df$vgrd10m^2)
 	driver_df$ShortWave = driver_df$dswrfsfc
 	driver_df$LongWave  = driver_df$dlwrfsfc
-	driver_df$Rain      = driver_df$apcpsfc*24/1000 #convert to m/day rate
 	
+	if('windspeed' %in% names(driver_df)){
+		driver_df$WindSpeed = driver_df$windspeed
+	}else if('ugrd10m' %in% names(driver_df)){
+		driver_df$WindSpeed = sqrt(driver_df$ugrd10m^2 + driver_df$vgrd10m^2)
+	}else{
+		stop('Unable to find wind data.\nDriver service must have temp data (named windspeed or ugrd10m). ')
+	}
+	
+	
+	
+	##TODO Maybe: Generalize these conversions so they aren't if/else statements
 	if('tmp2m' %in% names(driver_df)){
 		driver_df$AirTemp   = driver_df$tmp2m - 273.15 #convert K to deg C
 	}else if('airtemp' %in% names(driver_df)){
@@ -111,17 +119,30 @@ drivers_to_glm = function(driver_df){
 		driver_df$RelHum    = 100*driver_df$relhum
 	}else if('spfh2m' %in% names(driver_df)){
 		driver_df$RelHum    = 100*driver_df$spfh2m/qsat(driver_df$tmp2m-273.15, driver_df$pressfc*0.01)
+	}else if('relhumperc' %in% names(driver_df)){
+		driver_df$RelHum    = driver_df$relhumperc
 	}else{
 		stop('Unable to find humidity data.\nDriver service must have humidity data (named relhum or spfh2m). ')
 	}
 	
+	if('apcpsfc' %in% names(driver_df)){
+		#convert from mm/hour to m/day
+		driver_df$Rain      = driver_df$apcpsfc*24/1000 #convert to m/day rate
+	}else if('precip' %in% names(driver_df)){
+		#convert from mm/day to m/day
+		driver_df$Rain      = driver_df$precip/1000
+	}else{
+		stop('Unable to find precipitation data. \nMust be either apcpsfc or precip')
+	}
 	
-	#now deal with snow
+	
+	#now deal with snow base case
 	driver_df$Snow = 0
 	
 	# 10:1 ratio assuming 1:10 density ratio water weight
 	driver_df$Snow[driver_df$AirTemp < 0] = driver_df$Rain[driver_df$AirTemp < 0]*10 
 	driver_df$Rain[driver_df$AirTemp < 0] = 0
+	
 	
 	#convert DateTime to properly formatted string
 	driver_df$time = driver_df$DateTime
