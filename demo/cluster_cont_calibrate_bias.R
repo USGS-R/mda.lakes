@@ -24,8 +24,8 @@ clusterCall(c1, function(){library(devtools)})
 #glmr_install     = clusterCall(c1, function(){install.packages('glmtools', repos=c('http://owi.usgs.gov/R', 'http://cran.rstudio.com'))})
 glmr_install     = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/GLMr_3.1.10.tar.gz'))})
 glmtools_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/glmtools_0.13.0.tar.gz'))})
-lakeattr_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/lakeattributes_0.7.2.tar.gz'))})
-mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_3.0.1.tar.gz'))})
+lakeattr_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/lakeattributes_0.7.4.tar.gz'))})
+mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_3.0.2.tar.gz'))})
 
 library(lakeattributes)
 library(mda.lakes)
@@ -52,6 +52,7 @@ run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nm
     
     
     run_dir = file.path(fastdir, site_id)
+    cat(run_dir, '\n')
     dir.create(run_dir)
     
     #rename for dplyr
@@ -89,7 +90,7 @@ run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nm
     cal.data = resample_to_field(file.path(run_dir, 'output.nc'), file.path(run_dir,'obs.tsv'))
     cal.data$site_id = site_id
     
-    unlink(run_dir, recursive=TRUE)
+    #unlink(run_dir, recursive=TRUE)
     
     return(cal.data)
   
@@ -98,7 +99,7 @@ run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nm
 
 
 driver_fun = function(site_id){
-  nldas = read.csv(get_driver_path(paste0(site_id), driver_name = 'NLDAS'), header=TRUE)
+  nldas = read.csv(get_driver_path(site_id, driver_name = 'NLDAS', timestep = 'daily'), header=TRUE)
   drivers = driver_nldas_wind_debias(nldas)
   drivers = driver_add_burnin_years(drivers, nyears=2)
   drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
@@ -109,34 +110,32 @@ driver_fun = function(site_id){
 #ramdisk = clusterCall(c1, function(){file.exists('/mnt/ramdisk')})
 #c1 = c1[unlist(ramdisk)]
 
-to_run = intersect(wtemp$site_id, zmax$site_id)
+to_run = unique(intersect(intersect(wtemp$site_id, zmax$site_id), secchi$site_id))
 
-out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list())
-#
-# groups = split(to_run, ceiling(seq_along(to_run)/100))
-# out = list()
-# for(grp in groups){
-#   tmp = clusterApplyLB(c1,grp, run_cal, driver_fun)
-#   out = c(out, tmp)
-#   cat('iteration\n')
-# }
+out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list(), years=1980:1999)
 
 #out = clusterApplyLB(c1, to_run[1:50], run_cal)
 
 sprintf('%i lakes ran\n', sum(unlist(lapply(out, inherits, what='data.frame'))))
 
+
 ##results
 out_df = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
+write.table(out_df, 'c:/WiLMA/results/2016-03-22_NLDAS.tsv', sep='\t', row.names=FALSE)
 
-sqrt(mean((out_df$Observed_wTemp - out_df$Modeled_wTemp)^2, na.rm=TRUE))
-mean(out_df$Observed_wTemp - out_df$Modeled_wTemp, na.rm=TRUE)
+rmarkdown::render('demo/document_calibration_overview_template.Rmd', output_file='2016-03-22_NLDAS.pdf', 
+                  output_dir='c:/WiLMA/results/', params=list(out_df=out_df))
+
+
+sqrt(mean((out_df$Observed_temp - out_df$Modeled_temp)^2, na.rm=TRUE))
+mean(out_df$Observed_temp - out_df$Modeled_temp, na.rm=TRUE)
 
 ################################################################################
 ## ACCESS
 ################################################################################
 driver_fun = function(site_id, gcm){
-  drivers = read.csv(get_driver_path(paste0(site_id, ''), driver_name = gcm, timestep = 'daily'), header=TRUE)
-  nldas   = read.csv(get_driver_path(paste0(site_id, ''), driver_name = 'NLDAS'), header=TRUE)
+  drivers = read.csv(get_driver_path(site_id, driver_name = gcm, timestep = 'daily'), header=TRUE)
+  nldas   = read.csv(get_driver_path(site_id, driver_name = 'NLDAS', timestep = 'daily'), header=TRUE)
   drivers = driver_nldas_debias_airt_sw(drivers, nldas)
   drivers = driver_add_burnin_years(drivers, nyears=2)
   drivers = driver_add_rain(drivers, month=7:9, rain_add=0.5) ##keep the lakes topped off
@@ -145,7 +144,19 @@ driver_fun = function(site_id, gcm){
 
 clusterExport(c1, 'driver_fun')
 
-clusterApplyLB(c1, to_run, run_cal, years=1980:1999, driver_function=function(site_id){driver_fun(site_id, 'GENMOM')})
+out = clusterApplyLB(c1, to_run, run_cal, years=1980:1999, driver_function=function(site_id){driver_fun(site_id, 'ACCESS')})
+
+sprintf('%i lakes ran\n', sum(unlist(lapply(out, inherits, what='data.frame'))))
+
+##results
+out_df = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
+write.table(out_df, 'c:/WiLMA/results/2016-03-19_ACCESS.tsv', sep='\t', row.names=FALSE)
+
+sqrt(mean((out_df$Observed_temp - out_df$Modeled_temp)^2, na.rm=TRUE))
+mean(out_df$Observed_temp - out_df$Modeled_temp, na.rm=TRUE)
+
+rmarkdown::render('demo/document_calibration_overview_template.Rmd', output_file='2016-03-19_ACCESS.pdf', 
+                  output_dir='c:/WiLMA/results/', params=list(out_df=out_df))
 
 
 # groups = split(to_run, ceiling(seq_along(to_run)/100))
@@ -155,12 +166,5 @@ clusterApplyLB(c1, to_run, run_cal, years=1980:1999, driver_function=function(si
 #   out = c(out, tmp)
 #   cat('iteration\n')
 # }
-
-#out = clusterApplyLB(c1, to_run[1:50], run_cal)
-
-##results
-out_df = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
-sqrt(mean((out_df$Observed_wTemp - out_df$Modeled_wTemp)^2, na.rm=TRUE))
-mean(out_df$Observed_wTemp - out_df$Modeled_wTemp, na.rm=TRUE)
 
 

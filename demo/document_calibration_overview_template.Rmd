@@ -1,0 +1,101 @@
+---
+title: "Cal/Val Summary"
+author: "Luke Winslow"
+date: "March 22, 2016"
+output: pdf_document
+params:
+  out_df: !r data.frame()
+
+---
+
+Lets see how the run went. 
+
+
+
+```{r, echo=FALSE, message=FALSE}
+library(lubridate)
+library(glmtools)
+library(mda.lakes)
+
+#out_df = read.table('c:/WiLMA/results/2016-03-21_NLDAS.tsv', header=TRUE, sep='\t', as.is=TRUE)
+Sys.setenv(tz='GMT')
+
+out_df$DateTime   = as.POSIXct(out_df$DateTime)
+out_df$month      = month(out_df$DateTime)
+out_df$modLessObs = out_df$Modeled_temp - out_df$Observed_temp
+out_df$Depth_1   = floor(out_df$Depth/1)*1
+
+
+```
+
+#Run and code info
+Specific mda.lakes version on github [link](`r paste0('https://github.com/USGS-R/mda.lakes/tree/', system('git rev-parse HEAD', intern = TRUE))`)
+
+Package | Version
+--------|-------
+mda.lakes      | `r packageVersion('mda.lakes')`
+lakeattributes | `r packageVersion('lakeattributes')`
+GLMr           | `r packageVersion('GLMr')`
+glmtools       | `r packageVersion('glmtools')`
+
+
+#Classic, general stats:
+
+Statistic | Value
+----------|-------
+n obs     | `r nrow(na.omit(out_df)) `
+n lakes   | `r length(unique(out_df$site_id)) `
+RMSE      | `r sqrt(mean((out_df$modLessObs)^2, na.rm=TRUE)) `
+Mean error| `r mean(out_df$modLessObs, na.rm=TRUE)`
+
+
+
+
+
+\newpage
+#Overall observed vs model:
+```{r, echo=FALSE, fig.width=5, fig.height=7, warning=FALSE}
+
+par(mfrow=c(3,1), mar=c(1,4,0,1), oma=c(3,0,1,0))
+
+plot(out_df$Observed_temp, out_df$Modeled_temp, col=rgb(0, 0, 0, 0.1), pch=16, xlim=c(0,30), ylim=c(0,30), xaxt='n', ylab='Modeled Temp')
+
+abline(0, 1)
+
+epi = calc_mod_obs_metric(out_df, 'epi.temperature')
+
+plot(epi$obs, epi$mod, col=rgb(0, 0, 0, 0.1), pch=16, xlim=c(0,30), ylim=c(0,30), ylab='Modeled Epi', xaxt='n')
+abline(0, 1)
+
+hypo = calc_mod_obs_metric(out_df, 'hypo.temperature')
+plot(hypo$obs, hypo$mod, col=rgb(0, 0, 0, 0.1), pch=16, xlim=c(0,30), ylim=c(0,30), ylab='Modeled Hypo', xlab='Observed')
+abline(0, 1)
+
+```
+
+Statistic | RMSE  | Avg Resid
+----------|-------|------
+All Temp  | `r sqrt(mean((out_df$modLessObs)^2, na.rm=TRUE)) ` | `r mean(out_df$modLessObs, na.rm=TRUE)`
+Epi RMSE  | `r sqrt(mean((epi$mod - epi$obs)^2, na.rm=TRUE))` | `r mean(epi$mod - epi$obs, na.rm=TRUE)` 
+Hypo RMSE | `r sqrt(mean((hypo$mod - hypo$obs)^2, na.rm=TRUE))` | `r mean(hypo$mod - hypo$obs, na.rm=TRUE)`
+
+
+\newpage
+#Residuals across depth:
+
+```{r, echo=FALSE}
+boxplot(modLessObs~Depth_1, out_df, ylab="Model - Observation", xlab='Depth (m)', ylim=c(-10, 10))
+abline(h=0)
+```
+
+\newpage
+#Seasonality of residuals:
+
+```{r, echo=FALSE}
+boxplot(modLessObs~month, out_df, ylab="Model - Observation", xlab='Month', ylim=c(-10, 10))
+abline(h=0)
+
+```
+
+
+
