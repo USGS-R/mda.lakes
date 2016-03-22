@@ -47,7 +47,18 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 		daily = trunc(as.POSIXct(glm_drivers$time), units='days')
 		glm_drivers$time = format(daily,'%Y-%m-%d %H:%M:%S')
 		
-		glm_drivers = plyr::ddply(glm_drivers,'time', function(df){colMeans(df[,-1])})
+		glm_drivers = plyr::ddply(glm_drivers,'time', function(df){
+			
+			data.frame(
+				ShortWave = mean(df$ShortWave),
+				LongWave  = mean(df$LongWave),
+				AirTemp   = mean(df$AirTemp),
+				RelHum    = mean(df$RelHum),
+				WindSpeed = mean(df$WindSpeed^3)^(1/3),
+				Rain      = mean(df$Rain),
+				Snow      = mean(df$Snow)
+			)
+		})
 		
 	}
 	
