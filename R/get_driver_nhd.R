@@ -21,11 +21,16 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	#grab (and open?) Rdata files
 	for(i in 1:length(match_i)){
 		fname = indx[match_i[i], 'file.name']
-		driver_url = paste0(base_url, 'drivers_GLM_', driver_name, '/', fname)
+		driver_url = paste0(pkg_info$dvr_url, 'drivers_GLM_', driver_name, '/', fname)
 		dest = file.path(tempdir(), driver_name, fname)
 		
-		if(!download_helper(driver_url, dest)){
-			stop('failure downloading ', fname, '\n')
+		
+		if(substr(driver_url, 0,7) == 'file://'){
+		  dest = sub('file://', '', driver_url)
+		}else{
+		  if(!download_helper(driver_url, dest)){
+		    stop('failure downloading ', fname, '\n')
+		  }
 		}
 		
 		load(dest, envir=driver_env)
@@ -86,7 +91,7 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 #' @export
 get_driver_index = function(driver_name, loc_cache=TRUE){
 	#see if index file exists already
-	index_url = paste0(base_url, 'drivers_GLM_', driver_name, '/driver_index.tsv')
+	index_url = paste0(pkg_info$dvr_url, 'drivers_GLM_', driver_name, '/driver_index.tsv')
 	dest = file.path(tempdir(), driver_name, 'driver_index.tsv')
 	
 	#If it exists, return without downloading
@@ -99,6 +104,18 @@ get_driver_index = function(driver_name, loc_cache=TRUE){
 	}
 	
 	return(read.table(dest, sep='\t', header=TRUE, as.is=TRUE))
+}
+
+#' @title Set driver URL
+#' 
+#' @param url New base URL to set
+#' 
+#' @description 
+#' Sets the default URL to access driver data. 
+#' 
+#' @export
+set_driver_url = function(url){
+  pkg_info$dvr_url = url
 }
 
 drivers_to_glm = function(driver_df){
