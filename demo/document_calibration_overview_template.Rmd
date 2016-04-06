@@ -5,10 +5,11 @@ date: "March 22, 2016"
 output: pdf_document
 params:
   out_df: !r data.frame()
+  run_message: !r "default message"
 
 ---
 
-Lets see how the run went. 
+Run description: `r params$run_message`
 
 
 
@@ -16,6 +17,8 @@ Lets see how the run went.
 library(lubridate)
 library(glmtools)
 library(mda.lakes)
+
+out_df = params$out_df
 
 #out_df = read.table('c:/WiLMA/results/2016-03-21_NLDAS.tsv', header=TRUE, sep='\t', as.is=TRUE)
 Sys.setenv(tz='GMT')
