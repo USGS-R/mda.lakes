@@ -20,7 +20,7 @@ calc_mod_obs_metric = function(mod_obs_df, metric){
 	for(lid in uids){
 		lake_data = subset(mod_obs_df, site_id == lid)
 		lake_data$site_id = NULL
-		bathy = getBathy(strsplit(lid, '_')[[1]][2])
+		bathy = get_bathy(lid)
 		
 		lake_data = ddply(lake_data, 'DateTime', function(df){
 									if(nrow(na.omit(df)) >= 5){

@@ -4,7 +4,7 @@
 \alias{getCanopy}
 \title{Get surrounding canopy height for a given lake}
 \usage{
-getCanopy(site_id, default.if.null = FALSE, method = "aster")
+getCanopy(site_id, default.if.null = FALSE, method = "landcover")
 }
 \arguments{
 \item{site_id}{The character ID for the requested data}

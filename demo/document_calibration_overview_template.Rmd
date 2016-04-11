@@ -1,0 +1,218 @@
+---
+title: "Cal/Val Summary"
+author: "Luke Winslow"
+date: "March 22, 2016"
+output: html_document
+params:
+  out_df: !r data.frame()
+  run_message: !r "default message"
+
+---
+
+Run description: `r params$run_message`
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(lubridate)
+library(glmtools)
+library(mda.lakes)
+library(plyr)
+
+out_df = params$out_df
+
+#out_df = read.table('c:/WiLMA/results/2016-03-21_NLDAS.tsv', header=TRUE, sep='\t', as.is=TRUE)
+Sys.setenv(tz='GMT')
+
+out_df$DateTime   = as.POSIXct(out_df$DateTime)
+out_df$month      = month(out_df$DateTime)
+out_df$modLessObs = out_df$Modeled_temp - out_df$Observed_temp
+out_df$Depth_1   = floor(out_df$Depth/1)*1
+
+epi = calc_mod_obs_metric(out_df, 'epi.temperature')
+
+hypo = calc_mod_obs_metric(out_df, 'hypo.temperature')
+
+metric_calc_bylake = function(df){
+  data.frame(rmse=sqrt(mean((df$mod - df$obs)^2, na.rm=TRUE)), bias=mean(df$mod - df$obs, na.rm=TRUE), ndates=nrow(df))
+}
+
+
+epi_bylake = ddply(epi, 'site_id', metric_calc_bylake)
+hypo_bylake = ddply(hypo, 'site_id', metric_calc_bylake)
+
+epi_bylake = subset(epi_bylake, ndates >=10)
+hypo_bylake = subset(hypo_bylake, ndates >=10)
+
+```
+
+#Run and code info
+Specific mda.lakes version on github [link](`r paste0('https://github.com/USGS-R/mda.lakes/tree/', system('git rev-parse HEAD', intern = TRUE))`)
+
+Package | Version
+--------|-------
+mda.lakes      | `r packageVersion('mda.lakes')`
+lakeattributes | `r packageVersion('lakeattributes')`
+GLMr           | `r packageVersion('GLMr')`
+glmtools       | `r packageVersion('glmtools')`
+
+
+#Classic, general stats:
+
+Statistic | Value
+----------|-------
+n obs     | `r nrow(na.omit(out_df)) `
+n lakes   | `r length(unique(out_df$site_id)) `
+RMSE      | `r sqrt(mean((out_df$modLessObs)^2, na.rm=TRUE)) `
+Mean error| `r mean(out_df$modLessObs, na.rm=TRUE)`
+
+# Epi and Hypo lake-specific RMSE
+
+These are RMSE calculated for each lake, then the 50th and 95th percentile of those per-lake values 
+are presented. 
+
+Layer | 50% | 95% 
+------|-----|-----
+Epi | `r quantile(epi_bylake$rmse, probs=0.5)` | `r quantile(epi_bylake$rmse, probs=0.95)`
+Hypo RMSE | `r quantile(hypo_bylake$rmse, probs=0.5)` | `r quantile(hypo_bylake$rmse, probs=0.95)` 
+
+#Epi and Hypo lake-specific Bias stats
+
+Layer | 2.5% | 50% | 97.5 
+------|-----|-----|-------
+Epi Bias  | `r quantile(epi_bylake$bias, probs=0.025)` | `r quantile(epi_bylake$bias, probs=0.5)` | `r quantile(epi_bylake$bias, probs=0.975)` 
+Hypo Bias | `r quantile(hypo_bylake$bias, probs=0.025)` | `r quantile(hypo_bylake$bias, probs=0.5)` | `r quantile(hypo_bylake$bias, probs=0.975)` 
+
+
+#Overall observed vs model:
+```{r, echo=FALSE, fig.width=5, fig.height=7, warning=FALSE}
+
+par(mfrow=c(3,1), mar=c(1,4,0,1), oma=c(3,0,1,0))
+
+plot(out_df$Observed_temp, out_df$Modeled_temp, col=rgb(0, 0, 0, 0.1), pch=16, xlim=c(0,30), ylim=c(0,30), xaxt='n', ylab='Modeled Temp')
+
+abline(0, 1)
+
+
+plot(epi$obs, epi$mod, col=rgb(0, 0, 0, 0.1), pch=16, xlim=c(0,30), ylim=c(0,30), ylab='Modeled Epi', xaxt='n')
+abline(0, 1)
+
+
+plot(hypo$obs, hypo$mod, col=rgb(0, 0, 0, 0.1), pch=16, xlim=c(0,30), ylim=c(0,30), ylab='Modeled Hypo', xlab='Observed')
+abline(0, 1)
+
+```
+
+Statistic | RMSE  | Avg Resid
+----------|-------|------
+All Temp  | `r sqrt(mean((out_df$modLessObs)^2, na.rm=TRUE)) ` | `r mean(out_df$modLessObs, na.rm=TRUE)`
+Epi RMSE  | `r sqrt(mean((epi$mod - epi$obs)^2, na.rm=TRUE))` | `r mean(epi$mod - epi$obs, na.rm=TRUE)` 
+Hypo RMSE | `r sqrt(mean((hypo$mod - hypo$obs)^2, na.rm=TRUE))` | `r mean(hypo$mod - hypo$obs, na.rm=TRUE)`
+
+
+
+
+
+#Residuals across depth:
+
+```{r, echo=FALSE}
+boxplot(modLessObs~Depth_1, out_df, ylab="Model - Observation", xlab='Depth (m)', ylim=c(-10, 10))
+abline(h=0)
+```
+
+
+#Seasonality of residuals:
+
+```{r, echo=FALSE}
+boxplot(modLessObs~month, out_df, ylab="Model - Observation", xlab='Month', ylim=c(-10, 10))
+abline(h=0)
+
+```
+
+
+```{r, echo=FALSE}
+
+library(leaflet)
+library(plyr)
+library(lakeattributes)
+
+lake_stats = ddply(out_df, 'site_id', function(df){
+  
+  rmse = sqrt(mean((df$Observed_temp - df$Modeled_temp)^2, na.rm=TRUE))
+  bias = mean(df$Modeled_temp - df$Observed_temp, na.rm=TRUE)
+  n = nrow(df)
+  data.frame(rmse, bias, n)
+  
+})
+
+data(canopy)
+
+lake_stats = merge(lake_stats, lakeattributes::location, by='site_id')
+lake_stats = merge(lake_stats, lakeattributes::area, by='site_id')
+lake_stats = merge(lake_stats, lakeattributes::zmax, by='site_id')
+lake_stats$secchi = 1.7/get_kd_avg(lake_stats$site_id)$kd_avg
+lake_stats = merge(lake_stats, canopy, by='site_id')
+
+```
+
+#
+```{r, echo=FALSE}
+
+par(mfrow=c(2,1), mar=c(0,4,1,1), oma=c(4,0,0,0))
+plot((lake_stats$area_m2), lake_stats$bias, xlab='Lake area m^2', ylab='by-obs Bias', xaxt='n', log='x')
+plot((lake_stats$area_m2), lake_stats$rmse, xlab='Lake area m^2', ylab='by-obs RMSE', log='x')
+mtext(text='Log10(lake area m^2)', side=1, line=2)
+
+```
+
+```{r, echo=FALSE}
+par(mfrow=c(2,1), mar=c(0,4,1,1), oma=c(4,0,0,0))
+plot(lake_stats$secchi, lake_stats$bias, xlab='Secchi(m)', ylab='by-obs Bias', xaxt='n')
+plot(lake_stats$secchi, lake_stats$rmse, xlab='Secchi(m)', ylab='by-obs RMSE')
+mtext(text='Secchi(m)', side=1, line=2)
+```
+
+```{r, echo=FALSE}
+par(mfrow=c(2,1), mar=c(0,4,1,1), oma=c(4,0,0,0))
+plot(lake_stats$zmax_m, lake_stats$bias, log='x', xlab='Log(zmax)', ylab='by-obs Bias', xaxt='n')
+plot(lake_stats$zmax_m, lake_stats$rmse, log='x', xlab='Log(zmax)', ylab='by-obs RMSE')
+mtext(text='zmax', side=1, line=2)
+# 
+# par(mfrow=c(2,1))
+# boxplot(bias~canopy_m, lake_stats)
+# abline(h=0)
+# height = as.numeric(names(tmp))
+# barplot(height~tmp)
+
+
+```
+
+## Map of Bias
+
+```{r, echo=FALSE}
+
+m = leaflet() %>% addTiles() %>% 
+  addCircleMarkers(lng=lake_stats$lon, lat=lake_stats$lat, radius=4, stroke=TRUE, weight=1, 
+                   fillColor=colorNumeric(c('Blue', 'White', "Red"), (lake_stats$bias))((lake_stats$bias)),
+                   fillOpacity=1, popup=paste0('Bias: ', lake_stats$bias, '<br>RMSE:', lake_stats$rmse, '<br>N:', 
+                                               lake_stats$n, '<br>ID:', lake_stats$site_id))
+
+m
+
+
+```
+
+## Map of RMSE
+
+```{r, echo=FALSE}
+
+m = leaflet() %>% addTiles() %>% 
+  addCircleMarkers(lng=lake_stats$lon, lat=lake_stats$lat, radius=4, stroke=TRUE, weight=1, 
+                   fillColor=colorNumeric(c('White', "Red"), (lake_stats$rmse))((lake_stats$rmse)),
+                   fillOpacity=1, popup=paste0('Bias: ', lake_stats$bias, '<br>RMSE:', lake_stats$rmse, '<br>N:', 
+                                               lake_stats$n, '<br>ID:', lake_stats$site_id))
+
+m
+
+
+```

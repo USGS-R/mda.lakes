@@ -21,11 +21,16 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 	#grab (and open?) Rdata files
 	for(i in 1:length(match_i)){
 		fname = indx[match_i[i], 'file.name']
-		driver_url = paste0(base_url, 'drivers_GLM_', driver_name, '/', fname)
+		driver_url = paste0(pkg_info$dvr_url, 'drivers_GLM_', driver_name, '/', fname)
 		dest = file.path(tempdir(), driver_name, fname)
 		
-		if(!download_helper(driver_url, dest)){
-			stop('failure downloading ', fname, '\n')
+		
+		if(substr(driver_url, 0,7) == 'file://'){
+		  dest = sub('file://', '', driver_url)
+		}else{
+		  if(!download_helper(driver_url, dest)){
+		    stop('failure downloading ', fname, '\n')
+		  }
 		}
 		
 		load(dest, envir=driver_env)
@@ -47,7 +52,18 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 		daily = trunc(as.POSIXct(glm_drivers$time), units='days')
 		glm_drivers$time = format(daily,'%Y-%m-%d %H:%M:%S')
 		
-		glm_drivers = plyr::ddply(glm_drivers,'time', function(df){colMeans(df[,-1])})
+		glm_drivers = plyr::ddply(glm_drivers,'time', function(df){
+			
+			data.frame(
+				ShortWave = mean(df$ShortWave),
+				LongWave  = mean(df$LongWave),
+				AirTemp   = mean(df$AirTemp),
+				RelHum    = mean(df$RelHum),
+				WindSpeed = mean(df$WindSpeed^3)^(1/3),
+				Rain      = mean(df$Rain),
+				Snow      = mean(df$Snow)
+			)
+		})
 		
 	}
 	
@@ -75,7 +91,7 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 #' @export
 get_driver_index = function(driver_name, loc_cache=TRUE){
 	#see if index file exists already
-	index_url = paste0(base_url, 'drivers_GLM_', driver_name, '/driver_index.tsv')
+	index_url = paste0(pkg_info$dvr_url, 'drivers_GLM_', driver_name, '/driver_index.tsv')
 	dest = file.path(tempdir(), driver_name, 'driver_index.tsv')
 	
 	#If it exists, return without downloading
@@ -88,6 +104,18 @@ get_driver_index = function(driver_name, loc_cache=TRUE){
 	}
 	
 	return(read.table(dest, sep='\t', header=TRUE, as.is=TRUE))
+}
+
+#' @title Set driver URL
+#' 
+#' @param url New base URL to set
+#' 
+#' @description 
+#' Sets the default URL to access driver data. 
+#' 
+#' @export
+set_driver_url = function(url){
+  pkg_info$dvr_url = url
 }
 
 drivers_to_glm = function(driver_df){

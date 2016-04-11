@@ -4,12 +4,12 @@
 \alias{getWstr}
 \title{Get wind sheltering coefficient for a given lake}
 \usage{
-getWstr(WBIC, method = "Markfort", canopy = NULL)
+getWstr(site_id, method = "Markfort", canopy = NULL)
 }
 \arguments{
-\item{method}{The desired calculation method one of c('Markfort', 'Hondzo', )}
-
 \item{site_id}{The character ID for the requested data}
+
+\item{method}{The desired calculation method one of c('Markfort', 'Hondzo', )}
 }
 \value{
 The wind sheltering coefficient (between 0 and 1)

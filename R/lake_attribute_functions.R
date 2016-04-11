@@ -122,7 +122,7 @@ getResidenceTime	<-	local(
 #' 
 #' 
 #' @export
-getCanopy = function(site_id, default.if.null=FALSE, method="aster"){
+getCanopy = function(site_id, default.if.null=FALSE, method="landcover"){
 	
 	if (tolower(method) == 'aster'){
 			
@@ -137,28 +137,13 @@ getCanopy = function(site_id, default.if.null=FALSE, method="aster"){
 		return(vals$MEAN_HT)
 		
 	}else if (tolower(method) == "landcover"){
-		
-		fname = system.file('supporting_files/buffers_land_cover.csv', 
-												package=packageName())
-		d = read.table(fname, header=TRUE, sep=',')
-		#100 urban
-		#110 ag
-		#150 grassland
-		#160 forest 
-		#200 open water
-		#210 wetland
-		lc_types = data.frame(majority_cover=c(200, 160,  100, 150,  110, 210),
-													height=        c(0.5, 11.5, 0.5, 0.65, 0.8, 0.5))
-		
-		vals = merge(data.frame(site_id, order=1:length(site_id)),
-								 d, by='site_id', all.x=TRUE)
-		
-		heights = merge(vals, lc_types, all.x=TRUE, by='majority_cover')
-		
-		#merge does not preserve order, re-order before returning
-		heights = heights[order(heights$order),]
-		
-		return(heights$height)
+		data(canopy)
+	  id = site_id
+		d = subset(canopy, `site_id` == id & source == 'nlcd')
+		if(nrow(d) < 1){
+		  return(NA)
+		}
+		return(d$canopy_m)
 		
 	}else{
 		stop('Unidentified method ', method, ' for getCanopy [aster, landcover]')
@@ -494,9 +479,9 @@ getCD	<-	function(site_id=NULL, Wstr=NULL, method='Hondzo'){
 #'
 #'
 #'@export
-getWstr	<-	function(WBIC, method='Markfort', canopy=NULL){
+getWstr	<-	function(site_id, method='Markfort', canopy=NULL){
 
-	lkeArea	<-	get_area(WBIC)
+	lkeArea	<-	get_area(site_id)
   
   if(is.na(lkeArea)){
     return(NA)
@@ -506,7 +491,7 @@ getWstr	<-	function(WBIC, method='Markfort', canopy=NULL){
 		# Markfort et al. 2010
 		minWstr	<-	0.0001
 		if (is.null(canopy)){
-			hc	<-	max(c(getCanopy(WBIC),1))
+			hc	<-	max(c(getCanopy(site_id),1))
 		} else {
 			hc	<-	canopy
 		}
@@ -530,14 +515,14 @@ getWstr	<-	function(WBIC, method='Markfort', canopy=NULL){
 		# Markfort et al. 2010
 		minWstr	<-	0.0001
 		if (is.null(canopy)){
-			hc	<-	max(c(getCanopy(WBIC),1))
+			hc	<-	max(c(getCanopy(site_id),1))
 		} else {
 			hc	<-	canopy
 		}
 		
 		Xt	<-	50*hc
 		
-		perim	<-	getPerim(WBIC)
+		perim	<-	getPerim(site_id)
 		shelArea	<-	perim*hc*12.5 # 25% of Markfort, as sheltering is single direction...
 		shelter	<-	(lkeArea-shelArea)/lkeArea
 		wind.shelter	<-	max(c(shelter,minWstr))
