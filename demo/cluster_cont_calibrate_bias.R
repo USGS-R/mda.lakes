@@ -28,7 +28,7 @@ clusterCall(c1, function(){library(devtools)})
 glmr_install     = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/GLMr_3.1.10.tar.gz'))})
 glmtools_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/glmtools_0.13.0.tar.gz'))})
 lakeattr_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/lakeattributes_0.8.4.tar.gz'))})
-mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_3.0.3.tar.gz'))})
+mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_3.0.4.tar.gz'))})
 
 library(lakeattributes)
 library(mda.lakes)
@@ -38,7 +38,7 @@ library(glmtools)
 ## setup run function
 
 run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nml_args=list(), datasource=NA){
-
+  
   
   library(lakeattributes)
   library(mda.lakes)
@@ -61,9 +61,10 @@ run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nm
     #rename for dplyr
     nhd_id = site_id
     
+    data(wtemp)
     obs = filter(wtemp, site_id == nhd_id) %>%
-            transmute(DateTime=date, Depth=depth, temp=wtemp)
-      
+      transmute(DateTime=date, Depth=depth, temp=wtemp)
+    
     #having a weird issue with resample_to_field, make unique
     obs = obs[!duplicated(obs[,1:2]), ]
     
@@ -79,16 +80,17 @@ run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nm
     kd_avg = secchi_conv/mean(kds$secchi_avg, na.rm=TRUE)
     
     prep_run_glm_kd(site_id=site_id, 
-                            path=run_dir, 
-                            years=years,
-                            kd=kd_avg, 
-                            nml_args=c(list(
-                              dt=3600, subdaily=FALSE, nsave=24, 
-                              timezone=-6,
-                              csv_point_nlevs=0, 
-                              snow_albedo_factor=1.1, 
-                              meteo_fl=driver_path), 
-                              nml_args))
+                    path=run_dir, 
+                    years=years,
+                    kd=kd_avg, 
+                    nml_args=c(list(
+                      dt=3600, subdaily=FALSE, nsave=24, 
+                      timezone=-6,
+                      csv_point_nlevs=0, 
+                      snow_albedo_factor=1.1, 
+                      meteo_fl=driver_path, 
+                      cd=getCD(site_id, method='Hondzo')), 
+                      nml_args))
     
     cal.data = resample_to_field(file.path(run_dir, 'output.nc'), file.path(run_dir,'obs.tsv'))
     cal.data$site_id = site_id
@@ -96,11 +98,11 @@ run_cal = function(site_id, years=1979:2012, driver_function=get_driver_path, nm
     unlink(run_dir, recursive=TRUE)
     
     return(cal.data)
-  
+    
   }, error=function(e){
-      unlink(run_dir, recursive=TRUE)
-      return(paste(e$call, e$message, Sys.info()["nodename"]))
-    })
+    unlink(run_dir, recursive=TRUE)
+    return(paste(e$call, e$message, Sys.info()["nodename"]))
+  })
 }
 
 
@@ -116,16 +118,16 @@ driver_fun = function(site_id){
 #we want only ramdisk enabled nodes
 #ramdisk = clusterCall(c1, function(){file.exists('/mnt/ramdisk')})
 #c1 = c1[unlist(ramdisk)]
-
+data(wtemp)
 to_run = unique(intersect(intersect(wtemp$site_id, zmax$site_id), secchi$site_id))
 #to_run = to_run[to_run %in% read.table('~/managed_lakes_wilma_nhd.tsv', sep='\t', header=TRUE, as.is=TRUE)$id]
 
-run_name = '2016-03-31_cal_NLDAS'
-run_comment = "Full calibration run with all available wtemp, secchi and depth"
+run_name = '2016-04-06_cal_NLDAS'
+run_comment = "Markfort sheltering model for full calibration run with all available wtemp, secchi and depth. 1980-2014"
 
 clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
 
-out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list(), years=1980:1999, datasource=NA)
+out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list(), years=1980:2014, datasource=NA)
 
 #out = clusterApplyLB(c1, to_run[1:50], run_cal)
 
@@ -139,7 +141,32 @@ write.table(out_df, paste0('c:/WiLMA/results/', run_name, '.tsv'), sep='\t', row
 out_err = out[!unlist(lapply(out, inherits, what='data.frame'))]
 save(out_err, file = paste0('c:/WiLMA/results/', run_name, '.Rdata'))
 
-rmarkdown::render('demo/document_calibration_overview_template.Rmd', output_file=paste0(run_name,'.pdf'), 
+rmarkdown::render('demo/document_calibration_overview_template.Rmd', output_file=paste0(run_name,'.html'), 
+                  output_dir='c:/WiLMA/results/', params=list(out_df=out_df, run_message=run_comment))
+
+
+sqrt(mean((out_df$Observed_temp - out_df$Modeled_temp)^2, na.rm=TRUE))
+mean(out_df$Observed_temp - out_df$Modeled_temp, na.rm=TRUE)
+
+run_comment = "Markfort sheltering model for full calibration run with all available wtemp, secchi and depth. 1980-2014"
+
+clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
+
+out = clusterApplyLB(c1, to_run, run_cal, driver_function = driver_fun, nml_args=list(), years=1980:2014, datasource=NA)
+
+#out = clusterApplyLB(c1, to_run[1:50], run_cal)
+
+sprintf('%i lakes ran\n', sum(unlist(lapply(out, inherits, what='data.frame'))))
+
+
+##results
+out_df = do.call('rbind', out[unlist(lapply(out, inherits, what='data.frame'))])
+write.table(out_df, paste0('c:/WiLMA/results/', run_name, '.tsv'), sep='\t', row.names=FALSE)
+
+out_err = out[!unlist(lapply(out, inherits, what='data.frame'))]
+save(out_err, file = paste0('c:/WiLMA/results/', run_name, '.Rdata'))
+
+rmarkdown::render('demo/document_calibration_overview_template.Rmd', output_file=paste0(run_name,'.html'), 
                   output_dir='c:/WiLMA/results/', params=list(out_df=out_df, run_message=run_comment))
 
 
