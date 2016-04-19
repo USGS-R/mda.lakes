@@ -11,7 +11,7 @@
 #'
 #'
 #'
-#'
+#'@importFrom accelerometry rle2
 #'
 #'@export
 get_ice_onoff = function(ice, wtr){	
@@ -32,11 +32,18 @@ get_ice_onoff = function(ice, wtr){
 		#find ice-on
 		after_ice = ice[ice$DateTime >= peak_date & ice$DateTime <= peak_plus_365, ]$`ice(m)`
 		
-		tmp_indx = which(after_ice > 0)
-		if(length(tmp_indx) == 0){
+		ice_runs = rle2(as.numeric(after_ice > 0), indices=TRUE)
+		
+		#ice on is encoded as a run value of 1
+		ice_only = ice_runs[ice_runs[,'values'] == 1, ,drop=FALSE]
+		
+		if(nrow(ice_only) == 0){
 			ice_onoff$on[i] = NA
 		}else{
-			ice_onoff$on[i] = ice[ice$DateTime >= peak_date & ice$DateTime <= peak_plus_365, ]$DateTime[min(tmp_indx)]
+			#grab the longest ice run to use for on/off dates 
+			longest_ice = ice_only[which.max(ice_only[,'lengths']), , drop=FALSE]
+			
+			ice_onoff$on[i] = ice[ice$DateTime >= peak_date & ice$DateTime <= peak_plus_365, ]$DateTime[longest_ice[,'starts']]
 		}
 		
 		
@@ -44,11 +51,17 @@ get_ice_onoff = function(ice, wtr){
 		#find ice-off
 		before_ice = ice[ice$DateTime >= peak_minus_365 & ice$DateTime <= peak_date, ]$`ice(m)`
 		
-		tmp_indx = which(before_ice > 0)
-		if(length(tmp_indx) == 0){
+		ice_runs = rle2(as.numeric(before_ice > 0), indices=TRUE)
+		
+		#ice on is encoded as a run value of 1
+		ice_only = ice_runs[ice_runs[,'values'] == 1, ,drop=FALSE]
+		
+		if(nrow(ice_only) == 0){
 			ice_onoff$off[i] = NA
 		}else{
-			ice_onoff$off[i] = ice[ice$DateTime >= peak_minus_365 & ice$DateTime <= peak_date, ]$DateTime[max(tmp_indx)]
+			longest_ice = ice_only[which.max(ice_only[,'lengths']), , drop=FALSE]
+			
+			ice_onoff$off[i] = ice[ice$DateTime >= peak_minus_365 & ice$DateTime <= peak_date, ]$DateTime[longest_ice[,'stops']]
 		}
 	}
 	# add this to indicate information origin
@@ -57,28 +70,3 @@ get_ice_onoff = function(ice, wtr){
 	return(ice_onoff)
 }
 
-
-get_annual_temp_peaks = function(wtr){
-	
-	temp_max = apply(wtr[,-1], 1, max, na.rm=TRUE)
-	years = as.POSIXlt(wtr$DateTime)$year + 1900
-	uyears = unique(years)
-	
-	output = data.frame(year=uyears, max_date=as.POSIXct(Sys.Date()), max_val=NA)
-	
-	for(i in 1:nrow(output)){
-		
-		if(diff(range(wtr$DateTime[years==output$year[i]])) < as.difftime(364,units="days")){
-			output$max_date[i] = NA
-			output$max_val[i]  = NA
-			next
-		}
-		
-		max_indx = which.max(temp_max[years==output$year[i]])
-		
-		output$max_date[i] = wtr$DateTime[years==output$year[i]][max_indx]
-		output$max_val[i]  = temp_max[years==output$year[i]][max_indx]
-	}
-	
-	return(output)
-}
