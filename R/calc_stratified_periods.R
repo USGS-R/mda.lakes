@@ -8,6 +8,7 @@
 #' @description 
 #' A function to calculate 
 #' 
+#' @importFrom accelerometry rle2
 #' 
 #' @export
 calc_stratified_periods = function(surfT, botT, temp_thresh = 1, force_positive = TRUE){
