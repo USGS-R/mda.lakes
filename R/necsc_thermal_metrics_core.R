@@ -1,6 +1,14 @@
 #' @title Calculate core NECSC thermal metrics
 #' 
+#' @description 
+#' Calculates the list of core metrics decided by the team. 
+#' See inst/supporting_files/necsc_thermal_metrics_core_outputs.xlsx for details
 #' 
+#' @return A data frame with all metrics organized by year
+#' 
+#' @param run.path The directory where the output.nc and glm2.nml file can be found for the 
+#' simulation run.
+#' @param site_id The full ID of the lake site as a character string (e.g., 'nhd_13344210')
 #' 
 #' 
 #' @import glmtools
