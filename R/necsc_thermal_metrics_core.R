@@ -55,6 +55,8 @@ necsc_thermal_metrics_core = function(run.path, site_id){
 	
 	for(i in 1:length(years)){
 		
+	  cat('core metrics ', years[i], '\n')
+	  
 		onoff = subset(ice_onoff, year==years[i])
 		
 		#need this for the surface and bottom calcs
