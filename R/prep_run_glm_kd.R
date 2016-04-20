@@ -33,7 +33,7 @@ prep_run_glm_kd <- function(site_id, path, years,
 																nml_args=NULL, sed_heat=FALSE){
 	
 	
-	nml_obj = populate_base_lake_nml(site_id)
+	nml_obj = populate_base_lake_nml(site_id, kd=kd)
 	
 	
 	#finally, change supplied nml
