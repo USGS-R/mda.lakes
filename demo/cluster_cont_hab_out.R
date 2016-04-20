@@ -95,7 +95,6 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
     #to_keep = !(years <= min(years) + nburn - 1)
     #wtr_all = wtr[to_keep, ]
     
-    
     core_metrics = necsc_thermal_metrics_core(run_dir, site_id)
     
     hansen_habitat = hansen_habitat_calc(run_dir, site_id)
@@ -133,7 +132,7 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
     
     unlink(run_dir, recursive=TRUE)
     
-    all_data = list(wtr_all, core_metrics, hansen_habitat, site_id)
+    all_data = list(wtr=wtr_all, core_metrics=core_metrics, hansen_habitat=hansen_habitat, site_id=site_id)
 
     return(all_data)
     
@@ -160,24 +159,37 @@ to_run = unique(get_driver_index('NLDAS')$id)
 clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
 
 clusterExport(c1, 'secchi_standard')
-out = clusterApplyLB(c1, to_run[1:5000], future_hab_wtr, modern_era=1977:2012, 
+out = clusterApplyLB(c1, to_run, future_hab_wtr, modern_era=1977:2014, 
                      driver_function=driver_fun, secchi_function=secchi_standard)
 
-#hmm = lapply(to_run[2], future_hab_wtr, modern_era=1977:2012, driver_function=driver_fun, secchi_function=secchi_standard)
+#hmm = lapply('nhd_14767902', future_hab_wtr, modern_era=1977:2012, driver_function=driver_fun, secchi_function=secchi_standard)
 
+## 1 - temp
+## 2 - core metrics
+## 3 - hansen_habitat
+## 4 - site_id
+
+run_name = '2016-04-20_habitat_out'
+out_dir = file.path('c:/WiLMA/habitat', run_name)
+dir.create(out_dir)
 
 good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x)}))]
 bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x)}))]
 
 sprintf('%i lakes ran\n', length(good_data))
-dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[[3]]; return(tmp)})
+dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[['site_id']]; return(tmp)})
 #drop the burn-in years
 dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01-01'))})
 
-all_habitat = do.call(rbind, lapply(good_data, function(x){tmp = x[[2]]; tmp$site_id=x[[3]]; return(tmp)}))
-all_habitat = subset(all_habitat, year %in% 1979:2012)
+hansen_habitat = do.call(rbind, lapply(good_data, function(x){x[['hansen_habitat']]}))
+hansen_habitat = subset(hansen_habitat, year %in% 1979:2015)
 
-write.table(all_habitat, file.path(out_dir, 'NLDAS_best_all_habitat.tsv'), sep='\t', row.names=FALSE)
+core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
+core_metrics = subset(core_metrics, year %in% 1979:2015)
+
+
+write.table(hansen_habitat, file.path(out_dir, 'NLDAS_best_hansen_hab.tsv'), sep='\t', row.names=FALSE)
+write.table(core_metrics, file.path(out_dir, 'NLDAS_best_hansen_hab.tsv'), sep='\t', row.names=FALSE)
 save('dframes', file = file.path(out_dir, 'NLDAS_best_all_wtr.Rdata'))
 save('bad_data', file = file.path(out_dir, 'NLDAS_bad_data.Rdata'))
 
