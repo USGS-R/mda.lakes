@@ -1,7 +1,7 @@
 
 
 #'@export
-continuous.habitat.calc = function(run.path, output.path=NULL, lakeid){
+hansen_habitat_calc = function(run.path, lakeid, output.path=NULL){
 	
 	if(!(require(stringr) & require(glmtools))){
 		stop('Need stringr and glmtools for chained.habitat.calc')
