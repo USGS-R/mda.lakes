@@ -32,7 +32,7 @@ populate_base_lake_nml = function(site_id, kd=get_kd_avg(site_id)$kd_avg, nml_te
 	'max_layer_thick'=1,
 	'Kw'=0.63,
 	# 'coef_inf_entrain'=0,
-	'coef_mix_conv'=0.23,
+	'coef_mix_conv'=0.2,
 	'coef_wind_stir'=0.23,
 	'coef_mix_shear'=0.20,
 	'coef_mix_turb'=0.51,
