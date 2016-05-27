@@ -1,5 +1,10 @@
 ## Lets MPI cluserify things
 
+#first load some modules:
+# module load mpi/openmpi-1.5.5-gcc 
+# module load tools/netcdf-4.3.2-gnu
+
+
 ##install packages locally (available on cluster)
 #install.packages(c('devtools', 'rLakeAnalyzer', 'dplyr', 'lubridate'), repos='https://cran.rstudio.com')
 #library(devtools)
@@ -28,7 +33,7 @@ library(lakeattributes)
 library(mda.lakes)
 library(dplyr)
 library(glmtools)
-source('demo/common_running_functions.R')
+source(system.file('demo/common_running_functions.R', package='mda.lakes'))
 
 Sys.setenv(TZ='GMT')
 
