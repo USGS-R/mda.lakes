@@ -210,11 +210,14 @@ driver_fun = function(site_id, gcm){
 config = read.table('config', header=TRUE, as.is=TRUE)
 driver_name = config$drivername
 
+driver_url = config$driverurl
+
 to_run = as.character(unique(zmax$site_id))
 clusterExport(c1, 'driver_fun')
 clusterExport(c1, 'secchi_standard')
 clusterExport(c1, 'driver_name')
-#clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
+clusterExport(c1, 'driver_url')
+clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
 
 run_name = paste0('2016-05-12_', driver_name, '_habitat_out')
 
