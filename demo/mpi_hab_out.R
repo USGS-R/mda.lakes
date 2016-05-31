@@ -1,7 +1,7 @@
 ## Lets MPI cluserify things
 
 #first load some modules:
-# module load mpi/openmpi-1.5.5-gcc 
+# module load mpi/openmpi-1.5.5-gcc
 # module load tools/netcdf-4.3.2-gnu
 
 
@@ -19,11 +19,12 @@
 library(Rmpi)
 library(snow)
 
-if(mpi.comm.rank() != 0){
-	cat("Launching proletariat on comm rank ", mpi.comm.rank())
+if(mpi.comm.rank(0) != 0){
+	cat("Launching proletariat on comm rank ", mpi.comm.rank(0), '\n')
 	slaveLoop(makeMPImaster())
 	q()
 }else{
+	cat("Launching bourgeoisie on comm rank ", mpi.comm.rank(0), '\n')
 	makeMPIcluster()
 }
 
@@ -183,11 +184,11 @@ wrapup_output = function(out, run_name, years){
 	core_metrics = subset(core_metrics, year %in% years)
 	
 	
-	write.table(hansen_habitat, file.path(out_dir, 'NLDAS_best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-	write.table(core_metrics, file.path(out_dir, 'NLDAS_best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	
-	save('dframes', file = getnext(file.path(out_dir, 'NLDAS_best_all_wtr.Rdata')))
-	save('bad_data', file = getnext(file.path(out_dir, 'NLDAS_bad_data.Rdata')))
+	save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
+	save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
 	
 	rm(out, good_data, dframes)
 	gc()
