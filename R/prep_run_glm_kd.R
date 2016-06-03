@@ -30,7 +30,7 @@
 #'@export
 prep_run_glm_kd <- function(site_id, path, years,
 																kd = getClarity(site_id, default.if.null=TRUE), 
-																nml_args=NULL, sed_heat=FALSE){
+																nml_args=NULL, sed_heat=FALSE, verbose=FALSE){
 	
 	
 	nml_obj = populate_base_lake_nml(site_id, kd=kd)
@@ -54,7 +54,7 @@ prep_run_glm_kd <- function(site_id, path, years,
 	
 	nml_out_path = file.path(path, "glm2.nml")
 	write_nml(nml_obj, nml_out_path)
-	out_val = run_glm(path)
+	out_val = run_glm(path, verbose=verbose)
 
 	
 	return(out_val)
