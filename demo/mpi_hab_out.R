@@ -105,40 +105,20 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		
 		hansen_habitat = hansen_habitat_calc(run_dir, site_id)
 		
-		#Run future era only if requested
-		if(!missing(future_era)){
-			kd_avg = secchi_function(site_id) #secchi_conv/mean(kds$secchi_avg, na.rm=TRUE)
-			
-			prep_run_glm_kd(site_id=site_id, 
-											path=run_dir, 
-											years=future_era,
-											kd=kd_avg, 
-											nml_args=c(list(
-												dt=3600, subdaily=FALSE, nsave=24, 
-												timezone=-6,
-												csv_point_nlevs=0, 
-												snow_albedo_factor=1.1, 
-												meteo_fl=driver_path, 
-												cd=getCD(site_id, method='Hondzo')), 
-												nml_args))
-			
-			wtr = get_temp(file.path(run_dir, 'output.nc'), reference='surface', z_out = get.offsets(wtr_all))
-			## drop the first n burn-in years
-			#years = as.POSIXlt(wtr$DateTime)$year + 1900
-			#to_keep = !(years <= min(years) + nburn - 1)
-			#wtr = wtr[to_keep, ]
-			
-			wtr_all = rbind(wtr_all, wtr)
-			
-			core_metrics = rbind(core_metrics, necsc_thermal_metrics_core(run_dir, site_id))
-			
-			##now hab
-			hansen_habitat = rbind(hansen_habitat, hansen_habitat_calc(run_dir, lakeid=site_id))
-		}
+		notaro_metrics = summarize_notaro(paste0(run_dir, '/output.nc'))
+		
+		nml = read_nml(file.path(run_dir, "glm2.nml"))
+		
 		
 		unlink(run_dir, recursive=TRUE)
 		
-		all_data = list(wtr=wtr_all, core_metrics=core_metrics, hansen_habitat=hansen_habitat, site_id=site_id)
+		notaro_metrics$site_id = site_id
+		
+		all_data = list(wtr=wtr_all, core_metrics=core_metrics, 
+		                hansen_habitat=hansen_habitat, 
+		                site_id=site_id, 
+		                notaro_metrics=notaro_metrics, 
+		                nml=nml)
 		
 		return(all_data)
 		
@@ -188,12 +168,17 @@ wrapup_output = function(out, run_name, years){
 	core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
 	core_metrics = subset(core_metrics, year %in% years)
 	
+	notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
+	
+	model_config = lapply(good_data, function(x){x$nml})
 	
 	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(notaro_metrics, file.path(out_dir, 'notaro_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	
 	save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
 	save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
+	save('model_config', file=getnext(file.path(out_dir, 'model_config.Rdata')))
 	
 	rm(out, good_data, dframes)
 	gc()
