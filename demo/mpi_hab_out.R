@@ -16,19 +16,24 @@
 # lakeattr_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/lakeattributes_0.8.6.tar.gz'))})
 # mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_4.1.0.tar.gz'))})
 
+
 library(Rmpi)
-library(snow)
 
-if(mpi.comm.rank(0) != 0){
-	cat("Launching proletariat on comm rank ", mpi.comm.rank(0), '\n')
-	slaveLoop(makeMPImaster())
-	q()
-}else{
-	cat("Launching bourgeoisie on comm rank ", mpi.comm.rank(0), '\n')
-	makeMPIcluster()
-}
+args = commandArgs(trailingOnly=TRUE)
+mpirank = mpi.comm.rank(0)
+mpisize = mpi.comm.size(0)
 
-c1 = getMPIcluster()
+
+# if(mpi.comm.rank(0) != 0){
+# 	cat("Launching proletariat on comm rank ", mpi.comm.rank(0), '\n')
+# 	slaveLoop(makeMPImaster())
+# 	q()
+# }else{
+# 	cat("Launching bourgeoisie on comm rank ", mpi.comm.rank(0), '\n')
+# 	makeMPIcluster()
+# }
+
+# c1 = getMPIcluster()
 
 library(lakeattributes)
 library(mda.lakes)
@@ -38,7 +43,7 @@ source(system.file('demo/common_running_functions.R', package='mda.lakes'))
 
 Sys.setenv(TZ='GMT')
 
-clusterEvalQ(c1, Sys.setenv(TZ='GMT'))
+# clusterEvalQ(c1, Sys.setenv(TZ='GMT'))
 
 
 future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_function=get_driver_path, secchi_function=function(site_id){}, nml_args=list()){
@@ -163,7 +168,7 @@ getnext = function(fname){
 }
 
 wrapup_output = function(out, run_name, years){
-	out_dir = file.path('.')
+	out_dir = file.path('.', run_name)
 	
 	run_exists = file.exists(out_dir)
 	
@@ -213,13 +218,16 @@ driver_name = config$drivername
 driver_url = config$driverurl
 
 to_run = as.character(unique(zmax$site_id))
-clusterExport(c1, 'driver_fun')
-clusterExport(c1, 'secchi_standard')
-clusterExport(c1, 'driver_name')
-clusterExport(c1, 'driver_url')
-clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
+to_run = split(to_run, cut(seq_along(to_run), mpisize, labels = FALSE))[[mpirank+1]]
 
-run_name = paste0('2016-05-12_', driver_name, '_habitat_out')
+#clusterExport(c1, 'driver_fun')
+#clusterExport(c1, 'secchi_standard')
+#clusterExport(c1, 'driver_name')
+#clusterExport(c1, 'driver_url')
+#clusterCall(c1, function(){library(mda.lakes);set_driver_url(driver_url)})
+set_driver_url(driver_url)
+
+run_name = paste0(mpirank)
 
 ##1980-1999
 runsplits = split(1:length(to_run), floor(1:length(to_run)/1e3))
@@ -228,12 +236,13 @@ yeargroups = list(1980:1999, 2020:2039, 2080:2099)
 for(ygroup in yeargroups){
 	for(rsplit in runsplits){
 		start = Sys.time()
-		out = clusterApplyLB(c1, to_run[rsplit], future_hab_wtr, 
+		out = lapply(to_run[rsplit], future_hab_wtr, 
 												 modern_era=ygroup, 
 												 secchi_function=secchi_standard,
 												 driver_function=function(site_id){driver_fun(site_id, driver_name)})
 		
 		wrapup_output(out, run_name, years=ygroup)
+		
 		print(difftime(Sys.time(), start, units='hours'))
 		cat('on to the next\n')
 		cat(rsplit, '\n')
@@ -241,4 +250,5 @@ for(ygroup in yeargroups){
 	}
 }
 
-stopCluster(c1)
+
+
