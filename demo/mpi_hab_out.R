@@ -54,8 +54,13 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 	library(glmtools)
 	
 	fastdir = tempdir()
+	#for use on WiWSC Condor pool
 	if(file.exists('/mnt/ramdisk')){
 		fastdir = '/mnt/ramdisk'
+	}
+	#for use on YETI
+	if(Sys.getenv('RAM_SCRATCH', unset = '') != ''){
+		fastdir = Sys.getenv('RAM_SCRATCH', unset = '')
 	}
 	
 	
