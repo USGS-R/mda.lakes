@@ -198,6 +198,7 @@ driver_fun = function(site_id, gcm){
 }
 
 config = read.table('config', header=TRUE, as.is=TRUE)
+
 driver_name = config$drivername
 
 driver_url = config$driverurl

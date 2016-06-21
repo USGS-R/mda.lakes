@@ -20,7 +20,7 @@ necsc_thermal_metrics_core = function(run.path, site_id){
 	nml.file = file.path(run.path, 'glm2.nml')
 	
 	all_wtr      = get_temp(nc.file, reference='surface')
-	bottom_wtr   = get_temp(nc.file, reference='bottom', z_out=0.1) #0.1m from bottom
+	bottom_wtr   = get_temp(nc.file, reference='bottom', z_out=0) #bottom temperature
 	surface_wtr  = get_temp(nc.file, reference='surface', z_out=0) #surface temps
 	all_ice      = get_ice(nc.file)
 	all_raw_wtr  = get_raw(nc.file, 'temp')
