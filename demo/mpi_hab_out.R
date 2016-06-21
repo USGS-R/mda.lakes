@@ -105,19 +105,19 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		
 		hansen_habitat = hansen_habitat_calc(run_dir, site_id)
 		
-		notaro_metrics = summarize_notaro(paste0(run_dir, '/output.nc'))
+		#notaro_metrics = summarize_notaro(paste0(run_dir, '/output.nc'))
 		
 		nml = read_nml(file.path(run_dir, "glm2.nml"))
 		
 		
 		unlink(run_dir, recursive=TRUE)
 		
-		notaro_metrics$site_id = site_id
+		#notaro_metrics$site_id = site_id
 		
 		all_data = list(wtr=wtr_all, core_metrics=core_metrics, 
 		                hansen_habitat=hansen_habitat, 
 		                site_id=site_id, 
-		                notaro_metrics=notaro_metrics, 
+		                #notaro_metrics=notaro_metrics, 
 		                nml=nml)
 		
 		return(all_data)
@@ -168,13 +168,13 @@ wrapup_output = function(out, run_name, years){
 	core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
 	core_metrics = subset(core_metrics, year %in% years)
 	
-	notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
+	#notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
 	
 	model_config = lapply(good_data, function(x){x$nml})
 	
 	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-	write.table(notaro_metrics, file.path(out_dir, 'notaro_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	#write.table(notaro_metrics, file.path(out_dir, 'notaro_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	
 	save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
 	save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
