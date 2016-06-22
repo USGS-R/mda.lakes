@@ -21,7 +21,9 @@ populate_base_lake_nml = function(site_id, kd=get_kd_avg(site_id)$kd_avg, nml_te
 	#get default template
 	nml_obj = read_nml(nml_template)
 	
-	initZ = c(0,0.2, zmax);
+	#make last depth slightly less than total depth to avoid
+	# precision-based GLM errors
+	initZ = c(0,0.2, (zmax-0.1));
 	initT = c(3,4,4);
 	initS = c(0,0,0);
 	
