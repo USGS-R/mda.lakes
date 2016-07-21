@@ -1,7 +1,7 @@
 Package: mda.lakes
 Type: Package
 Title: Tools for combining models, data, and processing for lakes
-Version: 4.1.2
+Version: 4.2.1
 Date: 2015-12-03
 Author: Luke Winslow, Jordan Read
 Maintainer: Luke Winslow <lwinslow@usgs.gov>
@@ -16,7 +16,10 @@ Imports:
     rLakeAnalyzer (>= 1.5),
     insol,
     plyr,
-    accelerometry
+    accelerometry, 
+    lubridate, 
+    dplyr, 
+    tidyr
 Enhances: geoknife
 Description: More about what it does (maybe more than one line)
 License: LICENSE file

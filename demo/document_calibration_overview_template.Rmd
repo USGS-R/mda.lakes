@@ -6,11 +6,9 @@ output: html_document
 params:
   out_df: !r data.frame()
   run_message: !r "default message"
-
 ---
 
 Run description: `r params$run_message`
-
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}

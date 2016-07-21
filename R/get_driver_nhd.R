@@ -27,6 +27,11 @@ get_driver_nhd = function(id, driver_name, loc_cache, timestep){
 		
 		if(substr(driver_url, 0,7) == 'file://'){
 		  dest = sub('file://', '', driver_url)
+		 #if driver url is a zip file, pull out of zip
+		}else if(substr(pkg_info$dvr_url, nchar(pkg_info$dvr_url)-3,nchar(pkg_info$dvr_url)) == '.zip'){
+			
+			unzip(pkg_info$dvr_url, files = paste0('drivers_GLM_', driver_name, '/', fname), exdir=dirname(dest), junkpaths=TRUE)
+			
 		}else{
 		  if(!download_helper(driver_url, dest)){
 		    stop('failure downloading ', fname, '\n')
@@ -99,8 +104,12 @@ get_driver_index = function(driver_name, loc_cache=TRUE){
 		return(read.table(dest, sep='\t', header=TRUE, as.is=TRUE))
 	}
 	
-	if(!download_helper(index_url, dest)){
-		stop('driver_index.tsv: unable to download for driver data:', driver_name)
+	if(substr(pkg_info$dvr_url, nchar(pkg_info$dvr_url)-3,nchar(pkg_info$dvr_url)) == '.zip'){
+		unzip(pkg_info$dvr_url, files = paste0('drivers_GLM_', driver_name, '/driver_index.tsv'), exdir=dirname(dest), junkpaths=TRUE)
+	}else{
+		if(!download_helper(index_url, dest)){
+			stop('driver_index.tsv: unable to download for driver data:', driver_name)
+		}
 	}
 	
 	return(read.table(dest, sep='\t', header=TRUE, as.is=TRUE))
