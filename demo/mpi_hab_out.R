@@ -208,7 +208,7 @@ config = read.table('config', header=TRUE, as.is=TRUE)
 
 driver_name = config$drivername
 driver_url = config$driverurl
-out_dir = config$outdir
+out_dir = file.path(config$outdir, driver_name)
 
 
 to_run = as.character(unique(zmax$site_id))
