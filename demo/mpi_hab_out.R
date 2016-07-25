@@ -145,45 +145,42 @@ getnext = function(fname){
 	return(fname)
 }
 
-wrapup_output = function(out, out_dir, years){
-	#out_dir = file.path('.', run_name)
-	tryCatch({
-  	run_exists = file.exists(out_dir)
-  	
-  	if(!run_exists) {dir.create(out_dir, recursive=TRUE)}
-  	
-  	good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x) || is.null(x)}))]
-  	bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x) || is.null(x)}))]
-  	
-  	sprintf('%i lakes ran\n', length(good_data))
-  	dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[['site_id']]; return(tmp)})
-  	#drop the burn-in years
-  	dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01-01'))})
-  	
-  	hansen_habitat = do.call(rbind, lapply(good_data, function(x){x[['hansen_habitat']]}))
-  	hansen_habitat = subset(hansen_habitat, year %in% years)
-  	
-  	core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
-  	core_metrics = subset(core_metrics, year %in% years)
-  	
-  	notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
-  	
-  	model_config = lapply(good_data, function(x){x$nml})
-  	
-  	notaro_file = file.path(out_dir, paste0('notaro_metrics_', paste0(range(years), collapse='_'), '.tsv'))
-  	write.table(notaro_metrics, notaro_file, sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-  	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-  	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-  	
-  	
-  	save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
-  	save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
-  	save('model_config', file=getnext(file.path(out_dir, 'model_config.Rdata')))
-  	
-  	rm(out, good_data, dframes)
-  	
-	}, error=function(d){traceback()})
+wrapup_output = function(out, run_name, years){
+	out_dir = file.path('.', run_name)
+
+	run_exists = file.exists(out_dir)
 	
+	if(!run_exists) {dir.create(out_dir, recursive=TRUE)}
+	
+	good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x) || is.null(x)}))]
+	bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x) || is.null(x)}))]
+	
+	sprintf('%i lakes ran\n', length(good_data))
+	dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[['site_id']]; return(tmp)})
+	#drop the burn-in years
+	dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01-01'))})
+	
+	hansen_habitat = do.call(rbind, lapply(good_data, function(x){x[['hansen_habitat']]}))
+	hansen_habitat = subset(hansen_habitat, year %in% years)
+	
+	core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
+	core_metrics = subset(core_metrics, year %in% years)
+	
+	notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
+	
+	model_config = lapply(good_data, function(x){x$nml})
+	
+	notaro_file = file.path(out_dir, paste0('notaro_metrics_', paste0(range(years), collapse='_'), '.tsv'))
+	write.table(notaro_metrics, notaro_file, sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	
+	
+	save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
+	save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
+	save('model_config', file=getnext(file.path(out_dir, 'model_config.Rdata')))
+	
+	rm(out, good_data, dframes)
 	gc()
 }
 
@@ -231,7 +228,7 @@ for(ygroup in yeargroups){
 												 secchi_function=secchi_standard,
 												 driver_function=function(site_id){driver_fun(site_id, driver_name)})
 		
-		wrapup_output(out, file.path(out_dir, run_name), years=ygroup)
+		wrapup_output(out, run_name, years=ygroup)
 		
 		print(difftime(Sys.time(), start, units='hours'))
 		cat('on to the next\n')
