@@ -145,8 +145,8 @@ getnext = function(fname){
 	return(fname)
 }
 
-wrapup_output = function(out, run_name, years){
-	out_dir = file.path('.', run_name)
+wrapup_output = function(out, out_dir, years){
+	#out_dir = file.path('.', run_name)
 
 	run_exists = file.exists(out_dir)
 	
@@ -217,7 +217,7 @@ set_driver_url(driver_url)
 run_name = paste0(mpirank)
 
 ##1980-1999
-runsplits = split(1:length(to_run), floor(1:length(to_run)/10))
+runsplits = split(1:length(to_run), floor(1:length(to_run)/1e3))
 yeargroups = list(1980:1999, 2020:2039, 2080:2099)
 
 for(ygroup in yeargroups){
@@ -228,7 +228,7 @@ for(ygroup in yeargroups){
 												 secchi_function=secchi_standard,
 												 driver_function=function(site_id){driver_fun(site_id, driver_name)})
 		
-		wrapup_output(out, run_name, years=ygroup)
+		wrapup_output(out, system.file(out_dir, run_name), years=ygroup)
 		
 		print(difftime(Sys.time(), start, units='hours'))
 		cat('on to the next\n')
