@@ -217,7 +217,7 @@ set_driver_url(driver_url)
 run_name = paste0(mpirank)
 
 ##1980-1999
-runsplits = split(1:length(to_run), floor(1:length(to_run)/1e3))
+runsplits = split(1:length(to_run), floor(1:length(to_run)/1e2))
 yeargroups = list(1980:1999, 2020:2039, 2080:2099)
 
 for(ygroup in yeargroups){
