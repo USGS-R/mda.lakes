@@ -187,7 +187,7 @@ wrapup_output = function(out, out_dir, years){
 	model_config = lapply(good_data, function(x){x$nml})
 	
 	notaro_file = file.path(out_dir, paste0('notaro_metrics_', paste0(range(years), collapse='_'), '.tsv'))
-	write.table(notaro_metrics, notaro_file, sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(notaro_metrics, notaro_file, sep='\t', row.names=FALSE, append=file.exists(notaro_file), col.names=!file.exists(notaro_file))
 	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	write.table(cal_data, file.path(out_dir, 'best_cal_data.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
@@ -240,7 +240,7 @@ for(ygroup in yeargroups){
 												 secchi_function=secchi_standard,
 												 driver_function=function(site_id){driver_fun(site_id, driver_name)})
 		
-		wrapup_output(out, system.file(out_dir, run_name), years=ygroup)
+		wrapup_output(out, file.path(out_dir, run_name), years=ygroup)
 		
 		print(difftime(Sys.time(), start, units='hours'))
 		cat('on to the next\n')
