@@ -46,12 +46,13 @@ Sys.setenv(TZ='GMT')
 # clusterEvalQ(c1, Sys.setenv(TZ='GMT'))
 
 
-future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_function=get_driver_path, secchi_function=function(site_id){}, nml_args=list()){
+future_hab_wtr = function(site_id, modern_era=1979:2012, driver_function=get_driver_path, secchi_function=function(site_id){}, nml_args=list()){
 	
 	library(lakeattributes)
 	library(mda.lakes)
 	library(dplyr)
 	library(glmtools)
+  library(lubridate)
 	
 	fastdir = tempdir()
 	#for use on WiWSC Condor pool
@@ -77,12 +78,17 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		#prep observations for calibration data
 		data(wtemp)
 		obs = filter(wtemp, site_id == nhd_id) %>%
-		  transmute(DateTime=date, Depth=depth, temp=wtemp)
+		  transmute(DateTime=date, Depth=depth, temp=wtemp) %>%
+		  filter(year(DateTime) %in% modern_era)
 		
-		#having a weird issue with resample_to_field, make unique
-		obs = obs[!duplicated(obs[,1:2]), ]
+		have_cal = nrow(obs) > 0
 		
-		write.table(obs, file.path(run_dir, 'obs.tsv'), sep='\t', row.names=FALSE)
+		if(have_cal){
+		  #having a weird issue with resample_to_field, make unique
+		  obs = obs[!duplicated(obs[,1:2]), ]
+		  
+		  write.table(obs, file.path(run_dir, 'obs.tsv'), sep='\t', row.names=FALSE)
+		}
 		
 		
 		#get driver data
@@ -125,8 +131,14 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		
 		nml = read_nml(file.path(run_dir, "glm2.nml"))
 		
-		cal_data = resample_to_field(file.path(run_dir, 'output.nc'), file.path(run_dir,'obs.tsv'))
-		cal_data$site_id = site_id
+		if(have_cal){
+  		cal_data = resample_to_field(file.path(run_dir, 'output.nc'), file.path(run_dir,'obs.tsv'))
+  		cal_data$site_id = site_id
+  		cat('Calibration data calculated\n')
+		}else{
+		  cal_data = data.frame() #just use empy data frame if no cal data
+		  cat('No Cal, calibration skipped\n')
+		}
 		
 		unlink(run_dir, recursive=TRUE)
 		
