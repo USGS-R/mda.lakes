@@ -15,6 +15,11 @@ combine_output_data = function(sim, path){
   #this needs about 60GB of scratch space available
   fast_tmp = tempdir()
   
+  #ensure we have a trailing / on path
+  if(!substr(path, nchar(path), nchar(path)) == '/'){
+    path = paste0(path, '/')
+  }
+  
   core_path = paste0(path, sim, '/', sim, '_core_metrics.tsv')
   cfg_path = paste0(path, sim, '/', sim, '_model_config.json')
   hansen_path = paste0(path, sim, '/', sim, '_fish_hab.tsv')
