@@ -7,6 +7,7 @@
 #' @description Combines all the individual compute node model files into 
 #' a few files for the whole simulation
 #' 
+#' @import jsonlite
 #' 
 #' 
 #' @export
