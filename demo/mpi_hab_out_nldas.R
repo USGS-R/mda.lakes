@@ -74,6 +74,21 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		#rename for dplyr
 		nhd_id = site_id
 		
+		#prep observations for calibration data
+		data(wtemp)
+		obs = filter(wtemp, site_id == nhd_id) %>%
+		  transmute(DateTime=date, Depth=depth, temp=wtemp) %>%
+		  filter(year(DateTime) %in% modern_era)
+		
+		have_cal = nrow(obs) > 0
+		
+		if(have_cal){
+		  #having a weird issue with resample_to_field, make unique
+		  obs = obs[!duplicated(obs[,1:2]), ]
+		  
+		  write.table(obs, file.path(run_dir, 'obs.tsv'), sep='\t', row.names=FALSE)
+		}
+		
 		#get driver data
 		driver_path = driver_function(site_id)
 		driver_path = gsub('\\\\', '/', driver_path)
@@ -114,6 +129,15 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		
 		nml = read_nml(file.path(run_dir, "glm2.nml"))
 		
+		## if we have cal, use it
+		if(have_cal){
+		  cal_data = resample_to_field(file.path(run_dir, 'output.nc'), file.path(run_dir,'obs.tsv'))
+		  cal_data$site_id = site_id
+		  cat('Calibration data calculated\n')
+		}else{
+		  cal_data = data.frame() #just use empy data frame if no cal data
+		  cat('No Cal, calibration skipped\n')
+		}
 		
 		unlink(run_dir, recursive=TRUE)
 		
@@ -123,7 +147,8 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 		                hansen_habitat=hansen_habitat, 
 		                site_id=site_id, 
 		                #notaro_metrics=notaro_metrics, 
-		                nml=nml)
+		                nml=nml, 
+		                cal_data=cal_data)
 		
 		return(all_data)
 		
@@ -173,13 +198,13 @@ wrapup_output = function(out, run_name, years){
 	core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
 	core_metrics = subset(core_metrics, year %in% years)
 	
-	#notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
+	cal_data = do.call(rbind, lapply(good_data, function(x){x[['cal_data']]}))
 	
 	model_config = lapply(good_data, function(x){x$nml})
 	
 	write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-	#write.table(notaro_metrics, file.path(out_dir, 'notaro_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+	write.table(cal_data, file.path(out_dir, 'best_cal_data.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
 	
 	save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
 	save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
