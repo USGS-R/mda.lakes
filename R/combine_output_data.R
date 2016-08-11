@@ -14,7 +14,16 @@
 combine_output_data = function(sim, path){
   #fast temp location for bundling wtr out data
   #this needs about 60GB of scratch space available
-  fast_tmp = tempdir()
+  #if ram_scratch is there, use it
+  fast_tmp = Sys.getenv('RAM_SCRATCH', unset = '')
+  
+  if(fast_tmp == ''){
+    if(file.exists('/cxfs/scratch')){
+      fast_tmp = '/cxfs/scratch'
+    }else{
+      fast_tmp = tempdir()
+    }
+  }
   
   #ensure we have a trailing / on path
   if(!substr(path, nchar(path), nchar(path)) == '/'){
