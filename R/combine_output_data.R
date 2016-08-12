@@ -30,9 +30,10 @@ combine_output_data = function(sim, path){
     path = paste0(path, '/')
   }
   
-  core_path = paste0(path, sim, '/', sim, '_core_metrics.tsv')
-  cfg_path = paste0(path, sim, '/', sim, '_model_config.json')
+  core_path   = paste0(path, sim, '/', sim, '_core_metrics.tsv')
+  cfg_path    = paste0(path, sim, '/', sim, '_model_config.json')
   hansen_path = paste0(path, sim, '/', sim, '_fish_hab.tsv')
+  cal_path    = paste0(path, sim, '/', sim, '_calibration_data.tsv')
   
   ################################################################################
   ## read and handle core metrics
@@ -48,6 +49,19 @@ combine_output_data = function(sim, path){
                                    sep='\t', header=TRUE, as.is=TRUE)
   write.table(hab_metrics, hansen_path, 
               sep='\t', row.names=FALSE)
+  
+  
+  ################################################################################
+  ## read and handle habitat metrics
+  if(length(Sys.glob(paste0(path, sim, '/*/best_cal_data.tsv')))){
+    cat('Cal wrapup running.\n')
+    cal_data =  comb_output_table(paste0(path, sim, '/*/best_cal_data.tsv'), 
+                                     sep='\t', header=TRUE, as.is=TRUE)
+    write.table(cal_data, cal_path, 
+                sep='\t', row.names=FALSE)
+  }else{
+    cat('Skipping cal wrapup because no cal data.\n')
+  }
   
   ################################################################################
   ###read and handle NML files
