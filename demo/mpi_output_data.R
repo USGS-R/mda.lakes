@@ -6,9 +6,12 @@ config = read.table('config', header=TRUE, as.is=TRUE)
 driver_name = config$drivername
 driver_url = config$driverurl
 out_dir = config$outdir
-scratch_dir = config$scratch
 
-#scratch_dir = '/cxfs/projects/usgs/water/owi/lwinslow/scratch/'
+scratch_dir = Sys.getenv('GLOBAL_SCRATCH', unset=config$scratch)
+if(is.null(scratch_dir) || scratch_dir==''){
+  scratch_dir = '/cxfs/projects/usgs/water/owi/lwinslow/scratch/'
+}
+
 dir.create(scratch_dir)
 
 combine_output_data(driver_name, out_dir, fast_tmp=scratch_dir)
