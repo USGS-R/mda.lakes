@@ -20,8 +20,10 @@ comb_output_table = function(pattern, ...){
 	out = data.frame()
 	
 	for(i in 1:length(files)){
-		tmp = read.table(files[i], ...)
-		out = rbind(out, tmp)
+	  if(file.info(files[i])$size > 0){
+  		tmp = read.table(files[i], ...)
+  		out = rbind(out, tmp)
+	  }
 	}
 	
 	return(out)
