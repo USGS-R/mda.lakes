@@ -118,7 +118,7 @@ combine_output_data = function(sim, path, fast_tmp=tempdir()){
     
     
     for(i in 1:length(splits)){
-      zip(zipfile=wtemp_zips[i], files=all_wtr_files[splits[[i]]])
+      zip(zipfile=wtemp_zips[i], files=all_wtr_files[splits[[i]]], zip='zip')
     }
     #delete raw text files to save space
     unlink(all_wtr_files)

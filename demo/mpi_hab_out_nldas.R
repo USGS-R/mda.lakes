@@ -52,6 +52,7 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, future_era, driver_func
 	library(mda.lakes)
 	library(dplyr)
 	library(glmtools)
+  library(lubridate)
 	
 	fastdir = tempdir()
 	#for use on WiWSC Condor pool

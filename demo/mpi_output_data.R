@@ -8,6 +8,7 @@ driver_url = config$driverurl
 out_dir = config$outdir
 
 scratch_dir = Sys.getenv('GLOBAL_SCRATCH', unset=config$scratch)
+#base case just in case
 if(is.null(scratch_dir) || scratch_dir==''){
   scratch_dir = '/cxfs/projects/usgs/water/owi/lwinslow/scratch/'
 }
