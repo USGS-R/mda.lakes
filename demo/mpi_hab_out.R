@@ -69,7 +69,7 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, driver_function=get_dri
 		
 		
 		run_dir = file.path(fastdir, paste0(site_id, '_', sample.int(1e9, size=1)))
-		cat(run_dir, '\n')
+		cat('START:', format(Sys.time(), '%m-%d %H:%M:%S'), Sys.info()[['nodename']], site_id, '\n')
 		dir.create(run_dir)
 		
 		#rename for dplyr
@@ -151,10 +151,13 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, driver_function=get_dri
 		                nml=nml, 
 		                cal_data=cal_data)
 		
+		cat('END:', format(Sys.time(), '%m-%d %H:%M:%S'), Sys.info()[['nodename']], site_id, '\n')
+		
 		return(all_data)
 		
 	}, error=function(e){
-		unlink(run_dir, recursive=TRUE);
+		unlink(run_dir, recursive=TRUE)
+	  cat('FAIL:', format(Sys.time(), '%m-%d %H:%M:%S'), Sys.info()[['nodename']], site_id, '\n')
 		return(list(error=e, site_id))
 	})
 }
