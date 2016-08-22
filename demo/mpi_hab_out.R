@@ -20,8 +20,8 @@
 #library(Rmpi)
 
 #args = commandArgs(trailingOnly=TRUE)
-mpirank = is.numeric(Sys.getenv('SLURM_PROCID', 'NA')) #mpi.comm.rank(0)
-mpisize = is.numeric(Sys.getenv('SLURM_STEP_NUM_TASKS', 'NA')) #mpi.comm.size(0)
+mpirank = as.numeric(Sys.getenv('SLURM_PROCID', 'NA')) #mpi.comm.rank(0)
+mpisize = as.numeric(Sys.getenv('SLURM_STEP_NUM_TASKS', 'NA')) #mpi.comm.size(0)
 cat('MPIRANK:', mpirank, '\n')
 cat('MPISIZE:', mpisize, '\n')
 
