@@ -17,11 +17,15 @@
 # mdalakes_install = clusterCall(c1, function(){install_url(paste0('http://', local_url,'/mda.lakes_4.1.0.tar.gz'))})
 
 
-library(Rmpi)
+#library(Rmpi)
 
-args = commandArgs(trailingOnly=TRUE)
-mpirank = mpi.comm.rank(0)
-mpisize = mpi.comm.size(0)
+#args = commandArgs(trailingOnly=TRUE)
+mpirank = Sys.getenv('SLURM_PROCID', 'NA')#mpi.comm.rank(0)
+mpisize = Sys.getenv('SLURM_STEP_NUM_TASKS', 'NA') #mpi.comm.size(0)
+
+if(mpirank == 'NA' || mpisize == 'NA'){
+	stop('trouble finding MPIRANK or MPISIZE')
+}
 
 
 # if(mpi.comm.rank(0) != 0){
