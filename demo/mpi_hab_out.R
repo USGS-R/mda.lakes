@@ -20,10 +20,10 @@
 #library(Rmpi)
 
 #args = commandArgs(trailingOnly=TRUE)
-mpirank = Sys.getenv('SLURM_PROCID', 'NA')#mpi.comm.rank(0)
-mpisize = Sys.getenv('SLURM_STEP_NUM_TASKS', 'NA') #mpi.comm.size(0)
+mpirank = is.numeric(Sys.getenv('SLURM_PROCID', 'NA')) #mpi.comm.rank(0)
+mpisize = is.numeric(Sys.getenv('SLURM_STEP_NUM_TASKS', 'NA')) #mpi.comm.size(0)
 
-if(mpirank == 'NA' || mpisize == 'NA'){
+if(is.na(mpirank)|| is.na(mpisize)){
 	stop('trouble finding MPIRANK or MPISIZE')
 }
 
