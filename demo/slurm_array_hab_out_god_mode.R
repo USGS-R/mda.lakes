@@ -78,7 +78,7 @@ future_hab_wtr = function(site_id, modern_era=1979:2012, driver_function=get_dri
                       dt=3600, subdaily=FALSE, nsave=24, 
                       timezone=-6,
                       csv_point_nlevs=0, 
-                      snow_albedo_factor=1.1, 
+                      snow_albedo_factor=1, 
                       meteo_fl=driver_path, 
                       cd=getCD(site_id, method='Hondzo')), 
                       nml_args))
