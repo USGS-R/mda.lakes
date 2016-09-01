@@ -4,7 +4,7 @@
 \alias{combine_output_data}
 \title{combine full sim run output data}
 \usage{
-combine_output_data(sim, path)
+combine_output_data(sim, path, fast_tmp = tempdir())
 }
 \description{
 Combines all the individual compute node model files into 

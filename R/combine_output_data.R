@@ -104,7 +104,7 @@ combine_output_data = function(sim, path, fast_tmp=tempdir()){
     
     #split up files into 1000 lake groups 
     all_wtr_files = sort(unique(unlist(all_wtr_files)))
-    splits = split(1:length(all_wtr_files), floor((1:length(all_wtr_files))/500))
+    splits = split(1:length(all_wtr_files), floor((1:length(all_wtr_files))/1000))
     
     wtemp_zips = file.path(path, sim, paste0(sim, '_wtemp_', seq_along(splits), '.zip'))
     
