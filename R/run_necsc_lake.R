@@ -236,5 +236,4 @@ run_necsc_lake = function(site_id = NA, driver_name, out_dir){
     cat('on to the next\n')
   }
   
-  
 }
