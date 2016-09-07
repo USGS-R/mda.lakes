@@ -156,37 +156,38 @@ run_necsc_lake = function(site_id = NA, driver_name, out_dir){
     
     good_data = out[!unlist(lapply(out, function(x){'error' %in% names(x) || is.null(x)}))]
     bad_data  = out[unlist(lapply(out, function(x){'error' %in% names(x) || is.null(x)}))]
+    save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
+    
     
     sprintf('%i lakes ran\n', length(good_data))
-    dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[['site_id']]; return(tmp)})
-    #drop the burn-in years
-    dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01-01'))})
+    if(length(good_data) > 0){
+      dframes = lapply(good_data, function(x){tmp = x[[1]]; tmp$site_id=x[['site_id']]; return(tmp)})
+      #drop the burn-in years
+      dframes = lapply(dframes, function(df){subset(df, DateTime > as.POSIXct('1979-01-01'))})
+      
+      hansen_habitat = do.call(rbind, lapply(good_data, function(x){x[['hansen_habitat']]}))
+      hansen_habitat = subset(hansen_habitat, year %in% years)
+      
+      core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
+      core_metrics = subset(core_metrics, year %in% years)
+      
+      notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
+      
+      cal_data = do.call(rbind, lapply(good_data, function(x){x[['cal_data']]}))
+      
+      model_config = lapply(good_data, function(x){x$nml})
+      
+      notaro_file = file.path(out_dir, paste0('notaro_metrics_', paste0(range(years), collapse='_'), '.tsv'))
+      write.table(notaro_metrics, notaro_file, sep='\t', row.names=FALSE, append=file.exists(notaro_file), col.names=!file.exists(notaro_file))
+      write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+      write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+      write.table(cal_data, file.path(out_dir, 'best_cal_data.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
+      
+      
+      save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
+      save('model_config', file=getnext(file.path(out_dir, 'model_config.Rdata')))
+    }
     
-    hansen_habitat = do.call(rbind, lapply(good_data, function(x){x[['hansen_habitat']]}))
-    hansen_habitat = subset(hansen_habitat, year %in% years)
-    
-    core_metrics = do.call(rbind, lapply(good_data, function(x){x[['core_metrics']]}))
-    core_metrics = subset(core_metrics, year %in% years)
-    
-    notaro_metrics = do.call(rbind, lapply(good_data, function(x){x[['notaro_metrics']]}))
-    
-    cal_data = do.call(rbind, lapply(good_data, function(x){x[['cal_data']]}))
-    
-    model_config = lapply(good_data, function(x){x$nml})
-    
-    notaro_file = file.path(out_dir, paste0('notaro_metrics_', paste0(range(years), collapse='_'), '.tsv'))
-    write.table(notaro_metrics, notaro_file, sep='\t', row.names=FALSE, append=file.exists(notaro_file), col.names=!file.exists(notaro_file))
-    write.table(hansen_habitat, file.path(out_dir, 'best_hansen_hab.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-    write.table(core_metrics, file.path(out_dir, 'best_core_metrics.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-    write.table(cal_data, file.path(out_dir, 'best_cal_data.tsv'), sep='\t', row.names=FALSE, append=run_exists, col.names=!run_exists)
-    
-    
-    save('dframes', file = getnext(file.path(out_dir, 'best_all_wtr.Rdata')))
-    save('bad_data', file = getnext(file.path(out_dir, 'bad_data.Rdata')))
-    save('model_config', file=getnext(file.path(out_dir, 'model_config.Rdata')))
-    
-    rm(out, good_data, dframes)
-    gc()
   }
   
   
