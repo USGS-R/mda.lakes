@@ -23,6 +23,7 @@ combine_output_data = function(sim, path, fast_tmp=tempdir()){
   cfg_path    = paste0(path, sim, '/', sim, '_model_config.json')
   hansen_path = paste0(path, sim, '/', sim, '_fish_hab.tsv')
   cal_path    = paste0(path, sim, '/', sim, '_calibration_data.tsv')
+  error_path  = paste0(path, sim, '/', sim, '_error_output.tsv')
   
   ################################################################################
   ## read and handle core metrics
@@ -70,6 +71,22 @@ combine_output_data = function(sim, path, fast_tmp=tempdir()){
   }else{
     cat('Skipping nml config.\n')
   }
+  
+  ################################################################################
+  ### read and handle error files
+  bad_files = Sys.glob(paste0(path, sim, '/*/bad_data.Rdata*'))
+  
+  bad_data = list()
+  
+  for(i in 1:length(bad_files)){
+    tmp = new.env()
+    load(bad_files[i], envir = tmp)
+    
+    bad_data = c(bad_data, tmp$bad_data)
+  }
+  
+  save(bad_data, file=error_path)
+  
   
   ################################################################################
   ###read and handle raw water temp data.
