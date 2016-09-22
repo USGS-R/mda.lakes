@@ -106,6 +106,10 @@ get_driver_index = function(driver_name, loc_cache=TRUE){
 	
 	if(substr(pkg_info$dvr_url, nchar(pkg_info$dvr_url)-3,nchar(pkg_info$dvr_url)) == '.zip'){
 		unzip(pkg_info$dvr_url, files = paste0('drivers_GLM_', driver_name, '/driver_index.tsv'), exdir=dirname(dest), junkpaths=TRUE)
+	}else if(substr(index_url, 1,7) == 'file://'){
+	  
+	  dest = index_url
+	  
 	}else{
 		if(!download_helper(index_url, dest)){
 			stop('driver_index.tsv: unable to download for driver data:', driver_name)

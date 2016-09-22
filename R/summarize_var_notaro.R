@@ -47,7 +47,8 @@ summarize_var_notaro <- function(nc.file, var.name){
       mutate(doy=as.numeric(DateTime-base.date)/86400+1) %>% 
       select(-DateTime, -tz, -base.date) %>% select(doy, everything()) %>% group_by(doy) %>%  
       summarize_each(c('mean','sd')) %>% 
-      setNames(c('doy',rename_depths(names(.)[-1L]))) %>% gather(key = doy) %>% 
+      setNames(c('doy',rename_depths(names(.)[-1L]))) %>% 
+      as.data.frame %>% gather(key = doy) %>% 
       setNames(c('doy','depth_stat','value')) %>% 
       mutate(depth=get_depth(depth_stat), statistic=get_stat(depth_stat), variable=value.name) %>% 
       select(doy, depth, statistic, value, variable) %>% 
@@ -56,7 +57,7 @@ summarize_var_notaro <- function(nc.file, var.name){
     var <- get_var(nc.file, var.name)%>% 
       mutate(base.date=as.POSIXct(paste0(lubridate::year(DateTime),'-01-01')), tz='UTC') %>% 
       mutate(doy=as.numeric(DateTime-base.date)/86400+1) %>% select_('doy', var.name) %>% group_by(doy) %>% 
-      summarize_each(c('mean','sd')) %>% gather(key = doy) %>% 
+      summarize_each(c('mean','sd')) %>% as.data.frame %>% gather(doy) %>% 
       setNames(c('doy','statistic','value')) %>% 
       mutate(depth=NA, variable=value.name) %>% 
       select(doy, depth, statistic, value, variable) %>% 
