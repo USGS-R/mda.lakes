@@ -94,7 +94,6 @@ populate_base_lake_nml = function(site_id, kd=get_kd_avg(site_id)$kd_avg, nml_te
 	nml_obj = set_nml(nml_obj, 'bsn_len', bsn_len)
 	
 	#lake lat/lon
-	latlon = getLatLon(site_id)
 	nml_obj = set_nml(nml_obj, 'latitude', latlon[1])
 	nml_obj = set_nml(nml_obj, 'longitude', latlon[2])
 	
