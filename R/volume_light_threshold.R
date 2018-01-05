@@ -37,6 +37,9 @@
 #'How benthic area is to be calculated. Defaults to \code{benthic}, which tries to estimate the
 #'slope corrected benthic area for each layer. \code{surface} just uses a surface area approximation, 
 #'ignoring slope.
+#'@param new_depths Vector of depths onto which hypsography and light are calculated. This is here to
+#'enable the use of identical depths and hypsos across all calculating functions (and others are based
+#'on depths of \code{wtr} obs, which we don't have here.) Defaults to depths of supplied hypsography. 
 #'
 #'@description
 #'Returns the average amount of benthic area that is within the optical intensity thresholds based on 
@@ -45,12 +48,14 @@
 #'@author Luke Winslow
 #'
 #'@export
-area_light_threshold = function(kd, light_incident, irr_thresh=c(0,2000), hypso, area_type="benthic"){
+area_light_threshold = function(kd, light_incident, irr_thresh=c(0,2000), hypso, area_type="benthic", new_depths){
 	
-	#TODO: Should we add interpolation to light and hypso profiles?
-	
+	#Added interpolation to new depths. This is to allow the functions to be numerically identidcal
+  if(missing(new_depths)){
+    new_depths = hypso$depth
+  }
 	#new_depths = seq(0, max(hypso$depth), by=0.1)
-	#new_areas  = approx(hypso$depth, hypso$area, xout=new_depths)$y
+	new_areas  = approx(hypso$depth, hypso$area, xout=new_depths)$y
 	
 	light_map = vol_light_map(kd, light_incident, irr_thresh, hypso$depth)
 	
