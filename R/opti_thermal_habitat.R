@@ -30,7 +30,7 @@ opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0
 	
 	#Now, if we are going to interp this, we need to interp io and wtr to at least hourly or so
 	if(interp_hour){
-		io = create_irr_day_cycle(lat,lon, dates=io[,1], irr_mean = io[,2], by='hour')
+		io = create_irr_day_cycle(lat,lon, dates=io[,1], irr_mean = io[,2], by='min')
 		
 		#I really hate that I have to do this, but I need to ensure it is UTC for the later approx stage
 		wtr[,1] = as.POSIXct(format(wtr[,1], '%Y-%m-%d'), tz='UTC')
