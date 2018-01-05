@@ -40,11 +40,11 @@ opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0
 			colname = names(wtr)[i]
 			
 			#THere may not be enough non NA values for us to run approx, check
-			#if(sum(!is.na(wtr[, colname])) < 2){
-			#	new_wtr[,colname] = rep(NA, nrow(new_wtr))
-			#}else{
+			if(sum(!is.na(wtr[, colname])) == 0){
+				new_wtr[,colname] = rep(NA, nrow(new_wtr))
+			}else{
 				new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1], method=approx_method, rule=2)$y
-			#}
+			}
 			
 		}
 		wtr = new_wtr
