@@ -18,4 +18,3 @@ Returns the hypsometry profile for a lake with the given ID
 \author{
 Luke Winslow, Jordan Read
 }
-

@@ -20,4 +20,3 @@ no-freeze years. This function fills in missing ice on/off dates with
 the date of minimum average lake temp. Seems to be a reasonable enough 
 choice. There is no great one.
 }
-

@@ -20,4 +20,3 @@ This outputs all paired-value slopes for a seasonal/cross-site Sen's
 slope estimator. To get the slope, calculate the median value of all 
 paired-value slopes.
 }
-

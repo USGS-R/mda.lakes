@@ -17,4 +17,3 @@ driver_add_rain(drivers, months = 7:9, rain_add = 1)
 This is used to artificially add rain to a met file during 
 specific months (when it will impact heat budget the least).
 }
-

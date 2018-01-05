@@ -10,4 +10,3 @@ driver_nldas_debias_airt_sw(drivers, nldas)
 Debiases airT and SW based on a linear model of driver to NLDAS
 airT and a simple offset with SW
 }
-

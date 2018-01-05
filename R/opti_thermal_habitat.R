@@ -1,16 +1,16 @@
-
-#'@title Calculate optical thermal habitat using temp and light thresholds 
+#' @title Calculate optical thermal habitat using temp and light thresholds 
+#' 
+#' @inheritParams area_light_temp_threshold
+#' @param interp_hour Interpolate to hourly data
+#' @param approx_method Method for the approximate function
 #'
-#'@inheritParams area_light_temp_threshold
-#'@param interp_hour Interpolate to hourly data (and )
-#'
-#'@return data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
-#'for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
-#'m^2*days. Divide by the number of days in the data to 
+#' @return data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
+#' for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
+#' m^2*days. Divide by the number of days in the data to 
 #'
 #'
-#'@export
-opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE){
+#' @export
+opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE, approx_method='linear'){
 	
 # 	nml = read_nml(nml_file)
 # 	
@@ -43,7 +43,7 @@ opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0
 			if(sum(!is.na(wtr[, colname])) < 2){
 				new_wtr[,colname] = rep(NA, nrow(new_wtr))
 			}else{
-				new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1])$y
+				new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1], method=approx_method, rule=2)$y
 			}
 			
 		}

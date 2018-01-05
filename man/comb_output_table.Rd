@@ -19,4 +19,3 @@ pattern, then an empty data.frame is returned.
 \author{
 Luke Winslow
 }
-

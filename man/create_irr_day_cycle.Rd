@@ -18,4 +18,3 @@ create_irr_day_cycle(lat, lon, dates = as.POSIXct("1990-01-01"),
 
 \item{by}{Timestep to generate sequence of times, see \link{seq.POSIXt} for options}
 }
-

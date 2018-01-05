@@ -19,4 +19,3 @@ A data frame with all metrics organized by year
 Calculates the list of core metrics decided by the team. 
 See inst/supporting_files/necsc_thermal_metrics_core_outputs.xlsx for details
 }
-

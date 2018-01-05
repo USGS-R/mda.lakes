@@ -22,4 +22,3 @@ circle with the same area as the lake. Cannot be less than 1.
 \author{
 Luke Winslow, Jordan Read
 }
-

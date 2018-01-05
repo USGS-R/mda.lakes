@@ -28,4 +28,3 @@ light attenuation, hypsograph, and the desired threshold values.
 \author{
 Luke Winslow
 }
-

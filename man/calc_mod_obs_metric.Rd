@@ -13,4 +13,3 @@ Metric options include all available rLakeAnalyzer metrics
 \seealso{
 \code{\link[glmtools]{compare_to_field}}
 }
-

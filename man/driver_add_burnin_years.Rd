@@ -6,4 +6,3 @@
 \usage{
 driver_add_burnin_years(drivers, nyears = 2)
 }
-
