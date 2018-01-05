@@ -57,7 +57,7 @@ area_light_threshold = function(kd, light_incident, irr_thresh=c(0,2000), hypso,
 	#new_depths = seq(0, max(hypso$depth), by=0.1)
 	new_areas  = approx(hypso$depth, hypso$area, xout=new_depths)$y
 	
-	light_map = vol_light_map(kd, light_incident, irr_thresh, hypso$depth)
+	light_map = vol_light_map(kd, light_incident, irr_thresh, new_depths)
 	
 	
 	if(tolower(area_type) == "surface"){
