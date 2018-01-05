@@ -61,9 +61,9 @@ area_light_threshold = function(kd, light_incident, irr_thresh=c(0,2000), hypso,
 	
 	
 	if(tolower(area_type) == "surface"){
-		depth_area_rel = surface_areas(hypso$depths, hypso$areas)
+		depth_area_rel = surface_areas(new_depths, new_areas)
 	}else if(tolower(area_type) == "benthic"){
-		depth_area_rel = benthic_areas(hypso$depths, hypso$areas)
+		depth_area_rel = benthic_areas(new_depths, new_areas)
 	}else{
 		stop("Unrecognized area_type, must be 'surface' or 'benthic'")
 	}
