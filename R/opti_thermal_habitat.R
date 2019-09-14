@@ -1,16 +1,16 @@
-
-#'@title Calculate optical thermal habitat using temp and light thresholds 
+#' @title Calculate optical thermal habitat using temp and light thresholds 
+#' 
+#' @inheritParams area_light_temp_threshold
+#' @param interp_hour Interpolate to hourly data
+#' @param approx_method Method for the approximate function
 #'
-#'@inheritParams area_light_temp_threshold
-#'@param interp_hour Interpolate to hourly data (and )
-#'
-#'@return data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
-#'for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
-#'m^2*days. Divide by the number of days in the data to 
+#' @return data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
+#' for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
+#' m^2*days. Divide by the number of days in the data to 
 #'
 #'
-#'@export
-opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE){
+#' @export
+opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0,2000), wtr_thresh=c(0,25), area_type="benthic", interp_hour=FALSE, approx_method='linear'){
 	
 # 	nml = read_nml(nml_file)
 # 	
@@ -30,7 +30,7 @@ opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0
 	
 	#Now, if we are going to interp this, we need to interp io and wtr to at least hourly or so
 	if(interp_hour){
-		io = create_irr_day_cycle(lat,lon, dates=io[,1], irr_mean = io[,2], by='hour')
+		io = create_irr_day_cycle(lat,lon, dates=io[,1], irr_mean = io[,2], by='min')
 		
 		#I really hate that I have to do this, but I need to ensure it is UTC for the later approx stage
 		wtr[,1] = as.POSIXct(format(wtr[,1], '%Y-%m-%d'), tz='UTC')
@@ -40,22 +40,23 @@ opti_thermal_habitat = function(opt_wtr, io, kd, lat, lon, hypso, irr_thresh=c(0
 			colname = names(wtr)[i]
 			
 			#THere may not be enough non NA values for us to run approx, check
-			if(sum(!is.na(wtr[, colname])) < 2){
+			if(sum(!is.na(wtr[, colname])) == 0){
 				new_wtr[,colname] = rep(NA, nrow(new_wtr))
 			}else{
-				new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1])$y
+				new_wtr[,colname] = approx(wtr[,1], wtr[, colname], xout=io[,1], method=approx_method, rule=2)$y
 			}
 			
 		}
 		wtr = new_wtr
 		
 		#note, the division by 24, want it in m^2*days (not hours)
-		light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type)/24
-		temp_alone  = area_temp_threshold(wtr, wtr_thresh, hypso, area_type)/24
-		light_temp  = area_light_temp_threshold(wtr, kd, io[,2], irr_thresh, wtr_thresh, hypso, area_type)/24
+		# supply new_depths to area_light_threshold so same depths are used across all functions
+		light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type, new_depths=get.offsets(wtr))/1440
+		temp_alone  = area_temp_threshold(wtr, wtr_thresh, hypso, area_type)/1440
+		light_temp  = area_light_temp_threshold(wtr, kd, io[,2], irr_thresh, wtr_thresh, hypso, area_type)/1440
 		
 	}else{
-		light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type)
+		light_alone = area_light_threshold(kd, io[,2], irr_thresh, hypso, area_type, new_depths=get.offsets(wtr))
 		temp_alone  = area_temp_threshold(wtr, wtr_thresh, hypso, area_type)
 		light_temp  = area_light_temp_threshold(wtr, kd, io[,2], irr_thresh, wtr_thresh, hypso, area_type)
 	}

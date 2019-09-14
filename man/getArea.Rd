@@ -30,4 +30,3 @@ getArea('asdf')
 \author{
 Jordan Read, Luke Winslow
 }
-

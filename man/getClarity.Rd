@@ -32,4 +32,3 @@ getClarity(c('6100','asdf', '10000', 'asdf'), default.if.null=TRUE)
 \author{
 Luke Winslow, Jordan Read
 }
-

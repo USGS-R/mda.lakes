@@ -18,4 +18,3 @@ calc_stratified_periods(surfT, botT, temp_thresh = 1, force_positive = TRUE)
 \description{
 A function to calculate
 }
-

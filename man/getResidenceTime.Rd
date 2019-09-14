@@ -22,10 +22,9 @@ TODO
 TODO
 
 }
-\author{
-Luke Winslow, Jordan Read
-}
 \references{
 TODO Data source needed
 }
-
+\author{
+Luke Winslow, Jordan Read
+}

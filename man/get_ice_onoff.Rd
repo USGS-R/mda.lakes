@@ -18,4 +18,3 @@ data.frame with columns \code{c('year', 'on', 'off')}
 Function to estimate the ice on/off dates from a timeseries of water temperature
 and ice data.
 }
-

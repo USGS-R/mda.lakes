@@ -6,14 +6,29 @@
 \usage{
 opti_thermal_habitat(opt_wtr, io, kd, lat, lon, hypso, irr_thresh = c(0,
   2000), wtr_thresh = c(0, 25), area_type = "benthic",
-  interp_hour = FALSE)
+  interp_hour = FALSE, approx_method = "linear")
 }
 \arguments{
-\item{interp_hour}{Interpolate to hourly data (and )}
+\item{kd}{Light attenuation value of the lake (in m^-1 units)}
+
+\item{hypso}{Hypsography data.frame, with columns \code{depth} and \code{area}. From \code{\link{}}}
+
+\item{irr_thresh}{Vector of length 2 with min and max value (in that order) for light thresholds. Note: 
+>= and <= is used for comparison, so thresholds must be adjusted accordingly.}
+
+\item{wtr_thresh}{Vector of length 2 with min and max value (in that order) for temperature thresholds. Note: 
+>= and <= is used for comparison, so thresholds must be adjusted accordingly.}
+
+\item{area_type}{How benthic area is to be calculated. Defaults to \code{benthic}, which tries to estimate the
+slope corrected benthic area for each layer. \code{surface} just uses a surface area approximation, 
+ignoring slope.}
+
+\item{interp_hour}{Interpolate to hourly data}
+
+\item{approx_method}{Method for the approximate function}
 }
 \value{
 data.frame with three columns. opti_hab, therm_hab, opti_therm_hab 
 for areas of each habitat type (with opti_therm_hab being the overlap of both). Units are in
 m^2*days. Divide by the number of days in the data to
 }
-

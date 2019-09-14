@@ -18,4 +18,3 @@ calc_toha_stats(lakeid, width_thresh = 0.02, secchi = c(seq(0.1, 2.9, by =
 
 \item{irr_thresh}{The light intensity thresholds in W/m^2 (defaults from Lester et al 2004)}
 }
-

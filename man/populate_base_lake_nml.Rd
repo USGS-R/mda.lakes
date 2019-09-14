@@ -19,4 +19,3 @@ populate_base_lake_nml(site_id, kd = get_kd_avg(site_id)$kd_avg,
 This creates an NML object and pre-fills it with 
 key parameters for the site_id
 }
-

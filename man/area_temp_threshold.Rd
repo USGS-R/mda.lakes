@@ -22,4 +22,3 @@ ignoring slope.}
 \author{
 Luke Winslow
 }
-
