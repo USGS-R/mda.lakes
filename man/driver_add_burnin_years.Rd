@@ -6,3 +6,6 @@
 \usage{
 driver_add_burnin_years(drivers, nyears = 2)
 }
+\description{
+Duplicate n years of initial data
+}

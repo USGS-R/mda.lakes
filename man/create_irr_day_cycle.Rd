@@ -4,8 +4,13 @@
 \alias{create_irr_day_cycle}
 \title{Estimate a full irradiance diurnal cycle}
 \usage{
-create_irr_day_cycle(lat, lon, dates = as.POSIXct("1990-01-01"),
-  irr_mean = 1, by = "hour")
+create_irr_day_cycle(
+  lat,
+  lon,
+  dates = as.POSIXct("1990-01-01"),
+  irr_mean = 1,
+  by = "hour"
+)
 }
 \arguments{
 \item{lat}{Latitude in degrees}
@@ -17,4 +22,7 @@ create_irr_day_cycle(lat, lon, dates = as.POSIXct("1990-01-01"),
 \item{irr_mean}{The mean daily irradiance to match in the diurnal cycle (arbitrary units), must be the same length as \code{dates}}
 
 \item{by}{Timestep to generate sequence of times, see \link{seq.POSIXt} for options}
+}
+\description{
+Estimate a full irradiance diurnal cycle
 }

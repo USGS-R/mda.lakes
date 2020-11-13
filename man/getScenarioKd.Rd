@@ -4,8 +4,14 @@
 \alias{getScenarioKd}
 \title{Get light attenuation based on long-term trend scenario for a given lake}
 \usage{
-getScenarioKd(WBIC, years, year.1 = 1979, year.2 = 2011, trend = 0,
-  default.if.null = FALSE)
+getScenarioKd(
+  WBIC,
+  years,
+  year.1 = 1979,
+  year.2 = 2011,
+  trend = 0,
+  default.if.null = FALSE
+)
 }
 \arguments{
 \item{years}{Numeric year vector across which to calculate Kd values}

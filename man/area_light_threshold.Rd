@@ -4,8 +4,14 @@
 \alias{area_light_threshold}
 \title{Calculate the average benthic area within light thresholds}
 \usage{
-area_light_threshold(kd, light_incident, irr_thresh = c(0, 2000), hypso,
-  area_type = "benthic", new_depths)
+area_light_threshold(
+  kd,
+  light_incident,
+  irr_thresh = c(0, 2000),
+  hypso,
+  area_type = "benthic",
+  new_depths
+)
 }
 \arguments{
 \item{kd}{Light attenuation value of the lake (in m^-1 units)}
