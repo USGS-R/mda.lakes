@@ -4,8 +4,7 @@
 \alias{area_temp_threshold}
 \title{Calculate the average benthic area within temperature thresholds}
 \usage{
-area_temp_threshold(wtr, wtr_thresh = c(0, 25), hypso,
-  area_type = "surface")
+area_temp_threshold(wtr, wtr_thresh = c(0, 25), hypso, area_type = "surface")
 }
 \arguments{
 \item{wtr}{Data frame of water temperatures. See \code{\link[glmtools]{get_temp}}}
@@ -19,7 +18,9 @@ area_temp_threshold(wtr, wtr_thresh = c(0, 25), hypso,
 slope corrected benthic area for each layer. \code{surface} just uses a surface area approximation, 
 ignoring slope.}
 }
+\description{
+Calculate the average benthic area within temperature thresholds
+}
 \author{
 Luke Winslow
 }
-

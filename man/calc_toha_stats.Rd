@@ -4,13 +4,18 @@
 \alias{calc_toha_stats}
 \title{Calc standard stats on TOHA for a given lake}
 \usage{
-calc_toha_stats(lakeid, width_thresh = 0.02, secchi = c(seq(0.1, 2.9, by =
-  0.1), 3:10), wtr_thresh = c(11, 25), irr_thresh = c(0.0762, 0.6476))
+calc_toha_stats(
+  lakeid,
+  width_thresh = 0.02,
+  secchi = c(seq(0.1, 2.9, by = 0.1), 3:10),
+  wtr_thresh = c(11, 25),
+  irr_thresh = c(0.0762, 0.6476)
+)
 }
 \arguments{
 \item{lakeid}{ID of lake to run}
 
-\item{width_thresh}{The fraction of benthic area threshold across which to find the width of the peak (1 is 100%)}
+\item{width_thresh}{The fraction of benthic area threshold across which to find the width of the peak (1 is 100 percent)}
 
 \item{secchi}{Vector of secchi values to run model over}
 
@@ -18,4 +23,6 @@ calc_toha_stats(lakeid, width_thresh = 0.02, secchi = c(seq(0.1, 2.9, by =
 
 \item{irr_thresh}{The light intensity thresholds in W/m^2 (defaults from Lester et al 2004)}
 }
-
+\description{
+Calc standard stats on TOHA for a given lake
+}

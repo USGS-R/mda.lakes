@@ -4,8 +4,13 @@
 \alias{get_driver_path}
 \title{Return driver file location for given lake}
 \usage{
-get_driver_path(id, driver_name = "NLDAS", loc_cache = TRUE,
-  timestep = "daily", ...)
+get_driver_path(
+  id,
+  driver_name = "NLDAS",
+  loc_cache = TRUE,
+  timestep = "daily",
+  ...
+)
 }
 \arguments{
 \item{id}{Site id, prepended with id type followed by _ (e.g., 'nhd_' or 'wbic_')}
@@ -34,4 +39,3 @@ get_driver_path('WBIC_1881900')
 \author{
 Luke Winslow
 }
-

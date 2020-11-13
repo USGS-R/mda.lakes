@@ -13,8 +13,10 @@ driver_add_rain(drivers, months = 7:9, rain_add = 1)
 
 \item{rain_add}{Amount of rain to add across the months in meters}
 }
+\description{
+Add rain to specific month
+}
 \details{
 This is used to artificially add rain to a met file during 
 specific months (when it will impact heat budget the least).
 }
-

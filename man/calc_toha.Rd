@@ -4,8 +4,12 @@
 \alias{calc_toha}
 \title{calculate the Thermal Optical Habitat Area (TOHA) for a given lake}
 \usage{
-calc_toha(lakeid, secchi = c(seq(0.1, 2.9, by = 0.1), 3:10),
-  wtr_thresh = c(11, 25), irr_thresh = c(0.0762, 0.6476))
+calc_toha(
+  lakeid,
+  secchi = c(seq(0.1, 2.9, by = 0.1), 3:10),
+  wtr_thresh = c(11, 25),
+  irr_thresh = c(0.0762, 0.6476)
+)
 }
 \arguments{
 \item{lakeid}{ID of lake to run}
@@ -19,4 +23,3 @@ calc_toha(lakeid, secchi = c(seq(0.1, 2.9, by = 0.1), 3:10),
 \description{
 This runs GLM using a series of different secchi values, and for each calculates the TOHA.
 }
-

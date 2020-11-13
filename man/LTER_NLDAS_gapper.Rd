@@ -9,4 +9,3 @@ LTER_NLDAS_gapper(file_out = "../inst/extdata/LTER_met_gapped.csv")
 \description{
 see title
 }
-

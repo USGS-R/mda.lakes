@@ -19,4 +19,3 @@ all available driver data for a given driver
 unique(get_driver_index('NLDAS')$id)
 
 }
-

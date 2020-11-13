@@ -4,8 +4,15 @@
 \alias{prep_run_glm_kd}
 \title{Prepare and run  model with Kd scenario}
 \usage{
-prep_run_glm_kd(site_id, path, years, kd = getClarity(site_id, default.if.null
-  = TRUE), nml_args = NULL, sed_heat = FALSE, verbose = FALSE)
+prep_run_glm_kd(
+  site_id,
+  path,
+  years,
+  kd = getClarity(site_id, default.if.null = TRUE),
+  nml_args = NULL,
+  sed_heat = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{site_id}{}
@@ -35,4 +42,3 @@ prep_run_glm(to_run[i], path=to_run[i],
 								 
 
 }
-

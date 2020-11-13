@@ -4,7 +4,7 @@
 #'
 #'
 #'@inheritParams calc_toha
-#'@param width_thresh The fraction of benthic area threshold across which to find the width of the peak (1 is 100%)
+#'@param width_thresh The fraction of benthic area threshold across which to find the width of the peak (1 is 100 percent)
 #'
 #'
 #'

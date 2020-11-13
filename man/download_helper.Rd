@@ -20,4 +20,3 @@ Returns TRUE if download successful, 1 if download fails
 Attempts to download file to destination, retries if
 the download fails for whatever reason
 }
-

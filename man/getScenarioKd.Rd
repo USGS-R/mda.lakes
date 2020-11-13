@@ -4,8 +4,14 @@
 \alias{getScenarioKd}
 \title{Get light attenuation based on long-term trend scenario for a given lake}
 \usage{
-getScenarioKd(WBIC, years, year.1 = 1979, year.2 = 2011, trend = 0,
-  default.if.null = FALSE)
+getScenarioKd(
+  WBIC,
+  years,
+  year.1 = 1979,
+  year.2 = 2011,
+  trend = 0,
+  default.if.null = FALSE
+)
 }
 \arguments{
 \item{years}{Numeric year vector across which to calculate Kd values}
@@ -14,7 +20,7 @@ getScenarioKd(WBIC, years, year.1 = 1979, year.2 = 2011, trend = 0,
 (i.e., values outside of this range will not be used)}
 
 \item{trend}{The percentage of Secchi increase per year. 
-Positive is increasing secchi (e.g., 0.94 is 0.94% increase per year)}
+Positive is increasing secchi (e.g., 0.94 is 0.94 percent increase per year)}
 
 \item{default.if.null}{boolean indicating if default Kd should be used if lake has no observations}
 
@@ -33,4 +39,3 @@ TODO
 \author{
 Luke Winslow, Jordan Read
 }
-

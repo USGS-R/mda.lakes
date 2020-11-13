@@ -4,8 +4,15 @@
 \alias{area_light_temp_threshold}
 \title{Calculate the average benthic area within temperature and light threshold}
 \usage{
-area_light_temp_threshold(wtr, kd, light_incident, irr_thresh = c(0, 2000),
-  wtr_thresh = c(0, 25), hypso, area_type = "surface")
+area_light_temp_threshold(
+  wtr,
+  kd,
+  light_incident,
+  irr_thresh = c(0, 2000),
+  wtr_thresh = c(0, 25),
+  hypso,
+  area_type = "surface"
+)
 }
 \arguments{
 \item{wtr}{Data frame of water temperatures. See \code{\link[glmtools]{get_temp}}}
@@ -26,7 +33,9 @@ area_light_temp_threshold(wtr, kd, light_incident, irr_thresh = c(0, 2000),
 slope corrected benthic area for each layer. \code{surface} just uses a surface area approximation, 
 ignoring slope.}
 }
+\description{
+Calculate the average benthic area within temperature and light threshold
+}
 \author{
 Luke Winslow
 }
-

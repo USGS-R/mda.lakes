@@ -10,4 +10,3 @@ combine_output_data(sim, path, fast_tmp = tempdir())
 Combines all the individual compute node model files into 
 a few files for the whole simulation
 }
-

@@ -10,4 +10,3 @@ run_necsc_lake(site_id = NA, driver_name, out_dir)
 Runs a single NECSC lake given the default configuration for 
 both NLDAS and Notaro drivers
 }
-

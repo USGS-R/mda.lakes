@@ -12,4 +12,6 @@ summarize_notaro(nc.file)
 \value{
 data.frame with summary statistics
 }
-
+\description{
+Summary stats for Notaro
+}
