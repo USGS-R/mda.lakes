@@ -20,7 +20,7 @@ getScenarioKd(
 (i.e., values outside of this range will not be used)}
 
 \item{trend}{The percentage of Secchi increase per year. 
-Positive is increasing secchi (e.g., 0.94 is 0.94% increase per year)}
+Positive is increasing secchi (e.g., 0.94 is 0.94 percent increase per year)}
 
 \item{default.if.null}{boolean indicating if default Kd should be used if lake has no observations}
 

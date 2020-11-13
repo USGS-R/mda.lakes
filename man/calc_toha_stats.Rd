@@ -15,7 +15,7 @@ calc_toha_stats(
 \arguments{
 \item{lakeid}{ID of lake to run}
 
-\item{width_thresh}{The fraction of benthic area threshold across which to find the width of the peak (1 is 100%)}
+\item{width_thresh}{The fraction of benthic area threshold across which to find the width of the peak (1 is 100 percent)}
 
 \item{secchi}{Vector of secchi values to run model over}
 
